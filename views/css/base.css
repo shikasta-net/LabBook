@@ -1,0 +1,34 @@
+@media screen{
+    body.page {
+        margin:0;
+        padding:0;
+        height:100%;
+    }
+    div.page {
+        position:relative;
+        margin:1em;
+        border:0px solid #a1a1a1;
+        background:#F5F5F5;
+        width:70em;
+        height:50em;
+        box-shadow:3px 3px 3px #888888;
+    }
+}
+
+@media print{
+    body.page {
+        margin:0;
+        padding:0;
+        height:0%;
+    }
+    div.page {
+        width:70em;
+        height:50em;
+    }
+}
+
+div.txtbox {
+    position:absolute;
+}
+
+{{=contents}}

@@ -1,0 +1,10 @@
+__init__.py
+__init__.pyc
+cache/
+cron/
+databases/
+errors/
+languages/
+modules/
+private/
+sessions/
