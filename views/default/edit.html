@@ -5,24 +5,35 @@
 <!--{{response.files.append(URL(request.application,'css','base.css', args=['1']))}}  , _style="left:%(x)sem;top:%(y)sem;width:%(w)sem;height:%(h)sem;" % dict(x=tbox.position_x,y=tbox.position_y,w=tbox.width,h=tbox.height)
 
 
+            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(data).new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY -     $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
+            });
             
             
             -->
 {{include 'web2py_ajax.html'}}
 <script>
 $(document).ready(function(){
-    var pxPerem = $("div.page").width()/70.0
+    var pxPerem = $("div.page").width()/70.0; 
+    var mkbox = false;
+    if (mkbox) {
+        $("div#main_page").mousedown(function(e){
+            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){
+                jQuery.post('{{=URL("call/run/move_box")}}', { id:data.new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY - $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
+                });
+            }, "json");
+        });
+    };
     $(".txtbox").disableSelection();
     $(".txtbox").draggable({
         snap: ".snapable",
         snapTolerance: 5,
         stop: function(event, ui) {
-            jQuery.post('{{=URL("call/run/move")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened"); });
+            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     });
     $(".txtbox").resizable({
         stop: function(event, ui) {
-            jQuery.post('{{=URL("call/run/resize")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened"); });
+            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     });  
 });
@@ -37,8 +48,4 @@ $(document).ready(function(){
     </div>
         
     <div id="error">No error yet.</div>
- <!--   <div id="start">Waiting for dragging the image get started...</div> -->
-    <div id="stop">Waiting image getting dropped...</div>
-    
-    {{=form}}
 </body>

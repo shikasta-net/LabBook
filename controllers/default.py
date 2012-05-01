@@ -14,11 +14,11 @@ def call():
     return service()
     
 @service.run
-def move(id,x,y):
+def move_box(id,x,y):
     rcode = 0
     try :
         row = db(db.text_box.id==id).select().first()
-        row.update_record(position_x=x, position_y=y)
+        row.update_record(position_x=x, position_y=y)       
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -26,11 +26,11 @@ def move(id,x,y):
     else :     
         rcode = 200
     finally :
-        return rcode
+        return response.json( dict(return_code=rcode))
         
         
 @service.run
-def resize(id,w,h):
+def resize_box(id,w,h):
     rcode = 0
     try :
         row = db(db.text_box.id==id).select().first()
@@ -42,4 +42,19 @@ def resize(id,w,h):
     else :     
         rcode = 200
     finally :
-        return rcode
+        return response.json( dict(return_code=rcode))
+        
+        
+@service.run
+def new_box(page_id):
+    rcode = 0
+    try :
+        new_id = db.text_box.insert(body='some test text for a new record', page_id=page_id)
+    except Exception, e :
+        print 'oops: %s' % e
+        response.headers['Status'] = '400'
+        rcode = 400
+    else :     
+        rcode = 200
+    finally :
+        return response.json(dict(return_code=rcode,new_id=new_id))
