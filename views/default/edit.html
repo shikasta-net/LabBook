@@ -2,40 +2,44 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.3.2/jquery.min.js")}} 
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
-<!--{{response.files.append(URL(request.application,'css','base.css', args=['1']))}}  , _style="left:%(x)sem;top:%(y)sem;width:%(w)sem;height:%(h)sem;" % dict(x=tbox.position_x,y=tbox.position_y,w=tbox.width,h=tbox.height)
-
-
-            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(data).new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY -     $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
-            });
-            
+<!--
             
             -->
 {{include 'web2py_ajax.html'}}
 <script>
 $(document).ready(function(){
     var pxPerem = $("div.page").width()/70.0; 
+    $(".txtbox").disableSelection();
     var mkbox = false;
-    if (mkbox) {
-        $("div#main_page").mousedown(function(e){
+    $("input#mknewbox").click(function(){ 
+        if (!mkbox) {
+            mkbox = true;   
+        }
+        else {
+            mkbox = false;  
+        }
+    });    
+    $("div#main_page").mousedown(function(e){
+        if (mkbox) {    
             jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){
                 jQuery.post('{{=URL("call/run/move_box")}}', { id:data.new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY - $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
                 });
             }, "json");
-        });
-    };
-    $(".txtbox").disableSelection();
+            mkbox = false;
+        }            
+    });
     $(".txtbox").draggable({
         snap: ".snapable",
         snapTolerance: 5,
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
-        }
+        } 
     });
     $(".txtbox").resizable({
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
-    });  
+    }); 
 });
 </script>
 <link rel="stylesheet" type="text/css" href={{=URL('css','base.css', vars=dict(id=page.id))}} />
@@ -46,6 +50,7 @@ $(document).ready(function(){
         {{=DIV(tbox.body, _id="tb%s"%tbox.id, _class="txtbox snapable")}}
     {{pass}}
     </div>
+    {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}
         
     <div id="error">No error yet.</div>
 </body>
