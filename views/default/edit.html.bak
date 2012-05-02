@@ -4,17 +4,29 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--
           
-            $("div#main_page").selectable({ 
-        disable: true
-    })
-     
+   $('div#tb' + new_id['id']).css({ 'top':new_id['y']+'px', 'left':new_id['x']+'px', 'height':(e.pageY - new_id['y'] - $("div.page").offset().top)+'px', 'width':(e.pageX - new_id['x'] - $("div.page").offset().left)+'px' });
+        
+        style='top:"+new_id['y']+"px; left:"+new_id['x']+"px; height:"+(e.pageY - new_id['y'] - $("div.page").offset().top)+"px; width:"+(e.pageX - new_id['x'] - $("div.page").offset().left)+"px;'
+        
             -->
 {{include 'web2py_ajax.html'}}
 <script>
 $(document).ready(function(){
     var pxPerem = $("div.page").width()/70.0; 
     var mkbox = false;
-    var new_id = { 'id': "", x: "", y: ""};    
+    var new_id = { 'id': "", x: "", y: ""};  
+ 
+    function disableSelection(target){
+        if (typeof target.onselectstart!="undefined") //IE route
+    target.onselectstart=function(){return false}
+        else if (typeof target.style.MozUserSelect!="undefined") //Firefox route
+    target.style.MozUserSelect="none"
+        else //All other route (ie: Opera)
+    target.onmousedown=function(){return false}
+        target.style.cursor = "default"
+    }
+    disableSelection(document.body)
+      
     $(".txtbox").draggable({    
         snap: ".snapable",
         snapTolerance: 5,
@@ -32,12 +44,12 @@ $(document).ready(function(){
         if (!mkbox) {
             jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){ new_id['id'] = data.new_id }, "json");
             mkbox = true;            
-            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
         }
-        else {
+        else if (new_id['id'] != "") {
             jQuery.post('{{=URL("call/run/del_box")}}', { box_id:new_id['id'] }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
             mkbox = false;              
-            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
+            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
             new_id['id'] = "";
             new_id['x'] = "";
             new_id['y'] = "";
@@ -49,17 +61,31 @@ $(document).ready(function(){
             new_id['x'] = (e.pageX - $("div.page").offset().left)
             new_id['y'] = (e.pageY - $("div.page").offset().top)
             jQuery.post('{{=URL("call/run/move_box")}}', { id:new_id['id'], x:new_id['x']/pxPerem, y:new_id['y']/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
-        }            
-    })
-    $(document).mouseup(function(e){
-        if (mkbox) { 
-            jQuery.post('{{=URL("call/run/resize_box")}}', { id:new_id['id'], w:(e.pageX - new_id['x'] - $("div.page").offset().left)/pxPerem, h:(e.pageY - new_id['y'] - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
-            new_id['id'] = "";
-            new_id['x'] = "";
-            new_id['y'] = "";
-            mkbox = false;
-            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
-        }
+            $(document).mouseup(function(e){
+                if (mkbox) { 
+                    jQuery.post('{{=URL("call/run/resize_box")}}', { id:new_id['id'], w:(e.pageX - new_id['x'] - $("div.page").offset().left)/pxPerem, h:(e.pageY - new_id['y'] - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                    $("div#main_page").append( "<div class='txtbox snapable' id='tb"+new_id['id']+"' >New text box created by javascript. Reloaded from database on refresh.</div>" );
+                    $('div#tb' + new_id['id']).css({ 'top':new_id['y']+'px', 'left':new_id['x']+'px', 'height':(e.pageY - new_id['y'] - $("div.page").offset().top)+'px', 'width':(e.pageX - new_id['x'] - $("div.page").offset().left)+'px'
+                    }).draggable({    
+                        snap: ".snapable",
+                        snapTolerance: 5,
+                        snapMode: "outer",
+                        stop: function(event, ui) {            
+                            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                        }
+                    }).resizable({        
+                        stop: function(event, ui) {
+                            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                        }
+                    });
+                    new_id['id'] = "";
+                    new_id['x'] = "";
+                    new_id['y'] = "";
+                    mkbox = false;
+                    $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);            
+                }
+            });   
+        }           
     });
 });
 </script>
