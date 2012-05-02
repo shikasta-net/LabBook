@@ -17,8 +17,7 @@ def call():
 def move_box(id,x,y):
     rcode = 0
     try :
-        row = db(db.text_box.id==id).select().first()
-        row.update_record(position_x=x, position_y=y)       
+        db(db.text_box.id==id).update(position_x=x, position_y=y)       
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -26,15 +25,14 @@ def move_box(id,x,y):
     else :     
         rcode = 200
     finally :
-        return response.json( dict(return_code=rcode))
+        return response.json(dict(return_code=rcode))
         
         
 @service.run
 def resize_box(id,w,h):
     rcode = 0
     try :
-        row = db(db.text_box.id==id).select().first()
-        row.update_record(width=w, height=h)
+        db(db.text_box.id==id).update(width=w, height=h)
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -42,7 +40,7 @@ def resize_box(id,w,h):
     else :     
         rcode = 200
     finally :
-        return response.json( dict(return_code=rcode))
+        return response.json(dict(return_code=rcode))
         
         
 @service.run
@@ -58,3 +56,18 @@ def new_box(page_id):
         rcode = 200
     finally :
         return response.json(dict(return_code=rcode,new_id=new_id))
+        
+          
+@service.run
+def del_box(box_id):
+    rcode = 0
+    try :
+        db(db.text_box.id==box_id).delete()
+    except Exception, e :
+        print 'oops: %s' % e
+        response.headers['Status'] = '400'
+        rcode = 400
+    else :     
+        rcode = 200
+    finally :
+        return response.json(dict(return_code=rcode))

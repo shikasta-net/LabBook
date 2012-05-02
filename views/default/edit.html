@@ -3,43 +3,67 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--
-            
+          
+            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){
+                jQuery.post('{{=URL("call/run/move_box")}}', { id:data.new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY - $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
+                });
+            }, "json");  
             -->
 {{include 'web2py_ajax.html'}}
 <script>
 $(document).ready(function(){
     var pxPerem = $("div.page").width()/70.0; 
-    $(".txtbox").disableSelection();
     var mkbox = false;
-    $("input#mknewbox").click(function(){ 
-        if (!mkbox) {
-            mkbox = true;   
-        }
-        else {
-            mkbox = false;  
-        }
-    });    
-    $("div#main_page").mousedown(function(e){
-        if (mkbox) {    
-            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){
-                jQuery.post('{{=URL("call/run/move_box")}}', { id:data.new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY - $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
-                });
-            }, "json");
-            mkbox = false;
-        }            
-    });
-    $(".txtbox").draggable({
+    var new_id = { 'id': "", x: "", y: ""};
+    $("div#main_page").selectable({ 
+        disable: true
+    })
+    $(".txtbox").draggable({    
         snap: ".snapable",
         snapTolerance: 5,
-        stop: function(event, ui) {
+        snapMode: "outer",
+        stop: function(event, ui) {            
             jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
-        } 
-    });
-    $(".txtbox").resizable({
+        }
+    }).resizable({        
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
-    }); 
+    }).selectable();   
+    
+    $("input#mknewbox").click(function(){ 
+        if (!mkbox) {
+            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){ new_id['id'] = data.new_id }, "json");
+            mkbox = true;            
+            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+        }
+        else {
+            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:new_id['id'] }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            mkbox = false;              
+            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
+            new_id['id'] = "";
+            new_id['x'] = "";
+            new_id['y'] = "";
+        }
+    });   
+     
+    $("div#main_page").mousedown(function(e){
+        if (mkbox) {
+            new_id['x'] = (e.pageX - $("div.page").offset().left)
+            new_id['y'] = (e.pageY - $("div.page").offset().top)
+            jQuery.post('{{=URL("call/run/move_box")}}', { id:new_id['id'], x:new_id['x']/pxPerem, y:new_id['y']/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+        }            
+    })
+    $(document).mouseup(function(e){
+        if (mkbox) { 
+            jQuery.post('{{=URL("call/run/resize_box")}}', { id:new_id['id'], w:(e.pageX - new_id['x'] - $("div.page").offset().left)/pxPerem, h:(e.pageY - new_id['y'] - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            new_id['id'] = "";
+            new_id['x'] = "";
+            new_id['y'] = "";
+            mkbox = false;
+            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
+        }
+    });
 });
 </script>
 <link rel="stylesheet" type="text/css" href={{=URL('css','base.css', vars=dict(id=page.id))}} />
@@ -51,6 +75,4 @@ $(document).ready(function(){
     {{pass}}
     </div>
     {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}
-        
-    <div id="error">No error yet.</div>
 </body>
