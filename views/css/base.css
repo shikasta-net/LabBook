@@ -29,6 +29,7 @@
 
 div.txtbox {
     position:absolute;
+    background: #FAFAFA;
 }
 
 {{=contents}}

@@ -4,20 +4,29 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--
           
-            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){
-                jQuery.post('{{=URL("call/run/move_box")}}', { id:data.new_id, x:(e.pageX - $("div.page").offset().left)/pxPerem, y:(e.pageY - $("div.page").offset().top)/pxPerem }, function(newdata){ $("div#error").text("Something happened : " + newdata);
-                });
-            }, "json");  
+            $("div#main_page").selectable({ 
+        disable: true
+    })
+     
             -->
 {{include 'web2py_ajax.html'}}
 <script>
 $(document).ready(function(){
     var pxPerem = $("div.page").width()/70.0; 
     var mkbox = false;
-    var new_id = { 'id': "", x: "", y: ""};
-    $("div#main_page").selectable({ 
-        disable: true
-    })
+    var new_id = { 'id': "", x: "", y: ""};  
+ 
+    function disableSelection(target){
+        if (typeof target.onselectstart!="undefined") //IE route
+    target.onselectstart=function(){return false}
+        else if (typeof target.style.MozUserSelect!="undefined") //Firefox route
+    target.style.MozUserSelect="none"
+        else //All other route (ie: Opera)
+    target.onmousedown=function(){return false}
+        target.style.cursor = "default"
+    }
+    disableSelection(document.body)
+      
     $(".txtbox").draggable({    
         snap: ".snapable",
         snapTolerance: 5,
@@ -29,7 +38,7 @@ $(document).ready(function(){
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
-    }).selectable();   
+    });   
     
     $("input#mknewbox").click(function(){ 
         if (!mkbox) {

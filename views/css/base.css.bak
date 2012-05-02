@@ -29,7 +29,6 @@
 
 div.txtbox {
     position:absolute;
-    user-select: none;
 }
 
 {{=contents}}
