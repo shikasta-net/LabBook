@@ -3,11 +3,7 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--
-          
-   $('div#tb' + new_id['id']).css({ 'top':new_id['y']+'px', 'left':new_id['x']+'px', 'height':(e.pageY - new_id['y'] - $("div.page").offset().top)+'px', 'width':(e.pageX - new_id['x'] - $("div.page").offset().left)+'px' });
-        
-        style='top:"+new_id['y']+"px; left:"+new_id['x']+"px; height:"+(e.pageY - new_id['y'] - $("div.page").offset().top)+"px; width:"+(e.pageX - new_id['x'] - $("div.page").offset().left)+"px;'
-        
+           
             -->
 {{include 'web2py_ajax.html'}}
 <script>
@@ -31,10 +27,12 @@ $(document).ready(function(){
         snap: ".snapable",
         snapTolerance: 5,
         snapMode: "outer",
+        containment: "parent",
         stop: function(event, ui) {            
             jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
-    }).resizable({        
+    }).resizable({ 
+        containment: "parent",       
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
@@ -55,6 +53,21 @@ $(document).ready(function(){
             new_id['y'] = "";
         }
     });   
+    $("input#delbox").click(function(){ 
+        if (mkbox) {
+            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:new_id['id'] }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            mkbox = false;              
+            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+            new_id['id'] = "";
+            new_id['x'] = "";
+            new_id['y'] = "";
+        };
+        $(".txtbox").click(function(){
+                console.log($(this).attr("id"));                
+                jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('tb','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                $(this).detach();
+        });        
+    });
      
     $("div#main_page").mousedown(function(e){
         if (mkbox) {
@@ -70,10 +83,12 @@ $(document).ready(function(){
                         snap: ".snapable",
                         snapTolerance: 5,
                         snapMode: "outer",
+                        containment: "parent",
                         stop: function(event, ui) {            
                             jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
-                    }).resizable({        
+                    }).resizable({    
+                        containment: "parent",    
                         stop: function(event, ui) {
                             jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
@@ -98,4 +113,5 @@ $(document).ready(function(){
     {{pass}}
     </div>
     {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}
+    {{=INPUT(_type="button", _value="Delete box", _id="delbox")}}
 </body>
