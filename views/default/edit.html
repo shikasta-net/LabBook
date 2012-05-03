@@ -1,5 +1,5 @@
 <head>
-{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.3.2/jquery.min.js")}} 
+{{response.files.append("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")}} 
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--{{response.files.append(URL(request.application,'css','base.css', args=['1']))}}  , _style="left:%(x)sem;top:%(y)sem;width:%(w)sem;height:%(h)sem;" % dict(x=tbox.position_x,y=tbox.position_y,w=tbox.width,h=tbox.height)
@@ -9,7 +9,104 @@
             
             -->
 {{include 'web2py_ajax.html'}}
+<style>
+
+div.line {
+    -webkit-transform-origin: 0 50%;
+    -moz-transform-origin: 0 50%;
+    transform-origin: 0 50%;
+    height: 1px;
+    background: gray;
+    position: absolute;
+}
+
+#line1 {
+    transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    display: inherit;
+}
+
+#line2 {
+    transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    display: inherit;
+}
+
+#crossbox {
+    display: none;
+    background: #fff;
+    border: 1px solid gray;
+    position: absolute;
+}
+</style>
+
 <script>
+
+var crossBox = $('<div id="crossbox" />');
+var crossLine1 = $('<div class="line" id="line1" />');
+var crossLine2 = $('<div class="line" id="line2" />');
+crossBox.append(crossLine1);
+crossBox.append(crossLine2);
+crossBox.on('dragleave', function () { 
+                        console.log("crossbox called drag leave");
+                        crossBoxHide();
+                        currentHover = false;
+                        });
+
+function crossBoxShow(crossElementID) {
+
+    var crossElement = $('#'+crossElementID);
+    var hypotenuse = Math.sqrt(Math.pow(crossElement.width(), 2) + Math.pow(crossElement.height(), 2));
+    var angle = Math.atan2(crossElement.height(), crossElement.width()) * 180.0/Math.PI;
+   
+    crossBox.width(crossElement.width())
+                .height(crossElement.height())
+                .offset(crossElement.offset());
+    
+    crossLine1.css({
+        'transform': 'rotate('+angle+'deg)',
+        '-moz-transform': 'rotate('+angle+'deg)', 
+        '-webkit-transform': 'rotate('+angle+'deg)'})
+        .width(hypotenuse);
+        
+    crossLine2.css({
+        'transform': 'rotate(-'+angle+'deg)', 
+        '-moz-transform': 'rotate(-'+angle+'deg)', 
+        '-webkit-transform': 'rotate(-'+angle+'deg)', 
+        'top': crossElement.height()})
+        .width(hypotenuse);
+    
+    crossBox.css('display', 'block');    
+}
+   
+function crossBoxHide() {
+    crossBox.css('display', 'none');
+}
+
+var currentHover = false;
+
+function handleDragEnter(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    console.log(this.id + " called drag enter handler.");
+    if (currentHover != this) {
+        currentHover = this;
+        crossBoxShow(this.id);
+    }
+}
+
+function handleDrop(event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+}
+
+function handleDragLeave(event) {
+    console.log(this.id + " called drag leave");
+}
+
 $(document).ready(function(){
     var pxPerem = $("div.page").width()/70.0
     $(".txtbox").disableSelection();
@@ -24,10 +121,20 @@ $(document).ready(function(){
         stop: function(event, ui) {
             jQuery.post('{{=URL("call/run/resize")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened"); });
         }
-    });  
+    });
+    
+    $(".txtbox").each(function(index) {   
+        this.addEventListener('dragenter', handleDragEnter);
+        this.addEventListener('drop', handleDrop);
+        this.addEventListener('dragleave', handleDragLeave);
+    });
+    
+    $('body').append(crossBox);
+    
 });
 </script>
 <link rel="stylesheet" type="text/css" href={{=URL('css','base.css', vars=dict(id=page.id))}} />
+<link rel="stylesheet" type="text/css" href={{=URL('static','static-css.css')}} />
 </head>
 <body class="page">
     <div id="main_page" class="page snapable">
