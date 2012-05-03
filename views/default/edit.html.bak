@@ -1,5 +1,5 @@
 <head>
-{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.3.2/jquery.min.js")}} 
+{{response.files.append("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")}} 
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 <!--
@@ -22,7 +22,7 @@ $(document).ready(function(){
         target.style.cursor = "default"
     }
     disableSelection(document.body)
-      
+          
     $(".txtbox").draggable({    
         snap: ".snapable",
         snapTolerance: 5,
@@ -62,11 +62,11 @@ $(document).ready(function(){
             new_id['x'] = "";
             new_id['y'] = "";
         };
-        $(".txtbox").click(function(){
-                console.log($(this).attr("id"));                
+        $(".txtbox").on("click", function(){              
                 jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('tb','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                 $(this).detach();
-        });        
+                $(".txtbox").off("click");
+        });
     });
      
     $("div#main_page").mousedown(function(e){
