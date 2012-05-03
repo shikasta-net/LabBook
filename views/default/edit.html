@@ -109,7 +109,7 @@ $(document).ready(function(){
 <body class="page">
     <div id="main_page" class="page snapable">
     {{for tbox in boxes:}}
-        {{=DIV(tbox.body, _id="tb%s"%tbox.id, _class="txtbox snapable")}}
+        {{=DIV("Example text, hardcoded until file structure is implemented.", _id="tb%s"%tbox.id, _class="txtbox snapable")}}
     {{pass}}
     </div>
     {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}
