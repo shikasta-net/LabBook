@@ -1,5 +1,0 @@
-{{extend 'layout.html'}}
-<h1>Available pages</h1>
-<ul>{{for page in pages:}}
-     {{=LI(page.title)}}
-{{pass}}</ul>

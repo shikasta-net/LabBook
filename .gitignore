@@ -8,3 +8,4 @@ languages/
 modules/
 private/
 sessions/
+*.bak
