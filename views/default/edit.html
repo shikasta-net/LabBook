@@ -29,12 +29,12 @@ $(document).ready(function(){
         snapMode: "outer",
         containment: "parent",
         stop: function(event, ui) {            
-            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('text',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('c',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     }).resizable({ 
         containment: "parent",       
         stop: function(event, ui) {
-            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('text',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('c',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     });   
     
@@ -63,7 +63,7 @@ $(document).ready(function(){
             new_id['y'] = "";
         };
         $(".txtbox").on("click", function(){              
-                jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('text','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                 $(this).detach();
                 $(".txtbox").off("click");
         });
@@ -85,12 +85,12 @@ $(document).ready(function(){
                         snapMode: "outer",
                         containment: "parent",
                         stop: function(event, ui) {            
-                            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('text',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('c',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
                     }).resizable({    
                         containment: "parent",    
                         stop: function(event, ui) {
-                            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('text',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('c',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
                     });
                     new_id['id'] = "";
@@ -109,7 +109,7 @@ $(document).ready(function(){
 <body class="page">
     <div id="main_page" class="page snapable">
     {{for tbox in boxes:}}        
-        {{=DIV(contents[tbox.id]['file_content'], _id=contents[tbox.id]['file_type']+"%(id)s"%dict(id=tbox.id), _class="txtbox snapable")}}
+        {{=DIV(contents[tbox.id]['file_content'], _id="c%(id)s"%dict(id=tbox.id), _class="txtbox snapable")}}
     {{pass}}
     </div>
     {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}

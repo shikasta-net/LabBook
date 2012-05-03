@@ -9,7 +9,7 @@ def edit():
     contents = {}
     for box in boxes :
         if box.content_id is None :
-            contents[box.id] = {'file_type':'text', 'file_content':'blank text box'}
+            contents[box.id] = {'file_type':'text', 'file_content':'<b>No content specified yet</b>'}
         else:
             contents[box.id] = get_contents(box.content_id)
     return dict(page=this_page, boxes=boxes, contents=contents)
