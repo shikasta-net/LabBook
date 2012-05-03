@@ -1,5 +1,6 @@
 db = DAL('sqlite://storage.sqlite')
 from gluon.tools import *
+from gluon.contrib.simplejson import *
 service = Service()
 crud = Crud(db)
 
@@ -21,8 +22,8 @@ db.define_table('page',
 db.define_table('text_box',
                 Field('page_id', db.page),     
                 Field('body', 'text'),
-                Field('position_x', 'integer', default='2'),  
-                Field('position_y', 'integer', default='2'),      
+                Field('position_x', 'double', default='2'),  
+                Field('position_y', 'double', default='2'),      
                 Field('width', 'double', default='9'),      
                 Field('height', 'double', default='2'),         
                 Field('created_on', 'datetime', default=request.now),
