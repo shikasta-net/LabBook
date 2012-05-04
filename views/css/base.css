@@ -12,6 +12,10 @@
         width:70em;
         height:50em;
         box-shadow:3px 3px 3px #888888;
+    }    
+    div.cbox {
+        position:absolute;
+        background: #FAFAFA;
     }
 }
 
@@ -25,11 +29,10 @@
         width:70em;
         height:50em;
     }
+    div.cbox {
+        position:absolute;
+    }
 }
 
-div.txtbox {
-    position:absolute;
-    background: #FAFAFA;
-}
 
 {{=contents}}

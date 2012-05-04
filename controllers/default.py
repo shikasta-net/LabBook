@@ -71,8 +71,11 @@ def new_box(page_id):
 def del_box(box_id):
     rcode = 0
     try :
-        contents = db(db.content.id==db(db.container_box.id==box_id).content_id).select()
-        #if exists content, delete it.
+    
+        if db(db.container_box.id==box_id).select().first().content_id is not None :
+            db(db.content.id==db(db.container_box.id==box_id).select().first().content_id).delete()
+ #       contents = db(db.content.id==db(db.container_box.id==box_id).content_id).select()        
+        #if exists content, delete it.   
         db(db.container_box.id==box_id).delete()
     except Exception, e :
         print 'oops: %s' % e
