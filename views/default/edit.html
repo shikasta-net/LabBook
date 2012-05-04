@@ -12,9 +12,10 @@ div.line {
     -webkit-transform-origin: 0 50%;
     -moz-transform-origin: 0 50%;
     transform-origin: 0 50%;
-    height: 1px;
+    height: 3px;
     background: gray;
     position: absolute;
+
 }
 
 #line1 {
@@ -22,6 +23,7 @@ div.line {
     -moz-transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
     display: inherit;
+
 }
 
 #line2 {
@@ -29,38 +31,44 @@ div.line {
     -moz-transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
     display: inherit;
+
 }
 
 #crossbox {
     display: none;
     background: #fff;
-    border: 1px solid gray;
+    border: 3px solid gray;
     position: absolute;
+    opacity: 0.4;
 }
 </style>
 
 <script>
 
-var crossBox = $('<div id="crossbox" />');
-var crossLine1 = $('<div class="line" id="line1" />');
-var crossLine2 = $('<div class="line" id="line2" />');
+var crossBox = $('<div id="crossbox"></div>');
+var crossLine1 = $('<div class="line" id="line1"></div>');
+var crossLine2 = $('<div class="line" id="line2"></div>');
 crossBox.append(crossLine1);
 crossBox.append(crossLine2);
-crossBox.on('dragleave', function () { 
-                        console.log("crossbox called drag leave");
-                        crossBoxHide();
-                        currentHover = false;
-                        });
+crossBox[0].addEventListener('dragleave', function(event) { crossBoxHide(); });
+crossBox[0].addEventListener('drop', function(event) { crossBoxHide(); handleDrop(event); });
+crossBox[0].addEventListener('dragover', function (event) { handleDragOver(event) });
 
-function crossBoxShow(crossElementID) {
+function handleDragOver(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+}
+
+function crossBoxResizeAndPosition(crossElementID) {
 
     var crossElement = $('#'+crossElementID);
     var hypotenuse = Math.sqrt(Math.pow(crossElement.width(), 2) + Math.pow(crossElement.height(), 2));
     var angle = Math.atan2(crossElement.height(), crossElement.width()) * 180.0/Math.PI;
    
     crossBox.width(crossElement.width())
-                .height(crossElement.height())
-                .offset(crossElement.offset());
+                .height(crossElement.height());
+
     
     crossLine1.css({
         'transform': 'rotate('+angle+'deg)',
@@ -74,39 +82,48 @@ function crossBoxShow(crossElementID) {
         '-webkit-transform': 'rotate(-'+angle+'deg)', 
         'top': crossElement.height()})
         .width(hypotenuse);
-    
-    crossBox.css('display', 'block');    
+
+    elementOffset = crossElement.offset();
+
+    crossBox.css({
+            'top': crossElement.css('top'),
+            'left': crossElement.css('left')
+            });
+
 }
    
 function crossBoxHide() {
-    crossBox.css('display', 'none');
+    crossBox.fadeOut(100);
 }
 
-var currentHover = false;
+function crossBoxShow() {
+    crossBox.fadeIn(100);
+}
+
+var crossBoxOver = false;
 
 function handleDragEnter(event) {
     event.stopPropagation();
     event.preventDefault();
-    console.log(this.id + " called drag enter handler.");
-    if (currentHover != this) {
-        currentHover = this;
-        crossBoxShow(this.id);
-    }
+
+    crossBoxResizeAndPosition(this.id);
+    crossBoxShow();
 }
 
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
-
+    console.log('boom');
 }
 
 function handleDragLeave(event) {
-    console.log(this.id + " called drag leave");
+    //console.log(this.id + " called drag leave");
 }
 
+var pxPerem = false;
 $(document).ready(function(){
-    var pxPerem = $("div.page").width()/70.0; 
-    var mkbox = false;
+    pxPerem = $("div.page").width()/70.0; 
+    var mkboxß = false;
     var new_id = { 'id': "", x: "", y: ""};  
  
     function disableSelection(target){
@@ -199,17 +216,14 @@ $(document).ready(function(){
             });   
         }           
     });
-            jQuery.post('{{=URL("call/run/resize")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened"); });
-        }
-    });
     
     $(".txtbox").each(function(index) {   
-        this.addEventListener('dragenter', handleDragEnter);
-        this.addEventListener('drop', handleDrop);
-        this.addEventListener('dragleave', handleDragLeave);
+        $(this).on('dragenter', handleDragEnter);
+        $(this).on('drop', handleDrop);
+        $(this).on('dragleave', handleDragLeave);
     });
     
-    $('body').append(crossBox);
+    $('#main_page').append(crossBox);
     
 });
 </script>
