@@ -137,18 +137,18 @@ $(document).ready(function(){
     }
     disableSelection(document.body)
           
-    $(".txtbox").draggable({    
+    $(".cbox").draggable({    
         snap: ".snapable",
         snapTolerance: 5,
         snapMode: "outer",
         containment: "parent",
         stop: function(event, ui) {            
-            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('c',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     }).resizable({ 
         containment: "parent",       
         stop: function(event, ui) {
-            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('c',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
         }
     });   
     
@@ -156,12 +156,12 @@ $(document).ready(function(){
         if (!mkbox) {
             jQuery.post('{{=URL("call/run/new_box")}}', { page_id:{{=page.id}} }, function(data){ new_id['id'] = data.new_id }, "json");
             mkbox = true;            
-            $(".txtbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
+            $(".cbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
         }
         else if (new_id['id'] != "") {
             jQuery.post('{{=URL("call/run/del_box")}}', { box_id:new_id['id'] }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
             mkbox = false;              
-            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+            $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
             new_id['id'] = "";
             new_id['x'] = "";
             new_id['y'] = "";
@@ -171,15 +171,15 @@ $(document).ready(function(){
         if (mkbox) {
             jQuery.post('{{=URL("call/run/del_box")}}', { box_id:new_id['id'] }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
             mkbox = false;              
-            $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+            $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
             new_id['id'] = "";
             new_id['x'] = "";
             new_id['y'] = "";
         };
-        $(".txtbox").on("click", function(){              
-                jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('tb','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+        $(".cbox").on("click", function(){              
+                jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                 $(this).detach();
-                $(".txtbox").off("click");
+                $(".cbox").off("click");
         });
     });
      
@@ -191,27 +191,27 @@ $(document).ready(function(){
             $(document).mouseup(function(e){
                 if (mkbox) { 
                     jQuery.post('{{=URL("call/run/resize_box")}}', { id:new_id['id'], w:(e.pageX - new_id['x'] - $("div.page").offset().left)/pxPerem, h:(e.pageY - new_id['y'] - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
-                    $("div#main_page").append( "<div class='txtbox snapable' id='tb"+new_id['id']+"' >New text box created by javascript. Reloaded from database on refresh.</div>" );
-                    $('div#tb' + new_id['id']).css({ 'top':new_id['y']+'px', 'left':new_id['x']+'px', 'height':(e.pageY - new_id['y'] - $("div.page").offset().top)+'px', 'width':(e.pageX - new_id['x'] - $("div.page").offset().left)+'px'
+                    $("div#main_page").append( "<div class='cbox snapable' id='c"+new_id['id']+"' >New text box created by javascript. Reloaded from database on refresh.</div>" );
+                    $('div#c' + new_id['id']).css({ 'top':new_id['y']+'px', 'left':new_id['x']+'px', 'height':(e.pageY - new_id['y'] - $("div.page").offset().top)+'px', 'width':(e.pageX - new_id['x'] - $("div.page").offset().left)+'px'
                     }).draggable({    
                         snap: ".snapable",
                         snapTolerance: 5,
                         snapMode: "outer",
                         containment: "parent",
                         stop: function(event, ui) {            
-                            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('tb',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                            jQuery.post('{{=URL("call/run/move_box")}}', { id:$(this).attr("id").replace('c',''), x:($(this).offset().left - $("div.page").offset().left)/pxPerem, y:($(this).offset().top - $("div.page").offset().top)/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
                     }).resizable({    
                         containment: "parent",    
                         stop: function(event, ui) {
-                            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('tb',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+                            jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(this).attr("id").replace('c',''), w:$(this).width()/pxPerem, h:$(this).height()/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
                         }
                     });
                     new_id['id'] = "";
                     new_id['x'] = "";
                     new_id['y'] = "";
                     mkbox = false;
-                    $(".txtbox").draggable("option", "disabled", false).resizable("option", "disabled", false);            
+                    $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);            
                 }
             });   
         }           
@@ -232,10 +232,10 @@ $(document).ready(function(){
 </head>
 <body class="page">
     <div id="main_page" class="page snapable">
-    {{for tbox in boxes:}}
-        {{=DIV(tbox.body, _id="tb%s"%tbox.id, _class="txtbox snapable")}}
+    {{for tbox in boxes:}}        
+        {{=DIV(contents[tbox.id]['file_content'], _id="c%(id)s"%dict(id=tbox.id), _class="cbox snapable")}}
     {{pass}}
     </div>
-    {{=INPUT(_type="button", _value="Create new box", _id="mknewbox")}}
+    {{=INPUT(_type="button", _value="Create box", _id="mknewbox")}}
     {{=INPUT(_type="button", _value="Delete box", _id="delbox")}}
 </body>

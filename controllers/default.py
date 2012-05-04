@@ -4,20 +4,29 @@ def index():
     
 def edit():
     this_page = db.page(request.args(0)) or redirect(URL('index'))
-    db.text_box.page_id.default = this_page.id
-    form = crud.create(db.text_box)
-    t_boxes = db(db.text_box.page_id==this_page.id).select()
-    return dict(page=this_page, form=form, boxes=t_boxes)
+    db.container_box.page_id.default = this_page.id
+    boxes = db(db.container_box.page_id==this_page.id).select()
+    contents = {}
+    for box in boxes :
+        if box.content_id is None :
+            contents[box.id] = {'file_type':'text', 'file_content':'<b>No content specified yet</b>'}
+        else:
+            contents[box.id] = get_contents(box.content_id)
+    return dict(page=this_page, boxes=boxes, contents=contents)
     
 def call():
     session.forget()
     return service()
     
+def get_contents(content_id):
+    content = db(db.content.id==content_id).select().first()
+    return dict(file_type=content.file_type[0], file_content=content.file_name )
+    
 @service.run
 def move_box(id,x,y):
     rcode = 0
     try :
-        db(db.text_box.id==id).update(position_x=x, position_y=y)       
+        db(db.container_box.id==id).update(position_x=x, position_y=y, modified_on=request.now)       
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -32,7 +41,7 @@ def move_box(id,x,y):
 def resize_box(id,w,h):
     rcode = 0
     try :
-        db(db.text_box.id==id).update(width=w, height=h)
+        db(db.container_box.id==id).update(width=w, height=h, modified_on=request.now)
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -47,7 +56,7 @@ def resize_box(id,w,h):
 def new_box(page_id):
     rcode = 0
     try :
-        new_id = db.text_box.insert(body='some test text for a new record', page_id=page_id)
+        new_id = db.container_box.insert(page_id=page_id)
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -62,7 +71,12 @@ def new_box(page_id):
 def del_box(box_id):
     rcode = 0
     try :
-        db(db.text_box.id==box_id).delete()
+    
+        if db(db.container_box.id==box_id).select().first().content_id is not None :
+            db(db.content.id==db(db.container_box.id==box_id).select().first().content_id).delete()
+ #       contents = db(db.content.id==db(db.container_box.id==box_id).content_id).select()        
+        #if exists content, delete it.   
+        db(db.container_box.id==box_id).delete()
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'

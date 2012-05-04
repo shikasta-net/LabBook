@@ -6,12 +6,16 @@
     }
     div.page {
         position:relative;
-        margin:1em;
+        margin:5px;
         border:1px solid #a1a1a1;
         background:#F5F5F5;
         width:70em;
         height:50em;
         box-shadow:3px 3px 3px #888888;
+    }    
+    div.cbox {
+        position:absolute;
+        background: #FAFAFA;
     }
 }
 
@@ -25,12 +29,11 @@
         width:70em;
         height:50em;
     }
+    div.cbox {
+        position:absolute;
+    }
 }
 
-div.txtbox {
-    position:absolute;
-    background: #FAFAFA;
-}
 
 div.line {
     -webkit-transform-origin: 0 50%;
