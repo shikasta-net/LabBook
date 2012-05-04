@@ -50,7 +50,17 @@ var crossLine1 = $('<div class="line" id="line1"></div>');
 var crossLine2 = $('<div class="line" id="line2"></div>');
 crossBox.append(crossLine1);
 crossBox.append(crossLine2);
-crossBox[0].addEventListener('dragleave', function(event) { crossBoxHide(); });
+crossBox[0].addEventListener('dragleave', function(event) {
+                                                event = event || window.event;
+                                                if(event.target.id == "crossbox") {
+                                                    if(!(event.relatedTarget.id == "line1"
+                                                        || event.relatedTarget.id == "line2")) {
+
+                                                        crossBoxHide();
+                                                        
+                                                    }
+                                                }});
+                                                    
 crossBox[0].addEventListener('drop', function(event) { crossBoxHide(); handleDrop(event); });
 crossBox[0].addEventListener('dragover', function (event) { handleDragOver(event) });
 
@@ -123,7 +133,7 @@ function handleDragLeave(event) {
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
-    var mkboxß = false;
+    var mkbox = false;
     var new_id = { 'id': "", x: "", y: ""};  
  
     function disableSelection(target){
@@ -217,7 +227,7 @@ $(document).ready(function(){
         }           
     });
     
-    $(".txtbox").each(function(index) {   
+    $(".cbox").each(function(index) {   
         $(this).on('dragenter', handleDragEnter);
         $(this).on('drop', handleDrop);
         $(this).on('dragleave', handleDragLeave);
