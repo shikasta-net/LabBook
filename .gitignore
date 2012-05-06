@@ -9,3 +9,4 @@ modules/
 private/
 sessions/
 *.bak
+static/content/

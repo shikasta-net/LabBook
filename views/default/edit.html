@@ -57,11 +57,12 @@ crossBox[0].addEventListener('dragleave', function(event) {
                                                         || event.relatedTarget.id == "line2")) {
 
                                                         crossBoxHide();
+                                                        crossBoxOver = false;
                                                         
                                                     }
                                                 }});
                                                     
-crossBox[0].addEventListener('drop', function(event) { crossBoxHide(); handleDrop(event); });
+crossBox[0].addEventListener('drop', function(event) { crossBoxHide(); handleDrop(event); crossBoxOver = false});
 crossBox[0].addEventListener('dragover', function (event) { handleDragOver(event) });
 
 function handleDragOver(event) {
@@ -115,7 +116,7 @@ var crossBoxOver = false;
 function handleDragEnter(event) {
     event.stopPropagation();
     event.preventDefault();
-
+    crossBoxOver = this;
     crossBoxResizeAndPosition(this.id);
     crossBoxShow();
 }
@@ -123,7 +124,19 @@ function handleDragEnter(event) {
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
-    console.log('boom');
+    var box_id = crossBoxOver.id.substr(1);
+    var contentFile = event.dataTransfer.files[0];
+    var fd = new FormData();
+    fd.append("page_id", "{{=page.id}}");
+    fd.append("box_id", box_id);
+    fd.append("contentFile", contentFile);
+    fd.append("contentFileName", contentFile.name);
+    fd.append("contentFileType", contentFile.type);
+    fd.append("contentFileSize", contentFile.size);
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", "{{=URL('call/run/upload_content')}}" , true);
+    xhr.send(fd);
+    crossBoxOver.innerHTML = "Content updated - refresh to see!"
 }
 
 function handleDragLeave(event) {
@@ -243,7 +256,7 @@ $(document).ready(function(){
 <body class="page">
     <div id="main_page" class="page snapable">
     {{for tbox in boxes:}}        
-        {{=DIV(contents[tbox.id]['file_content'], _id="c%(id)s"%dict(id=tbox.id), _class="cbox snapable")}}
+        {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox snapable")}}
     {{pass}}
     </div>
     {{=INPUT(_type="button", _value="Create box", _id="mknewbox")}}

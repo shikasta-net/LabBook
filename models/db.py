@@ -17,7 +17,7 @@ db.define_table('page',
 #                format='%(title)s')
                 
 db.define_table('content',
-                Field('file_type', 'list:string'),
+                Field('file_type', 'string'),
                 Field('file_name', 'string'),
                 Field('created_on', 'datetime', default=request.now),
                 Field('modified_on', 'datetime', default=request.now))              
