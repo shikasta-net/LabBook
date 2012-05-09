@@ -46,10 +46,10 @@ def resize_box(id,w,h):
         
         
 @service.run
-def new_box(page_id):
+def new_box(page_id, x, y, w, h):
     rcode = 0
     try :
-        new_id = db.container_box.insert(page_id=page_id)
+        new_id = db.container_box.insert(page_id=page_id, position_x=x, position_y=y, width=w, height=h)
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -130,12 +130,13 @@ def default_get_handler(page_id, box_id, file_name):
 # Add new handlers here   
 handlers['image/svg+xml'] = FileHandler(default_save_handler, default_get_handler)
 handlers['image/jpeg'] = FileHandler(default_save_handler, default_get_handler)
+#handlers['text/html'] = FileHandler(default_save_handler, default_get_handler)
   
 # Described above         
 @service.run
 def upload_content():
     try:
-        print "upload_content service called on " + request.vars['page_id'] + "/" + request.vars['box_id'] + request.vars['contentFileName']
+        print "upload_content service called on " + request.vars['page_id'] + "/" + request.vars['box_id'] + "/" + request.vars['contentFileName']
         handler = handlers[request.vars['contentFileType']]
         if handler is not None:
             handler.save_file(request.vars['page_id'], request.vars['box_id'], request.vars['contentFileName'], request.vars['contentFile'])
