@@ -6,6 +6,7 @@
            
             -->
 {{include 'web2py_ajax.html'}}
+<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 <style>
 
 button.selected {
@@ -149,12 +150,14 @@ function handleDragLeave(event) {
     //console.log(this.id + " called drag leave");
 }
 
-function handleUpdateTitle(event) {
-    jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:$(event.target).text() }, function(data){ 
-        $(event.target).text(data.title_content);
-        new_title = data.title_content;
-        console.log("title update : " + data);
-     }, "json"); 
+function handleUpdateTitle(event) { 
+    if (new_title != $(event.target).text()) {
+        jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:$(event.target).text() }, function(data){
+            $(event.target).text(data.title_content);
+            new_title = data.title_content;
+            console.log("title update : " + data);
+        }, "json"); 
+    }
 }         
 
 function handleMoveContainer(event, ui) {
@@ -166,9 +169,15 @@ function handleResizeContainer(event, ui) {
 }
 
 function handleCreateContainer(new_cont) {
-    jQuery.post('{{=URL("call/run/new_box")}}', { page_id:new_cont['pid'], x:new_cont['x']/pxPerem, y:new_cont['y']/pxPerem, w:new_cont['w']/pxPerem, h:new_cont['h']/pxPerem }, function(data){  
+    console.log(new_cont);
+    var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
+    jQuery.post('{{=URL("call/run/new_box")}}', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){  
         $("#content_area").append( "<div class='cbox snapable' id='c"+data.new_id+"' >New content box created by javascript.</div>" );   
-        $("div#c" + data.new_id).css({ 'top':new_cont['y']+'px', 'left':new_cont['x']+'px', 'height':new_cont['h']+'px', 'width':new_cont['w']+'px'
+        $("div#c" + data.new_id).css({ 
+            'top':dims['y']+'px',
+            'left':dims['x']+'px',
+            'width':dims['w']+'px',
+            'height':dims['h']+'px'
         });
         defineContainerMobile($("div#c" + data.new_id));           
         console.log("create container : " + data);             
@@ -177,12 +186,13 @@ function handleCreateContainer(new_cont) {
 
 
 function disableSelection(target){
-    if (typeof target.onselectstart!="undefined") //IE route
+    if (typeof target.onselectstart!="undefined") {//IE route
         target.onselectstart=function(){return false}
-    else if (typeof target.style.MozUserSelect!="undefined") //Firefox route
+    } else if (typeof target.style.MozUserSelect!="undefined") {//Firefox route
         target.style.MozUserSelect="none"
-    else //All other route (ie: Opera)
+    } else {//All other route (ie: Opera)
         target.onmousedown=function(){return false}
+    }
     target.style.cursor = "default"
 }
 
@@ -217,14 +227,14 @@ var new_title = '{{=page.title}}';
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
-    var new_cont = { 'pid': {{=page.id}}, x: "", y: "", w: "", h: ""}; 
+    var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""}; 
        
  
-    $("#content_area").disableSelection();
+    $("#main_page").disableTextSelect();
     defineContainerMobile($(".cbox"));    
     
     //Press enter or click off to save changes. Press Esc to cancel them.
-    $("#title_bar").bind('focusout', handleUpdateTitle ).bind('keypress', function(event) { 
+    $("#title_bar").dblclick(function() { $(this).focus(); }).bind('focusout', handleUpdateTitle ).bind('keypress', function(event) { 
         if (event.keyCode == 13) {
             event.preventDefault();
             $(this).blur();
@@ -260,18 +270,30 @@ $(document).ready(function(){
     });
      
     $("#content_area").mousedown(function(e){    
-        if ($("button#mknewbox").hasClass("selected")) {          
-            new_cont['x'] = (e.pageX - $("div.content_area").offset().left);
-            new_cont['y'] = (e.pageY - $("div.content_area").offset().top);
+        if ($("button#mknewbox").hasClass("selected")) {   
+            new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
+            new_cont['y1'] = (e.pageY - $("div.content_area").offset().top);
+            if (!(new_cont['x1'] > 0 && new_cont['y1'] > 0 && new_cont['x1'] < $("div.content_area").width() && new_cont['y1'] < $("div.content_area").height()))  {
+                new_cont['x1'] = -1;
+                new_cont['y1'] = -1;
+            }
         }
     }).mouseup(function(e){
         if ($("button#mknewbox").hasClass("selected")) { 
-            new_cont['w'] = (e.pageX - new_cont['x'] - $("div.content_area").offset().left);
-            new_cont['h'] = (e.pageY - new_cont['y'] - $("div.content_area").offset().top); 
-            if (new_cont['w'] > 0 && new_cont['h'] > 0) {
+            new_cont['x2'] = (e.pageX - $("div.content_area").offset().left);
+            new_cont['y2'] = (e.pageY - $("div.content_area").offset().top); 
+            if (!(new_cont['x2'] > 0 && new_cont['y2'] > 0 && new_cont['x2'] < $("div.content_area").width() && new_cont['y2'] < $("div.content_area").height())) {
+                new_cont['x2'] = -1;
+                new_cont['y2'] = -1;
+            }            
+            if (new_cont['x1'] > 0 && new_cont['x2'] > 0 && new_cont['y1'] > 0 && new_cont['y2'] > 0) {
                 handleCreateContainer(new_cont);  
                 $(".selected").removeClass("selected");
-                setContainersMobile();            
+                setContainersMobile();           
+                new_cont['x1'] = -1;
+                new_cont['y1'] = -1; 
+                new_cont['x2'] = -1;
+                new_cont['y2'] = -1;
             }
         }           
     });
