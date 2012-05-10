@@ -1,5 +1,10 @@
 {{extend 'layout.html'}}
 <h1>Available pages</h1>
 <ul>{{for page in pages:}}
-     {{=LI(A(page.title, _href=URL('edit', args=page.id)))}}
+     {{if page.title != '':}}
+       {{ttl=page.title}}
+     {{else:}}
+       {{ttl='*'}}
+     {{pass}}
+     {{=LI(A(ttl, _href=URL('edit', args=page.id)))}}
 {{pass}}</ul>

@@ -8,7 +8,7 @@
 {{include 'web2py_ajax.html'}}
 <style>
 
-input.selected {
+button.selected {
     background: orange;
 }
 
@@ -147,32 +147,45 @@ function handleDragLeave(event) {
     //console.log(this.id + " called drag leave");
 }
 
+function handleUpdateTitle(event) {
+    jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:$(event.target).text() }, function(data){ 
+        $(event.target).text(data.title_content);
+        console.log("title update : " + data);
+     }, "json"); 
+}         
+
 function handleMoveContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : " + data); }, "json");
 }
 
 function handleResizeContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : " + data); }, "json");
 }
 
-function handleNewContainer(event) {
-    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+function handleCreateContainer(new_cont) {
+    jQuery.post('{{=URL("call/run/new_box")}}', { page_id:new_cont['pid'], x:new_cont['x']/pxPerem, y:new_cont['y']/pxPerem, w:new_cont['w']/pxPerem, h:new_cont['h']/pxPerem }, function(data){  
+        $("#content_area").append( "<div class='cbox snapable' id='c"+data.new_id+"' >New content box created by javascript.</div>" );   
+        $("div#c" + data.new_id).css({ 'top':new_cont['y']+'px', 'left':new_cont['x']+'px', 'height':new_cont['h']+'px', 'width':new_cont['w']+'px'
+        });
+        defineContainerMobile($("div#c" + data.new_id));           
+        console.log("create container : " + data);             
+    }, "json"); 
 }
 
 
 function disableSelection(target){
     if (typeof target.onselectstart!="undefined") //IE route
-target.onselectstart=function(){return false}
+        target.onselectstart=function(){return false}
     else if (typeof target.style.MozUserSelect!="undefined") //Firefox route
-target.style.MozUserSelect="none"
+        target.style.MozUserSelect="none"
     else //All other route (ie: Opera)
-target.onmousedown=function(){return false}
+        target.onmousedown=function(){return false}
     target.style.cursor = "default"
 }
 
-function defineContainersMobile() {
-    $(".cbox").draggable({    
-        snap: ".snapable",
+function defineContainerMobile(target) {
+    target.draggable({    
+        snap: ".cbox",
         snapTolerance: 5,
         snapMode: "outer",
         containment: "parent",
@@ -181,10 +194,10 @@ function defineContainersMobile() {
         containment: "parent",       
         stop: function(event, ui) { handleResizeContainer(event, ui); }
     }).click( function() {
-        if ($("input#delbox").hasClass("selected")) {
-            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ $("div#error").text("Something happened : " + data); }, "json");
+        if ($("button#delbox").hasClass("selected")) {
+            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ console.log("remove container : " + data); }, "json");
             $(this).detach();
-            $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+            setContainersMobile();
             $(".selected").removeClass("selected");
         }
     });  
@@ -196,16 +209,23 @@ function unsetContainersMobile() {
 function setContainersMobile() {
     $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
-
+   
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
-    var new_cont = { 'pid': {{=page.id}}, x: "", y: "", w: "", h: ""};   
+    var new_cont = { 'pid': {{=page.id}}, x: "", y: "", w: "", h: ""};    
  
-    disableSelection(document.body) 
-    defineContainersMobile();
+    $("#content_area").disableSelection();
+    defineContainerMobile($(".cbox"));    
     
-    $("input#mknewbox").click(function(){ 
+    $("#title_bar").bind('focusout', handleUpdateTitle ).bind('keypress', function(event) { 
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            $(this).blur();
+        }
+    });    
+       
+    $("button#mknewbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
             $(".selected").removeClass("selected");
             $(this).addClass("selected");
@@ -216,7 +236,7 @@ $(document).ready(function(){
         }
     });   
     
-    $("input#delbox").click(function(){ 
+    $("button#delbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
             $(".selected").removeClass("selected");
             $(this).addClass("selected");
@@ -227,24 +247,20 @@ $(document).ready(function(){
         }
     });
      
-    $("div#main_page").mousedown(function(e){    
-        if ($("input#mknewbox").hasClass("selected")) {          
-            new_cont['x'] = (e.pageX - $("div.page").offset().left);
-            new_cont['y'] = (e.pageY - $("div.page").offset().top);
+    $("#content_area").mousedown(function(e){    
+        if ($("button#mknewbox").hasClass("selected")) {          
+            new_cont['x'] = (e.pageX - $("div.content_area").offset().left);
+            new_cont['y'] = (e.pageY - $("div.content_area").offset().top);
         }
     }).mouseup(function(e){
-        if ($("input#mknewbox").hasClass("selected")) { 
-            new_cont['w'] = (e.pageX - new_cont['x'] - $("div.page").offset().left);
-            new_cont['h'] = (e.pageY - new_cont['y'] - $("div.page").offset().top); 
-            jQuery.post('{{=URL("call/run/new_box")}}', { page_id:new_cont['pid'], x:new_cont['x']/pxPerem, y:new_cont['y']/pxPerem, w:new_cont['w']/pxPerem, h:new_cont['h']/pxPerem }, function(data){  
-                $("div#main_page").append( "<div class='cbox snapable' id='c"+data.new_id+"' >New text box created by javascript. Reloaded from database on refresh.</div>" );   
-                $("div#c" + data.new_id).css({ 'top':new_cont['y']+'px', 'left':new_cont['x']+'px', 'height':new_cont['h']+'px', 'width':new_cont['w']+'px'
-                });
-                defineContainersMobile();           
-                $("div#error").text("Something happened : " + data);             
-            }, "json");   
-            $(".selected").removeClass("selected");
-            setContainersMobile();            
+        if ($("button#mknewbox").hasClass("selected")) { 
+            new_cont['w'] = (e.pageX - new_cont['x'] - $("div.content_area").offset().left);
+            new_cont['h'] = (e.pageY - new_cont['y'] - $("div.content_area").offset().top); 
+            if (new_cont['w'] > 0 && new_cont['h'] > 0) {
+                handleCreateContainer(new_cont);  
+                $(".selected").removeClass("selected");
+                setContainersMobile();            
+            }
         }           
     });
     
@@ -254,7 +270,7 @@ $(document).ready(function(){
         $(this).on('dragleave', handleDragLeave);
     });
     
-    $('#main_page').append(crossBox);
+    $('#content_area').append(crossBox);
     
 });
 </script>
@@ -262,11 +278,14 @@ $(document).ready(function(){
 <link rel="stylesheet" type="text/css" href={{=URL('static','static-css.css')}} />
 </head>
 <body class="page">
-    <div id="main_page" class="page snapable">
-    {{for tbox in boxes:}}        
-        {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox snapable")}}
-    {{pass}}
+    <div id="main_page" class="page">
+        {{=SPAN(page.title, _id="title_bar", _class="title_bar", _contentEditable="true")}}
+        <div id="content_area" class="content_area">
+            {{for tbox in boxes:}}        
+                {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+            {{pass}}
+        </div>
     </div>
-    {{=INPUT(_type="button", _value="Create box", _id="mknewbox")}}
-    {{=INPUT(_type="button", _value="Delete box", _id="delbox")}}
+    <button type="button" id="mknewbox">Create box</button>
+    <button type="button" id="delbox">Delete box</button>
 </body>

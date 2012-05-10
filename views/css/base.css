@@ -7,12 +7,29 @@
     div.page {
         position:relative;
         margin:5px;
-        border:1px solid #a1a1a1;
+        border:1px solid darkgray;
         background:#F5F5F5;
         width:70em;
         height:50em;
         box-shadow:3px 3px 3px #888888;
-    }    
+    } 
+    div.content_area {
+        position:relative;
+        margin:3em;
+        border:1px dotted lightgray;
+        width:64em;
+        height:44em;
+    }   
+    span.title_bar{
+        position:absolute;
+        margin-top:1em;
+        height: 1em;
+        width: inherit; 
+        text-align: center;  
+        font-family: Times, serif;
+        font-weight: bold;        
+        font-size: 16pt;        
+    }
     div.cbox {
         position:absolute;
         background: #FAFAFA;
@@ -26,9 +43,16 @@
         height:0%;
     }
     div.page {
+        position:relative;
         width:70em;
         height:50em;
     }
+    div.content_area {
+        position:relative;
+        margin:3em;
+        width:64em;
+        height:44em;
+    }   
     div.cbox {
         position:absolute;
     }

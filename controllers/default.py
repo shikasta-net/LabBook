@@ -10,11 +10,28 @@ def edit():
     for box in boxes :
         contents[box.id] = get_content(box.id)
     return dict(page=this_page, boxes=boxes, contents=contents)
-    
+      
 def call():
     session.forget()
     return service()   
     
+# Function to update the page title
+@service.run
+def update_title(page_id, title_content):
+    rcode = 0
+    try :    
+        db(db.page.id==page_id).update(title=title_content, modified_on=request.now)       
+    except Exception, e :
+        print 'oops: %s' % e
+        response.headers['Status'] = '400'
+        rcode = 400
+    else :     
+        rcode = 200
+    finally :
+        title_content = db(db.page.id==page_id).select().first().title
+        return response.json(dict(return_code=rcode, title_content=title_content))
+    
+# Functions to create, remove and modify the container boxes.  
 @service.run
 def move_box(id,x,y):
     rcode = 0
@@ -67,8 +84,6 @@ def del_box(box_id):
     
         if db(db.container_box.id==box_id).select().first().content_id is not None :
             db(db.content.id==db(db.container_box.id==box_id).select().first().content_id).delete()
- #       contents = db(db.content.id==db(db.container_box.id==box_id).content_id).select()        
-        #if exists content, delete it.   
         db(db.container_box.id==box_id).delete()
     except Exception, e :
         print 'oops: %s' % e
