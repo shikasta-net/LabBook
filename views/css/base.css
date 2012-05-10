@@ -22,13 +22,23 @@
     }   
     span.title_bar{
         position:absolute;
-        margin-top:1em;
-        height: 1em;
+        margin-top:1em;        
+        height: 14pt;
         width: inherit; 
         text-align: center;  
         font-family: Times, serif;
         font-weight: bold;        
-        font-size: 16pt;        
+        font-size: 14pt;        
+    }
+    div.side_bar{
+        position:absolute;
+        margin-top:3em;
+        height: 44em;
+        width: 3em;   
+    }
+    .side_button{
+        width:inherit;
+        padding:0;
     }
     div.cbox {
         position:absolute;

@@ -48,6 +48,8 @@ div.line {
 </style>
 
 <script>
+var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button"/></button>');
+var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button"/></button>');
 
 var crossBox = $('<div id="crossbox"></div>');
 var crossLine1 = $('<div class="line" id="line1"></div>');
@@ -150,6 +152,7 @@ function handleDragLeave(event) {
 function handleUpdateTitle(event) {
     jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:$(event.target).text() }, function(data){ 
         $(event.target).text(data.title_content);
+        new_title = data.title_content;
         console.log("title update : " + data);
      }, "json"); 
 }         
@@ -210,21 +213,30 @@ function setContainersMobile() {
     $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
    
+var new_title = '{{=page.title}}';
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
-    var new_cont = { 'pid': {{=page.id}}, x: "", y: "", w: "", h: ""};    
+    var new_cont = { 'pid': {{=page.id}}, x: "", y: "", w: "", h: ""}; 
+       
  
     $("#content_area").disableSelection();
     defineContainerMobile($(".cbox"));    
     
+    //Press enter or click off to save changes. Press Esc to cancel them.
     $("#title_bar").bind('focusout', handleUpdateTitle ).bind('keypress', function(event) { 
         if (event.keyCode == 13) {
             event.preventDefault();
             $(this).blur();
+        } else if (event.keyCode == 27) {
+            event.preventDefault();
+            $(this).text(new_title);
+            $(this).blur();
         }
     });    
        
+    $('#side_bar_l').append(buttonAddContainer,buttonRemoveContainer);
+    
     $("button#mknewbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
             $(".selected").removeClass("selected");
@@ -280,6 +292,7 @@ $(document).ready(function(){
 <body class="page">
     <div id="main_page" class="page">
         {{=SPAN(page.title, _id="title_bar", _class="title_bar", _contentEditable="true")}}
+        {{=DIV(_id="side_bar_l", _class="side_bar")}}
         <div id="content_area" class="content_area">
             {{for tbox in boxes:}}        
                 {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
