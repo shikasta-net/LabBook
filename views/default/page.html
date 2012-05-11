@@ -6,49 +6,10 @@
            
             -->
 {{include 'web2py_ajax.html'}}
+<link rel="stylesheet" type="text/css" href={{=URL('css','page_layout.css', vars=dict(id=page.id))}} />
 <script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
-<style>
-
-button.selected {
-    background: orange;
-}
-
-div.line {
-    -webkit-transform-origin: 0 50%;
-    -moz-transform-origin: 0 50%;
-    transform-origin: 0 50%;
-    height: 3px;
-    background: gray;
-    position: absolute;
-
-}
-
-#line1 {
-    transform: rotate(45deg);
-    -moz-transform: rotate(45deg);
-    -webkit-transform: rotate(45deg);
-    display: inherit;
-
-}
-
-#line2 {
-    transform: rotate(-45deg);
-    -moz-transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-    display: inherit;
-
-}
-
-#crossbox {
-    display: none;
-    background: #fff;
-    border: 3px solid gray;
-    position: absolute;
-    opacity: 0.4;
-}
-</style>
-
-<script>
+<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
+<script type="text/javascript">
 var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
 var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button" style="width:90%;" /></button>');
 
@@ -150,22 +111,17 @@ function handleDragLeave(event) {
     //console.log(this.id + " called drag leave");
 }
 
-function handleUpdateTitle(event) { 
-    if (new_title != $(event.target).text()) {
-        jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:$(event.target).text() }, function(data){
-            $(event.target).text(data.title_content);
-            new_title = data.title_content;
-            console.log("title update : " + data);
-        }, "json"); 
-    }
-}         
+function handleUpdateTitle(value, settings) { 
+   jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:value }, function(data){ value = data.title_content; console.log("title update : ");console.log(data); }, "json"); 
+    return(value);
+}   
 
 function handleMoveContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : " + data); }, "json");
+    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
 }
 
 function handleResizeContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : " + data); }, "json");
+    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
 }
 
 function handleCreateContainer(new_cont) {
@@ -180,11 +136,11 @@ function handleCreateContainer(new_cont) {
             'height':dims['h']+'px'
         });
         defineContainerMobile($("div#c" + data.new_id));           
-        console.log("create container : " + data);             
+        console.log("create container : ");console.log(data);             
     }, "json"); 
 }
 
-
+/*
 function disableSelection(target){
     if (typeof target.onselectstart!="undefined") {//IE route
         target.onselectstart=function(){return false}
@@ -195,6 +151,7 @@ function disableSelection(target){
     }
     target.style.cursor = "default"
 }
+*/
 
 function defineContainerMobile(target) {
     target.draggable({    
@@ -208,7 +165,7 @@ function defineContainerMobile(target) {
         stop: function(event, ui) { handleResizeContainer(event, ui); }
     }).click( function() {
         if ($("button#delbox").hasClass("selected")) {
-            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ console.log("remove container : " + data); }, "json");
+            jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
             $(this).detach();
             setContainersMobile();
             $(".selected").removeClass("selected");
@@ -223,7 +180,6 @@ function setContainersMobile() {
     $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
    
-var new_title = '{{=page.title}}';
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
@@ -233,17 +189,11 @@ $(document).ready(function(){
     $("#main_page").disableTextSelect();
     defineContainerMobile($(".cbox"));    
     
-    //Press enter or click off to save changes. Press Esc to cancel them.
-    $("#title_bar").dblclick(function() { $(this).focus(); }).bind('focusout', handleUpdateTitle ).bind('keypress', function(event) { 
-        if (event.keyCode == 13) {
-            event.preventDefault();
-            $(this).blur();
-        } else if (event.keyCode == 27) {
-            event.preventDefault();
-            $(this).text(new_title);
-            $(this).blur();
-        }
-    });    
+    //Doubdle click to edit Press enter to save changes. Press Esc to cancel them.
+    $("#title_bar").bind('focusin', function() { $("#main_page").enableTextSelect() } ).bind('focusout', function() { $("#main_page").disableTextSelect() } ).editable(handleUpdateTitle, { 
+        tooltip   : "DoubleClick to edit...",
+        event     : "dblclick"
+    });  
        
     $('#side_bar_l').append(buttonAddContainer,buttonRemoveContainer);
     
@@ -308,12 +258,10 @@ $(document).ready(function(){
     
 });
 </script>
-<link rel="stylesheet" type="text/css" href={{=URL('css','base.css', vars=dict(id=page.id))}} />
-<link rel="stylesheet" type="text/css" href={{=URL('static','static-css.css')}} />
 </head>
 <body class="page">
     <div id="main_page" class="page">
-        {{=SPAN(page.title, _id="title_bar", _class="title_bar", _contentEditable="true")}}
+        {{=DIV(SPAN(page.title, _id="title_bar", _class="title_bar"), _class="title_bar")}}
         {{=DIV(_id="side_bar_l", _class="side_bar")}}
         <div id="content_area" class="content_area">
             {{for tbox in boxes:}}        
@@ -321,6 +269,6 @@ $(document).ready(function(){
             {{pass}}
         </div>
     </div>
-    <button type="button" id="mknewbox">Create box</button>
-    <button type="button" id="delbox">Delete box</button>
+<!--    <button type="button" id="mknewbox">Create box</button>
+    <button type="button" id="delbox">Delete box</button> -->
 </body>

@@ -2,7 +2,7 @@ def index():
     pages = db().select(db.page.id, db.page.title, db.page.modified_on, orderby=db.page.modified_on)
     return dict(pages=pages)
     
-def edit():
+def page():
     this_page = db.page(request.args(0)) or redirect(URL('index'))
     db.container_box.page_id.default = this_page.id
     boxes = db(db.container_box.page_id==this_page.id).select()

@@ -1,4 +1,4 @@
-def base():
+def page_layout():
      response.headers['Content-Type']='text/css'
      boxes = db(db.container_box.page_id==request.vars.id).select()
      contents = ""
