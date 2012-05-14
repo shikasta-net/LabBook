@@ -41,6 +41,5 @@ db.container_box.content_id.readable = db.container_box.content_id.writable = Fa
 db.container_box.created_on.readable = db.container_box.created_on.writable = False
 db.container_box.modified_on.readable = db.container_box.modified_on.writable = False
 
-db.content.file_type.requires=IS_IN_SET(('text','image'))
 db.content.created_on.readable = db.content.created_on.writable = False
 db.content.modified_on.readable = db.content.modified_on.writable = False

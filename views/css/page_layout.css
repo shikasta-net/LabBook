@@ -73,18 +73,26 @@ div.line {
     position: absolute;
     opacity: 0.4;
 }
-
+div.empty {
+    border: 2px dashed gray;
+}
 div.cbox {
+    opacity: 1; 
     position: absolute;
 }   
 div.cbox img {
     width: 100%;
     height: 100%;
 }
-div.cbox p {
+div.textbox {  
+    width: 100%;
+    height: 100%;
+}  
+div.textbox p {
     margin: 0;
     padding: 0;
 }
+
 {{=contents}}
 
 @media screen{

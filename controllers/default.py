@@ -80,11 +80,11 @@ def new_box(page_id, x, y, w, h):
 @service.run
 def del_box(box_id):
     rcode = 0
-    try :
-    
-        if db(db.container_box.id==box_id).select().first().content_id is not None :
-            db(db.content.id==db(db.container_box.id==box_id).select().first().content_id).delete()
-        db(db.container_box.id==box_id).delete()
+    try :    
+        container = db(db.container_box.id==box_id).select().first()
+        if container.content_id is not None :
+            delete_content(container.page_id, box_id, container.content_id)
+        db(db.container_box.id==box_id).delete() #better way to do this without requery? pop by setting to variable?
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -118,16 +118,28 @@ class FileHandler:
         self.get_file = get_handler
 
 import os  
-import shutil      
+import shutil     
+def delete_content(page_id, box_id, content_id) :
+    content_dir = os.path.join(os.getcwd(), get_content_dir(page_id, box_id))
+    shutil.rmtree(content_dir)
+    db(db.content.id==content_id).delete()
+ 
 def default_save_handler(page_id, box_id, file_name, file_content):
     page_upload_dir = get_content_dir(page_id, box_id)
     save_dir = os.path.join(os.getcwd(), page_upload_dir)
     print "Saving " + file_name + " to " + save_dir
-    # Throws an error if leaf directory already exists
-    # TODO: add handling of overwrites
-    os.makedirs(save_dir)
-    f = open(os.path.join(save_dir, file_name), 'w')
-    shutil.copyfileobj(file_content.file, f)
+    # TODO: overwrite handeled if file has the same name not otherwise
+    if not os.path.isdir(save_dir) :
+        os.makedirs(save_dir)
+    content_file = os.path.join(save_dir, file_name)
+    if os.path.isfile(content_file) :
+        shutil.copy(content_file, content_file+'.old')
+    f = open(content_file, 'w')
+    # TODO: better checking of content type for writing method
+    if ".html" in file_name :
+        f.write(file_content)
+    else :
+        shutil.copyfileobj(file_content.file, f)        
     f.close()
 
 def get_content_reldir(page_id, box_id):
@@ -136,16 +148,23 @@ def get_content_reldir(page_id, box_id):
 def get_content_dir(page_id, box_id):
     return os.path.join(request.folder, get_content_reldir(page_id, box_id))
     
-def default_get_handler(page_id, box_id, file_name):
-    print "Get handler called for: " + file_name
+def default_image_get_handler(page_id, box_id, file_name):
+#    print "Get handler called for: " + file_name
     #return "<img src='" + file_name + "' alt='" + file_name + "' />"
     return IMG(_src=URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, file_name)), _alt=file_name)
 
+def default_text_get_handler(page_id, box_id, file_name):
+#    print "Get handler called for: " + file_name
+    #return "<p src='" + file_name + "' alt='" + file_name + "' />"
+    content_dir = os.path.join(os.getcwd(), get_content_dir(page_id, box_id))
+    f = open(os.path.join(content_dir, file_name), 'r')    
+    return DIV(XML(f.read()), _id='txt'+str(box_id), _class='textbox', _alt=file_name)
+
 
 # Add new handlers here   
-handlers['image/svg+xml'] = FileHandler(default_save_handler, default_get_handler)
-handlers['image/jpeg'] = FileHandler(default_save_handler, default_get_handler)
-#handlers['text/html'] = FileHandler(default_save_handler, default_get_handler)
+handlers['image/svg+xml'] = FileHandler(default_save_handler, default_image_get_handler)
+handlers['image/jpeg'] = FileHandler(default_save_handler, default_image_get_handler)
+handlers['text/html'] = FileHandler(default_save_handler, default_text_get_handler)
   
 # Described above         
 @service.run
@@ -170,7 +189,7 @@ def upload_content():
 def get_content(box_id):
     c_box = db(db.container_box.id == box_id).select().first()
     if c_box.content_id is None:
-        return "No content for this box yet"
+        return ""
     content = db(db.content.id == c_box.content_id).select().first()
     handler = handlers[content.file_type]
     html_resp = handler.get_file(c_box.page_id, box_id, content.file_name)
