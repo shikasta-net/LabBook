@@ -2,13 +2,12 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")}} 
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
-<!--
-           
-            -->
 {{include 'web2py_ajax.html'}}
 <link rel="stylesheet" type="text/css" href={{=URL('css','page_layout.css', vars=dict(id=page.id))}} />
 <script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
+
 <script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
 <script type="text/javascript">
 var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
@@ -23,22 +22,37 @@ function handleDragEnter(event) {
     crossBoxShow();
 }
 
+//TODO: implement this for newly created boxes and load image imidiately rather than requiring refresh.
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
     var box_id = crossBoxOver.id.substr(1);
-    var contentFile = event.dataTransfer.files[0];
-    var fd = new FormData();
+    var contentFile = event.dataTransfer.files[0];    
+    handleSaveContent(box_id, contentFile, contentFile);
+    crossBoxOver.innerHTML = "Content updated - refresh to see!" 
+}
+
+function handleSaveContent(box_id, content, metadata) {
+    var fd = new FormData();    
     fd.append("page_id", "{{=page.id}}");
     fd.append("box_id", box_id);
-    fd.append("contentFile", contentFile);
-    fd.append("contentFileName", contentFile.name);
-    fd.append("contentFileType", contentFile.type);
-    fd.append("contentFileSize", contentFile.size);
-    xhr = new XMLHttpRequest();
-    xhr.open("POST", "{{=URL('call/run/upload_content')}}" , true);
-    xhr.send(fd);
-    crossBoxOver.innerHTML = "Content updated - refresh to see!"
+    fd.append("contentFile", content);
+    fd.append("contentFileName", metadata.name);
+    fd.append("contentFileType", metadata.type);
+    fd.append("contentFileSize", metadata.size);
+    $.ajax({
+        url: "{{=URL('call/run/upload_content')}}",
+        data: fd,
+        cache: false,
+        contentType: false,
+        processData: false,
+        type: 'POST',
+        success: function(data){
+            console.log("Content upload : ");
+            console.log(data);
+        }
+    });
+
 }
 
 function handleDragLeave(event) {
@@ -59,17 +73,20 @@ function handleResizeContainer(event, ui) {
 }
 
 function handleCreateContainer(new_cont) {
-    console.log(new_cont);
     var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
     jQuery.post('{{=URL("call/run/new_box")}}', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){  
-        $("#content_area").append( "<div class='cbox snapable' id='c"+data.new_id+"' >New content box created by javascript.</div>" );   
+        $("#content_area").append( "<div class='cbox empty' id='c"+data.new_id+"'></div>" );   
         $("div#c" + data.new_id).css({ 
             'top':dims['y']+'px',
             'left':dims['x']+'px',
             'width':dims['w']+'px',
             'height':dims['h']+'px'
         });
-        defineContainerMobile($("div#c" + data.new_id));           
+        $("div#c" + data.new_id).on('dragenter', handleDragEnter);
+        $("div#c" + data.new_id).on('drop', handleDrop);
+        $("div#c" + data.new_id).on('dragleave', handleDragLeave); 
+        defineContainerMobile($("div#c" + data.new_id));   
+        defineIsBlank($("div#c" + data.new_id));
         console.log("create container : ");console.log(data);             
     }, "json"); 
 }
@@ -104,24 +121,87 @@ function defineContainerMobile(target) {
             setContainersMobile();
             $(".selected").removeClass("selected");
         }
-    });  
+    }); 
 }
 
-function unsetContainersMobile() {
-    $(".cbox").draggable("option", "disabled", true).resizable("option", "disabled", true);
+function unsetContainersMobile(target) {
+    if(typeof target == 'undefined') target = $(".cbox");  
+    target.draggable("option", "disabled", true).resizable("option", "disabled", true);
 }
-function setContainersMobile() {
-    $(".cbox").draggable("option", "disabled", false).resizable("option", "disabled", false);
+function setContainersMobile(target) {
+    if(typeof target == 'undefined') target = $(".cbox");
+    target.draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
+
+function defineIsBlank(target) {
+    target.addClass('empty');
+    target.bind('dblclick', function(event) {   
+        $(event.target).prepend("<div class='textbox' id='"+$(event.target).attr('id').replace('c','txt')+"'><p></p></div>"); //the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
+        target.removeClass("empty");
+        target.unbind('dblclick');   
+        defineIsEditable($('#'+$(event.target).attr('id')));
+        handleDynamicTextEditor($('#'+$(event.target).attr('id')));
+    })
+}
+
+function defineIsEditable(target) {
+    target.bind('dblclick', function(event) {  
+        handleDynamicTextEditor($(event.target));
+    });
+}
+
+function handleDynamicTextEditor(target){
+    unsetContainersMobile(target);
+    if(target.attr('id') == undefined) {
+        target = target.parent('div');        
+    }
+    var id = target.attr('id').replace('c','txt');
+    if(tinyMCE.getInstanceById(id)) {        
+        tinyMCE.getInstanceById(id).show();
+        tinyMCE.execCommand('mceFocus', false, id);
+    } else {
+        tinyMCE.execCommand('mceAddControl', false, id);           
+    }
+}
+
    
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
     var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""}; 
        
- 
+    tinyMCE.init({
+        mode : "none",
+        theme : "simple",
+        setup: function(ed) {
+                ed.onInit.add(function(ed, evt) {
+                    var dom = ed.dom;
+                    var doc = ed.getDoc();            
+                    tinymce.dom.Event.add(doc, 'blur', function(e) { //chose between save and hide or remove editor.
+                        tinyMCE.execCommand('mceRemoveControl', false, ed.id);
+//                        ed.save();
+//                        ed.hide();  
+                        setContainersMobile($('#'+ed.id.replace('txt','c')));
+                    });
+                }); 
+                ed.onSaveContent.add(function(ed, o) {
+                    if (o.content == '') { //set as blank again.
+                       $('#' + ed.id).remove();
+                       $('#' + ed.id.replace('txt','c')).unbind('dblclick'); 
+                       defineIsBlank($('#' + ed.id.replace('txt','c')));
+                    } else {      
+                        handleSaveContent(ed.id.replace('txt',''), o.content, { name:'textbox'+ed.id.replace('txt','')+'.'+o.format, type:'text/'+o.format, size: 8*unescape(encodeURIComponent(content)).length });
+                        console.log("The content has been submitted for saving");
+                    }
+                });
+        },
+        init_instance_callback : function(ed) { ed.focus() }
+    });
+   
+     
     $("#main_page").disableTextSelect();
-    defineContainerMobile($(".cbox"));    
+    $(".empty").each(function(index) { defineIsBlank($(this)); });
+    $(".textbox").each(function(index) { defineIsEditable($('#'+$(this).attr('id').replace('txt','c'))); })
     
     //Doubdle click to edit Press enter to save changes. Press Esc to cancel them.
     $("#title_bar").bind('focusin', function() { $("#main_page").enableTextSelect() } ).bind('focusout', function() { $("#main_page").disableTextSelect() } ).editable(handleUpdateTitle, { 
@@ -185,10 +265,12 @@ $(document).ready(function(){
     $(".cbox").each(function(index) {   
         $(this).on('dragenter', handleDragEnter);
         $(this).on('drop', handleDrop);
-        $(this).on('dragleave', handleDragLeave);
+        $(this).on('dragleave', handleDragLeave);        
+        defineContainerMobile($(this));   
     });
-    
-    $('#content_area').append(getCrossBox());
+  
+//newly created divs have cross box underneither somhow???
+    $('#content_area').append(crossBox);
     
 });
 </script>
@@ -198,8 +280,12 @@ $(document).ready(function(){
         {{=DIV(SPAN(page.title, _id="title_bar", _class="title_bar"), _class="title_bar")}}
         {{=DIV(_id="side_bar_l", _class="side_bar")}}
         <div id="content_area" class="content_area">
-            {{for tbox in boxes:}}        
-                {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+            {{for tbox in boxes:}} 
+                {{if contents[tbox.id] is not "" :}}
+                    {{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+                {{else:}}
+                    {{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}                
+                {{pass}}                   
             {{pass}}
         </div>
     </div>
