@@ -1,3 +1,12 @@
+/*body.mceContentBody {
+
+    color:#000;
+    font-family: inherit;
+    font-size: inherit;
+    margin: inherit;
+    overflow: hidden;
+}*/
+
 body.page {
     margin: 0;
     padding: 0;

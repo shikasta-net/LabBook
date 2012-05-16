@@ -3,7 +3,7 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 {{include 'web2py_ajax.html'}}
-<link rel="stylesheet" type="text/css" href={{=URL('css','page_layout.css', vars=dict(id=page.id))}} />
+<link rel="stylesheet" type="text/css" href="{{=URL('css','page_layout.css', vars=dict(id=page.id))}}" />
 <script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
@@ -126,7 +126,7 @@ function defineContainerMobile(target) {
 
 function unsetContainersMobile(target) {
     if(typeof target == 'undefined') target = $(".cbox");  
-    target.draggable("option", "disabled", true).resizable("option", "disabled", true);
+    target.each(function (index) { $(this).draggable("option", "disabled", true).resizable("option", "disabled", true); });
 }
 function setContainersMobile(target) {
     if(typeof target == 'undefined') target = $(".cbox");
@@ -145,17 +145,30 @@ function defineIsBlank(target) {
 }
 
 function defineIsEditable(target) {
-    target.bind('dblclick', function(event) {  
+    target.bind('dblclick', function(event) {
+        event.stopPropagation();  
         handleDynamicTextEditor($(event.target));
     });
 }
 
 function handleDynamicTextEditor(target){
-    unsetContainersMobile(target);
-    if(target.attr('id') == undefined) {
-        target = target.parent('div');        
+    if(target.hasClass('cbox')) {
+        var targetCBox = target;
+        var targetTBox = target.child('div.textbox');
+    } else if(target.hasClass('textbox')) {
+        var targetCBox = target.parent('div.cbox');
+        var targetTBox = target;
+    } else {
+        var targetCBox = target.parents('div.cbox');
+        var targetTBox = target.parents('div.textbox');
     }
-    var id = target.attr('id').replace('c','txt');
+    if (!targetCBox || !targetTBox) {
+        throw "handleDynamicTextEditor called on something which isn't a child of a cbox or a textbox: " + $(target)[0].tagName
+    }
+    console.log(targetCBox.attr('id'));
+    console.log(targetTBox.attr('id'));
+    unsetContainersMobile(targetCBox);
+    var id = $(targetTBox).attr('id');
     if(tinyMCE.getInstanceById(id)) {        
         tinyMCE.getInstanceById(id).show();
         tinyMCE.execCommand('mceFocus', false, id);
@@ -173,6 +186,7 @@ $(document).ready(function(){
     tinyMCE.init({
         mode : "none",
         theme : "simple",
+        skin: "default",
         setup: function(ed) {
                 ed.onInit.add(function(ed, evt) {
                     var dom = ed.dom;
