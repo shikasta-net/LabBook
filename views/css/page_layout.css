@@ -15,6 +15,7 @@ div.content_area {
     margin: 3em;
     width: 64em;
     height: 44em;
+    z-index:0;
 }   
 
 div.title_bar{
@@ -23,7 +24,8 @@ div.title_bar{
     height: 2em; 
     margin-left: 3em;
     width: 64em;           
-    text-align: center;         
+    text-align: center;   
+    z-index:1;      
 }
 span.title_bar{
     font-family: Times, serif;
@@ -36,6 +38,7 @@ div.side_bar{
     margin-top:3em;
     height: 44em;
     width: 3em;   
+    z-index:1;
 }
 button.side_button{
     width:inherit;
@@ -72,13 +75,16 @@ div.line {
     border: 3px solid gray;
     position: absolute;
     opacity: 0.4;
+    z-index:10;
 }
 div.empty {
     border: 2px dashed gray;
+    z-index:2;
 }
 div.cbox {
     opacity: 1; 
     position: absolute;
+    z-index:1;
 }   
 div.cbox img {
     width: 100%;

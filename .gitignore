@@ -10,3 +10,4 @@ private/
 sessions/
 *.bak
 static/content/
+static/tinymce_3.5_jquery.zip

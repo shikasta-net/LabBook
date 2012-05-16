@@ -88,7 +88,7 @@ function handleDragEnter(event) {
     crossBoxShow();
 }
 
-//TODO: implement this for newly created boxes and load image imidiately rather than requiring refresh.
+//TODO: load image imidiately rather than requiring refresh.
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
@@ -151,6 +151,7 @@ function handleCreateContainer(new_cont) {
         $("div#c" + data.new_id).on('dragenter', handleDragEnter);
         $("div#c" + data.new_id).on('drop', handleDrop);
         $("div#c" + data.new_id).on('dragleave', handleDragLeave); 
+        defineContainerDragNDrop($("div#c" + data.new_id));  
         defineContainerMobile($("div#c" + data.new_id));   
         defineIsBlank($("div#c" + data.new_id));
         console.log("create container : ");console.log(data);             
@@ -169,6 +170,12 @@ function disableSelection(target){
     target.style.cursor = "default"
 }
 */
+
+function defineContainerDragNDrop(target){
+    target.on('dragenter', handleDragEnter);
+    target.on('drop', handleDrop);
+    target.on('dragleave', handleDragLeave);   
+}
 
 function defineContainerMobile(target) {
     target.draggable({    
@@ -217,10 +224,10 @@ function defineIsEditable(target) {
 }
 
 function handleDynamicTextEditor(target){
-    unsetContainersMobile(target);
     if(target.attr('id') == undefined) {
         target = target.parent('div');        
     }
+    unsetContainersMobile(target);
     var id = target.attr('id').replace('c','txt');
     if(tinyMCE.getInstanceById(id)) {        
         tinyMCE.getInstanceById(id).show();
@@ -328,10 +335,8 @@ $(document).ready(function(){
         }           
     });
     
-    $(".cbox").each(function(index) {   
-        $(this).on('dragenter', handleDragEnter);
-        $(this).on('drop', handleDrop);
-        $(this).on('dragleave', handleDragLeave);        
+    $(".cbox").each(function(index) {    
+        defineContainerDragNDrop($(this));
         defineContainerMobile($(this));   
     });
   
