@@ -176,7 +176,7 @@ def upload_content():
             handler.save_file(request.vars['page_id'], request.vars['box_id'], request.vars['contentFileName'], request.vars['contentFile'])
             c_id = db.content.insert(file_type=request.vars['contentFileType'], file_name=request.vars['contentFileName'])
             db(db.container_box.id == request.vars['box_id']).update(content_id = c_id)
-            return response.json({'success': True})
+            return response.json(dict(content=str(get_content(request.vars['box_id'])), box_id=request.vars['box_id']))
         else:
             print "No file handler for " + request.vars['contentFileType']
             response.headers['Status'] = '500'

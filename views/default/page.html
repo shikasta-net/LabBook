@@ -22,14 +22,12 @@ function handleDragEnter(event) {
     crossBoxShow();
 }
 
-//TODO: implement this for newly created boxes and load image imidiately rather than requiring refresh.
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
     var box_id = crossBoxOver.id.substr(1);
     var contentFile = event.dataTransfer.files[0];    
     handleSaveContent(box_id, contentFile, contentFile);
-    crossBoxOver.innerHTML = "Content updated - refresh to see!" 
 }
 
 function handleSaveContent(box_id, content, metadata) {
@@ -47,16 +45,18 @@ function handleSaveContent(box_id, content, metadata) {
         contentType: false,
         processData: false,
         type: 'POST',
+        dataType: "json",
         success: function(data){
-            console.log("Content upload : ");
-            console.log(data);
+            //console.log("Content upload : ");
+            //console.log(data);
+            if (data.error == undefined) {
+                $('#c'+data['box_id']).html(data['content']);
+            } else {
+                alert("There was an error uploading content.");
+            }
         }
     });
 
-}
-
-function handleDragLeave(event) {
-    //console.log(this.id + " called drag leave");
 }
 
 function handleUpdateTitle(value, settings) { 
@@ -90,19 +90,6 @@ function handleCreateContainer(new_cont) {
         console.log("create container : ");console.log(data);             
     }, "json"); 
 }
-
-/*
-function disableSelection(target){
-    if (typeof target.onselectstart!="undefined") {//IE route
-        target.onselectstart=function(){return false}
-    } else if (typeof target.style.MozUserSelect!="undefined") {//Firefox route
-        target.style.MozUserSelect="none"
-    } else {//All other route (ie: Opera)
-        target.onmousedown=function(){return false}
-    }
-    target.style.cursor = "default"
-}
-*/
 
 function defineContainerMobile(target) {
     target.draggable({    
@@ -165,8 +152,8 @@ function handleDynamicTextEditor(target){
     if (!targetCBox || !targetTBox) {
         throw "handleDynamicTextEditor called on something which isn't a child of a cbox or a textbox: " + $(target)[0].tagName
     }
-    console.log(targetCBox.attr('id'));
-    console.log(targetTBox.attr('id'));
+    //console.log(targetCBox.attr('id'));
+    //console.log(targetTBox.attr('id'));
     unsetContainersMobile(targetCBox);
     var id = $(targetTBox).attr('id');
     if(tinyMCE.getInstanceById(id)) {        
