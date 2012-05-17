@@ -88,11 +88,15 @@ div.empty {
 div.cbox {
     opacity: 1; 
     position: absolute;
+    overflow: hidden;
+    border: 1px dotted lightgray;
+    background-color: lightgray;
 }   
-div.cbox img {
-    width: 100%;
-    height: 100%;
+
+div.cbox .ui-selected {
+    background-color: red;
 }
+
 div.textbox {  
     width: 100%;
     height: 100%;
@@ -100,6 +104,11 @@ div.textbox {
 div.textbox p {
     margin: 0;
     padding: 0;
+}
+
+.ui-state-disabled {
+    opacity: inherit;
+    
 }
 
 {{=contents}}

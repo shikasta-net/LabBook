@@ -35,8 +35,11 @@ def update_title(page_id, title_content):
 @service.run
 def move_box(id,x,y):
     rcode = 0
+    db_mapping = dict(c=db.container_box, i=db.image_box)
     try :
-        db(db.container_box.id==id).update(position_x=x, position_y=y, modified_on=request.now)       
+        db_id = id[0]
+        box_id = int(id[1:])
+        db(db_mapping[db_id].id==box_id).update(position_x=x, position_y=y, modified_on=request.now)       
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -50,8 +53,11 @@ def move_box(id,x,y):
 @service.run
 def resize_box(id,w,h):
     rcode = 0
+    db_mapping = dict(c=db.container_box, i=db.image_box)
     try :
-        db(db.container_box.id==id).update(width=w, height=h, modified_on=request.now)
+        db_id = id[0]
+        box_id = int(id[1:])
+        db(db_mapping[db_id].id==box_id).update(width=w, height=h, modified_on=request.now)
     except Exception, e :
         print 'oops: %s' % e
         response.headers['Status'] = '400'
@@ -150,8 +156,9 @@ def get_content_dir(page_id, box_id):
     
 def default_image_get_handler(page_id, box_id, file_name):
 #    print "Get handler called for: " + file_name
-    #return "<img src='" + file_name + "' alt='" + file_name + "' />"
-    return IMG(_src=URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, file_name)), _alt=file_name)
+    img_box = db(db.image_box.page_id==page_id and db.image_box.box_id==box_id).select().first()
+    img_box_style = 'position: relative; left: %fem; top: %fem; width: %fem; height: %fem' % (img_box.position_x, img_box.position_y, img_box.width, img_box.height)
+    return DIV(IMG(_src=URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, file_name)), _alt=file_name, _style='width: 100%; height: 100%'), _id='i'+str(img_box.id), _class="imgbox", _style=img_box_style)
 
 def default_text_get_handler(page_id, box_id, file_name):
 #    print "Get handler called for: " + file_name
@@ -160,10 +167,13 @@ def default_text_get_handler(page_id, box_id, file_name):
     f = open(os.path.join(content_dir, file_name), 'r')    
     return DIV(XML(f.read()), _id='txt'+str(box_id), _class='textbox', _alt=file_name)
 
-
+def image_save_handler(page_id, box_id, file_name, file_content):
+    default_save_handler(page_id, box_id, file_name, file_content)
+    db.image_box.insert(box_id=box_id, page_id=page_id, position_x=0, position_y=0, width=20, height=15)
+    
 # Add new handlers here   
-handlers['image/svg+xml'] = FileHandler(default_save_handler, default_image_get_handler)
-handlers['image/jpeg'] = FileHandler(default_save_handler, default_image_get_handler)
+handlers['image/svg+xml'] = FileHandler(image_save_handler, default_image_get_handler)
+handlers['image/jpeg'] = FileHandler(image_save_handler, default_image_get_handler)
 handlers['text/html'] = FileHandler(default_save_handler, default_text_get_handler)
   
 # Described above         

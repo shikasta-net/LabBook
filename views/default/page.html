@@ -28,6 +28,8 @@ function handleDrop(event) {
     var box_id = crossBoxOver.id.substr(1);
     var contentFile = event.dataTransfer.files[0];    
     handleSaveContent(box_id, contentFile, contentFile);
+    $(crossBoxOver).removeClass('empty');
+    $(crossBoxOver).off('dblclick.empty');
 }
 
 function handleSaveContent(box_id, content, metadata) {
@@ -65,11 +67,11 @@ function handleUpdateTitle(value, settings) {
 }   
 
 function handleMoveContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
+    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id"), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
 }
 
 function handleResizeContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
+    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id"), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
 }
 
 function handleCreateContainer(new_cont) {
@@ -84,7 +86,6 @@ function handleCreateContainer(new_cont) {
         });
         $("div#c" + data.new_id).on('dragenter', handleDragEnter);
         $("div#c" + data.new_id).on('drop', handleDrop);
-        $("div#c" + data.new_id).on('dragleave', handleDragLeave); 
         defineContainerMobile($("div#c" + data.new_id));   
         defineIsBlank($("div#c" + data.new_id));
         console.log("create container : ");console.log(data);             
@@ -112,17 +113,17 @@ function defineContainerMobile(target) {
 }
 
 function unsetContainersMobile(target) {
-    if(typeof target == 'undefined') target = $(".cbox");  
+    if(typeof target == 'undefined') target = $("div.cbox");  
     target.each(function (index) { $(this).draggable("option", "disabled", true).resizable("option", "disabled", true); });
 }
 function setContainersMobile(target) {
-    if(typeof target == 'undefined') target = $(".cbox");
+    if(typeof target == 'undefined') target = $("div.cbox");
     target.draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
 
 function defineIsBlank(target) {
     target.addClass('empty');
-    target.bind('dblclick', function(event) {   
+    target.on('dblclick.empty', function(event) {   
         $(event.target).prepend("<div class='textbox' id='"+$(event.target).attr('id').replace('c','txt')+"'><p></p></div>"); //the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
         target.removeClass("empty");
         target.unbind('dblclick');   
@@ -265,9 +266,20 @@ $(document).ready(function(){
     
     $(".cbox").each(function(index) {   
         $(this).on('dragenter', handleDragEnter);
-        $(this).on('drop', handleDrop);
-        $(this).on('dragleave', handleDragLeave);        
-        defineContainerMobile($(this));   
+        $(this).on('drop', handleDrop);        
+        defineContainerMobile($(this));  
+    });
+    
+    $(".imgbox").on("dblclick", function(event) {        
+        if ($(this).hasClass('ui-draggable')) { 
+            $(this).css('border', 'none');
+            $(this).draggable('destroy');
+            $(this).resizable('destroy');
+        } else {
+            $(this).css('border', '1px dotted red');
+            $(this).draggable({stop: function(event, ui) { handleMoveContainer(event, ui); }});
+            $(this).resizable({stop: function(event, ui) { handleResizeContainer(event, ui); }});
+        }
     });
   
 //newly created divs have cross box underneither somhow???
