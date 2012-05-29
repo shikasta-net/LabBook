@@ -1,3 +1,12 @@
+/*body.mceContentBody {
+
+    color:#000;
+    font-family: inherit;
+    font-size: inherit;
+    margin: inherit;
+    overflow: hidden;
+}*/
+
 body.page {
     margin: 0;
     padding: 0;
@@ -33,6 +42,15 @@ span.title_bar{
     font-size: 14pt;        
 }
 
+#option_bar{
+    position : relative;
+    float : right;
+    left : 30px;
+    background : blue;
+    width : 20px;
+    height : 40px;
+    z-index : 10;
+}
 div.side_bar{
     position:absolute;
     margin-top:3em;
@@ -78,7 +96,7 @@ div.line {
     z-index:10;
 }
 div.empty {
-    border: 2px dashed gray;
+    border: 3px dashed gray;
     z-index:2;
 }
 div.cbox {
