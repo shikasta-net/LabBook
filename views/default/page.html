@@ -12,7 +12,7 @@
 <script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 <script type="text/javascript">
 var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
-var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button" style="width:90%;" /></button>');
+//var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button" style="width:90%;" /></button>');
 
 
 
@@ -24,14 +24,14 @@ function handleDragEnter(event) {
     crossBoxShow();
 }
 
-//TODO: load image imidiately rather than requiring refresh.
 function handleDrop(event) {
     event.stopPropagation();
     event.preventDefault();
     var box_id = crossBoxOver.id.substr(1);
     var contentFile = event.dataTransfer.files[0];    
     handleSaveContent(box_id, contentFile, contentFile);
-    crossBoxOver.innerHTML = "Content updated - refresh to see!" 
+    $(crossBoxOver).removeClass('empty');
+    $(crossBoxOver).off('dblclick.empty');
 }
 
 function handleSaveContent(box_id, content, metadata) {
@@ -49,16 +49,18 @@ function handleSaveContent(box_id, content, metadata) {
         contentType: false,
         processData: false,
         type: 'POST',
+        dataType: "json",
         success: function(data){
-            console.log("Content upload : ");
-            console.log(data);
+            //console.log("Content upload : ");
+            //console.log(data);
+            if (data.error == undefined) {
+                $('#c'+data['box_id']).html(data['content']);
+            } else {
+                alert("There was an error uploading content.");
+            }
         }
     });
 
-}
-
-function handleDragLeave(event) {
-    //console.log(this.id + " called drag leave");
 }
 
 function handleUpdateTitle(value, settings) { 
@@ -67,11 +69,11 @@ function handleUpdateTitle(value, settings) {
 }   
 
 function handleMoveContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id").replace('c',''), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
+    jQuery.post('{{=URL("call/run/move_box")}}', { id:$(ui.helper).attr("id"), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
 }
 
 function handleResizeContainer(event, ui) {
-    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id").replace('c',''), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
+    jQuery.post('{{=URL("call/run/resize_box")}}', { id:$(ui.helper).attr("id"), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
 }
 
 function handleCreateContainer(new_cont) {
@@ -86,31 +88,10 @@ function handleCreateContainer(new_cont) {
         });
         $("div#c" + data.new_id).on('dragenter', handleDragEnter);
         $("div#c" + data.new_id).on('drop', handleDrop);
-        $("div#c" + data.new_id).on('dragleave', handleDragLeave); 
-        defineContainerDragNDrop($("div#c" + data.new_id));  
         defineContainerMobile($("div#c" + data.new_id));   
         defineIsBlank($("div#c" + data.new_id));
         console.log("create container : ");console.log(data);             
     }, "json"); 
-}
-
-/*
-function disableSelection(target){
-    if (typeof target.onselectstart!="undefined") {//IE route
-        target.onselectstart=function(){return false}
-    } else if (typeof target.style.MozUserSelect!="undefined") {//Firefox route
-        target.style.MozUserSelect="none"
-    } else {//All other route (ie: Opera)
-        target.onmousedown=function(){return false}
-    }
-    target.style.cursor = "default"
-}
-*/
-
-function defineContainerDragNDrop(target){
-    target.on('dragenter', handleDragEnter);
-    target.on('drop', handleDrop);
-    target.on('dragleave', handleDragLeave);   
 }
 
 function defineContainerMobile(target) {
@@ -126,27 +107,29 @@ function defineContainerMobile(target) {
     }).click( function(event) {
         event.stopImmediatePropagation();        
         optionBarAttach(this);
+        /*
         if ($("button#delbox").hasClass("selected")) {
             jQuery.post('{{=URL("call/run/del_box")}}', { box_id:$(this).attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
             $(this).detach();
             setContainersMobile();
             $(".selected").removeClass("selected");
         }
+        */
     }); 
 }
 
 function unsetContainersMobile(target) {
-    if(typeof target == 'undefined') target = $(".cbox");  
+    if(typeof target == 'undefined') target = $("div.cbox");  
     target.each(function (index) { $(this).draggable("option", "disabled", true).resizable("option", "disabled", true); });
 }
 function setContainersMobile(target) {
-    if(typeof target == 'undefined') target = $(".cbox");
+    if(typeof target == 'undefined') target = $("div.cbox");
     target.draggable("option", "disabled", false).resizable("option", "disabled", false);
 }
 
 function defineIsBlank(target) {
     target.addClass('empty');
-    target.bind('dblclick', function(event) {   
+    target.on('dblclick.empty', function(event) {   
         $(event.target).prepend("<div class='textbox' id='"+$(event.target).attr('id').replace('c','txt')+"'><p></p></div>"); //the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
         target.removeClass("empty");
         target.unbind('dblclick');   
@@ -177,8 +160,8 @@ function handleDynamicTextEditor(target){
     if (!targetCBox || !targetTBox) {
         throw "handleDynamicTextEditor called on something which isn't a child of a cbox or a textbox: " + $(target)[0].tagName
     }
-    console.log(targetCBox.attr('id'));
-    console.log(targetTBox.attr('id'));
+    //console.log(targetCBox.attr('id'));
+    //console.log(targetTBox.attr('id'));
     unsetContainersMobile(targetCBox);
     var id = $(targetTBox).attr('id');
     if(tinyMCE.getInstanceById(id)) {        
@@ -235,7 +218,7 @@ $(document).ready(function(){
         event     : "dblclick"
     });  
        
-    $('#side_bar_l').append(buttonAddContainer,buttonRemoveContainer);
+    $('#side_bar_l').append(buttonAddContainer);
     
     $("button#mknewbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
@@ -292,9 +275,22 @@ $(document).ready(function(){
         }           
     });
     
-    $(".cbox").each(function(index) {    
-        defineContainerDragNDrop($(this));
-        defineContainerMobile($(this));   
+    $(".cbox").each(function(index) {   
+        $(this).on('dragenter', handleDragEnter);
+        $(this).on('drop', handleDrop);        
+        defineContainerMobile($(this));  
+    });
+    
+    $(".imgbox").on("dblclick", function(event) {        
+        if ($(this).hasClass('ui-draggable')) { 
+            $(this).css('border', 'none');
+            $(this).draggable('destroy');
+            $(this).resizable('destroy');
+        } else {
+            $(this).css('border', '1px dotted red');
+            $(this).draggable({stop: function(event, ui) { handleMoveContainer(event, ui); }});
+            $(this).resizable({stop: function(event, ui) { handleResizeContainer(event, ui); }});
+        }
     });
   
     $('#content_area').append(crossBox);
@@ -316,6 +312,5 @@ $(document).ready(function(){
             {{pass}}
         </div>
     </div>
-<!--    <button type="button" id="mknewbox">Create box</button>
-    <button type="button" id="delbox">Delete box</button> -->
+    <button type="button" id="mknewbox">Create box</button>
 </body>
