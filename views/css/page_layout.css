@@ -46,9 +46,7 @@ span.title_bar{
     position : relative;
     float : right;
     left : 30px;
-    background : blue;
     width : 20px;
-    height : 40px;
     z-index : 10;
 }
 div.side_bar{
@@ -87,8 +85,8 @@ div.line {
     display: inherit;
 }
 
-#crossbox {
-    display: none;
+.crossbox {
+    display: block;
     background: #fff;
     border: 3px solid gray;
     position: absolute;

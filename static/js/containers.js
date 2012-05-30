@@ -38,7 +38,7 @@ containers.defineContainerMobile = function(target) {
         stop: function(event, ui) { containers.handleResizeContainer(event, ui); }
     }).click( function(event) {
         event.stopImmediatePropagation();        
-        optionBarAttach(this);        
+        optionBarShow(this);        
     }); 
 }
 
@@ -105,7 +105,7 @@ containers.toggleMoveResize = function(toggleElement) {
     }
 }
 
-containers.deleteBox =  function(target) {    
+containers.deleteBox =  function(target) {  
     jQuery.post(serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
     target.detach();
     containers.setContainersMobile();

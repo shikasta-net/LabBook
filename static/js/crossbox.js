@@ -1,72 +1,84 @@
-var crossBox = $('<div id="crossbox"></div>');
-var crossLine1 = $('<div class="line" id="line1"></div>');
-var crossLine2 = $('<div class="line" id="line2"></div>');
-crossBox.append(crossLine1);
-crossBox.append(crossLine2);
-crossBox[0].addEventListener('dragleave', function(event) {
-                                                event = event || window.event;
-                                                if(event.target.id == "crossbox") {
-                                                    if(!(event.relatedTarget.id == "line1"
-                                                        || event.relatedTarget.id == "line2")) {
+var crossBoxCounter = 0;
 
-                                                        crossBoxHide();
-                                                        crossBoxOver = false;
-                                                        
-                                                    }
-                                                }});
-                                                    
-crossBox[0].addEventListener('drop', function(event) { crossBoxHide(); handleDrop(event); crossBoxOver = false});
-crossBox[0].addEventListener('dragover', function (event) { handleDragOver(event) });
-
-function handleDragOver(event) {
-    event.stopPropagation();
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
-}
-
-function crossBoxResizeAndPosition(crossElementID) {
-
-    var crossElement = $('#'+crossElementID);    
-    crossBox.width(crossElement.width()  
-                    - crossBox.css('border-left-width').replace('px','') 
-                    - crossBox.css('border-right-width').replace('px',''))        
-                .height(crossElement.height() 
-                    - crossBox.css('border-top-width').replace('px','') 
-                    - crossBox.css('border-bottom-width').replace('px',''));
-                
-    var hypotenuse = Math.sqrt(Math.pow(crossBox.width(), 2) + Math.pow(crossBox.height(), 2));
-    var angle = Math.atan2(crossBox.height(), crossBox.width()) * 180.0/Math.PI;
-   
-
+function crossBox(css) {
     
-    crossLine1.css({
-        'transform': 'rotate('+angle+'deg)',
-        '-moz-transform': 'rotate('+angle+'deg)', 
-        '-webkit-transform': 'rotate('+angle+'deg)'})
-        .width(hypotenuse);
-        
-    crossLine2.css({
-        'transform': 'rotate(-'+angle+'deg)', 
-        '-moz-transform': 'rotate(-'+angle+'deg)', 
-        '-webkit-transform': 'rotate(-'+angle+'deg)', 
-        'top': crossBox.height()})
-        .width(hypotenuse);
+    crossBoxCounter++;
+    this.crossBoxID = crossBoxCounter;
+    this.crossDiv = $('<div class="crossbox" id="crossbox' + crossBoxCounter + '"></div>');
+    this.line1 = $('<div class="line"></div>');
+    this.line2 = $('<div class="line"></div>');
+    this.crossDiv.append(this.line1);
+    this.crossDiv.append(this.line2);
 
-    crossBox.css({
+    if (css != undefined) {
+        this.crossDiv.css(css);
+    }
+    this.elementOver = false;
+    this.crossDiv.on('dragleave', null, {crossBox: this}, 
+        function(event) {
+            thisCrossBox = event.data.crossBox;
+            event = event.originalEvent;
+            if(event.target.id == "crossbox" + thisCrossBox.crossBoxID) {
+                if(!($(event.relatedTarget).hasClass('line'))) {
+                    thisCrossBox.hide()
+                    thisCrossBox.elementOver = false;
+                }                                            
+            } 
+        });
+                                                    
+    this.crossDiv.on('drop', function(event) { 
+            this.hide();
+            content.handleDrop(event);
+            this.elementOver = false;
+    });
+    
+    this.crossDiv.on('dragover', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        event.originalEvent.dataTransfer.dropEffect = 'copy';
+    });
+    
+    this.resizeAndPosition = function(newElementID) {
+
+        var crossElement = $('#'+newElementID);
+        var x = crossElement.position().left;
+        var y = crossElement.position().top;
+        var w = crossElement.width();
+        var h = crossElement.height();
+        var borderWidthAdjust = (this.crossDiv.innerWidth() - this.crossDiv.outerWidth()) - (crossElement.innerWidth() - crossElement.outerWidth());
+        var borderHeightAdjust = (this.crossDiv.innerHeight() - this.crossDiv.outerHeight()) - (crossElement.innerHeight() - crossElement.outerHeight());
+        var hypotenuse = Math.sqrt(Math.pow(w+borderWidthAdjust, 2) + Math.pow(h+borderHeightAdjust, 2));
+        var angle = Math.atan2(h+borderHeightAdjust, w+borderHeightAdjust) * 180.0/Math.PI;
+        this.crossDiv.width(w+borderWidthAdjust);
+        this.crossDiv.height(h+borderHeightAdjust);
+
+        this.line1.css({
+            'transform': 'rotate('+angle+'deg)',
+            '-moz-transform': 'rotate('+angle+'deg)', 
+            '-webkit-transform': 'rotate('+angle+'deg)'})
+            .width(hypotenuse);
+        
+        this.line2.css({
+            'transform': 'rotate(-'+angle+'deg)', 
+            '-moz-transform': 'rotate(-'+angle+'deg)', 
+            '-webkit-transform': 'rotate(-'+angle+'deg)', 
+            'top': h+borderHeightAdjust})
+            .width(hypotenuse);
+
+        elementOffset = crossElement.offset();
+        
+        this.crossDiv.css({
             'top': crossElement.css('top'),
             'left': crossElement.css('left')
-            });
-            
+        });
+    }
+    
+    this.show = function() {
+        this.crossDiv.fadeIn(100);
+    }
+    
+    this.hide = function() {
+        this.crossDiv.fadeOut(100);
+    }
+    
 }
-   
-function crossBoxHide() {
-    crossBox.fadeOut(100);
-}
-
-function crossBoxShow() {
-    crossBox.fadeIn(100);
-}
-
-var crossBoxOver = false;
-
-function getCrossBox() { return crossBox; }
