@@ -21,16 +21,16 @@ content.handleDrop = function(event) {
     $(content.dropCrossBox.elementOver).off('dblclick.empty');
 }
 
-content.handleSaveContent = function(box_id, content, metadata) {
+content.handleSaveContent = function(page_id, box_id, content, metadata) {
     var fd = new FormData();    
-    fd.append("page_id", "{{=page.id}}");
+    fd.append("page_id", page_id);
     fd.append("box_id", box_id);
     fd.append("contentFile", content);
     fd.append("contentFileName", metadata.name);
     fd.append("contentFileType", metadata.type);
     fd.append("contentFileSize", metadata.size);
     $.ajax({
-        url: "{{=URL('call/run/upload_content')}}",
+        url: serviceURL+"/upload_content",
         data: fd,
         cache: false,
         contentType: false,
@@ -40,11 +40,13 @@ content.handleSaveContent = function(box_id, content, metadata) {
         success: function(data){
             //console.log("Content upload : ");
             //console.log(data);
+            /*
             if (data.error == undefined) {
-                $('#c'+data['box_id']).html(data['content']);
+                $('#c'+data['box_id']).html(data['content']); //This turns out to replace too much and kills the resize divs
             } else {
                 alert("There was an error uploading content.");
             }
+            */
         }
     });
 

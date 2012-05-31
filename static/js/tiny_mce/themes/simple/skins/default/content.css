@@ -1,13 +1,6 @@
 body, td, pre {
-/*
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 10px;
-    */
-    font-family: inherit;
-    font-size: inherit;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
 }
 
 body {

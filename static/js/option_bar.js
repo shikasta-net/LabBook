@@ -34,7 +34,7 @@ function attach(target) {
         activeContainer.prepend(optionBar);
     } else {
         console.log('unknown type, no options to display');
-        console.log(container);
+        console.log(activeContainer);
     }
 
 }

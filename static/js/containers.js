@@ -10,9 +10,9 @@ containers.handleResizeContainer = function(event, ui) {
 
 containers.handleCreateContainer = function(new_cont) {
     var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
-    jQuery.post(serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){  
-        $("#content_area").append( "<div class='cbox empty' id='c"+data.new_id+"'></div>" );   
-        $("div#c" + data.new_id).css({ 
+    jQuery.post(serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){
+        $("#content_area").append( "<div class='cbox empty' id='c"+data.new_id+"'></div>" );
+        $("div#c" + data.new_id).css({
             'top':dims['y']+'px',
             'left':dims['x']+'px',
             'width':dims['w']+'px',
@@ -20,43 +20,54 @@ containers.handleCreateContainer = function(new_cont) {
         });
         $("div#c" + data.new_id).on('dragenter', content.handleDragEnter);
         $("div#c" + data.new_id).on('drop', content.handleDrop);
-        containers.defineContainerMobile($("div#c" + data.new_id));   
+        containers.defineContainerMobile($("div#c" + data.new_id));
         containers.defineIsBlank($("div#c" + data.new_id));
-        console.log("create container : ");console.log(data);             
-    }, "json"); 
+        console.log("create container : ");console.log(data);
+    }, "json");
 }
 
 containers.defineContainerMobile = function(target) {
-    target.draggable({    
+    target.draggable({
         snap: ".cbox",
         snapTolerance: 5,
         snapMode: "outer",
         containment: "parent",
         stop: function(event, ui) { containers.handleMoveContainer(event, ui); }
-    }).resizable({ 
-        containment: "parent",       
+    }).resizable({
+        containment: "parent",
         stop: function(event, ui) { containers.handleResizeContainer(event, ui); }
-    }).click( function(event) {
-        event.stopImmediatePropagation();        
-        optionBarShow(this);        
-    }); 
+    });
 }
 
 containers.unsetContainersMobile = function(target) {
-    if(typeof target == 'undefined') target = $("div.cbox");  
+    if(typeof target == 'undefined') target = $("div.cbox");
     target.each(function (index) { $(this).draggable("option", "disabled", true).resizable("option", "disabled", true); });
 }
 containers.setContainersMobile = function(target) {
     if(typeof target == 'undefined') target = $("div.cbox");
-    target.draggable("option", "disabled", false).resizable("option", "disabled", false);
+    target.each(function (index) { $(this).draggable("option", "disabled", false).resizable("option", "disabled", false); });
 }
+
+
+containers.enableOptionBar = function(target) {
+    target.bind('click', function(event) {
+        event.stopImmediatePropagation();        
+        optionBarShow($(this));        
+    });
+}
+
+containers.dissableOptionBar = function(target) {
+    target.unbind('click');
+}
+
 
 containers.defineIsBlank = function(target) {
     target.addClass('empty');
-    target.on('dblclick.empty', function(event) {   
+    target.on('dblclick.empty', function(event) {
+        optionBarHide();
         $(event.target).prepend("<div class='textbox' id='"+$(event.target).attr('id').replace('c','txt')+"'><p></p></div>"); //the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
         target.removeClass("empty");
-        target.unbind('dblclick');   
+        target.unbind('dblclick');
         containers.defineIsEditable($('#'+$(event.target).attr('id')));
         containers.handleDynamicTextEditor($('#'+$(event.target).attr('id')));
     })
@@ -64,7 +75,8 @@ containers.defineIsBlank = function(target) {
 
 containers.defineIsEditable = function(target) {
     target.bind('dblclick', function(event) {
-        event.stopPropagation();  
+        event.stopPropagation();
+        optionBarHide();
         containers.handleDynamicTextEditor($(event.target));
     });
 }
@@ -72,7 +84,7 @@ containers.defineIsEditable = function(target) {
 containers.handleDynamicTextEditor = function(target){
     if(target.hasClass('cbox')) {
         var targetCBox = target;
-        var targetTBox = target.child('div.textbox');
+        var targetTBox = target.children('div.textbox');
     } else if(target.hasClass('textbox')) {
         var targetCBox = target.parent('div.cbox');
         var targetTBox = target;
@@ -83,18 +95,20 @@ containers.handleDynamicTextEditor = function(target){
     if (!targetCBox || !targetTBox) {
         throw "handleDynamicTextEditor called on something which isn't a child of a cbox or a textbox: " + $(target)[0].tagName
     }
+    targetCBox.unbind('dblclick'); //protect the double clicking when the editor is open already
+    containers.dissableOptionBar(targetCBox);
     containers.unsetContainersMobile(targetCBox);
     var id = $(targetTBox).attr('id');
-    if(tinyMCE.getInstanceById(id)) {        
+    if(tinyMCE.getInstanceById(id)) {
         tinyMCE.getInstanceById(id).show();
         tinyMCE.execCommand('mceFocus', false, id);
     } else {
-        tinyMCE.execCommand('mceAddControl', false, id);           
+        tinyMCE.execCommand('mceAddControl', false, id);
     }
 }
 
 containers.toggleMoveResize = function(toggleElement) {
-    if ($(toggleElement).hasClass('ui-draggable')) { 
+    if ($(toggleElement).hasClass('ui-draggable')) {
         $(toggleElement).css('border', 'none');
         $(toggleElement).draggable('destroy');
         $(toggleElement).resizable('destroy');
@@ -105,7 +119,7 @@ containers.toggleMoveResize = function(toggleElement) {
     }
 }
 
-containers.deleteBox =  function(target) {  
+containers.deleteBox =  function(target) {
     jQuery.post(serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
     target.detach();
     containers.setContainersMobile();
