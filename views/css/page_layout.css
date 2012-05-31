@@ -75,13 +75,15 @@ div.line {
     display: inherit;
 }
 
-#crossbox {
-    display: none;
+.crossbox {
+    display: block;
+    z-index: 10;
+    position: absolute;
     background: #fff;
     border: 3px solid gray;
-    position: absolute;
     opacity: 0.4;
 }
+
 div.empty {
     border: 2px dashed gray;
 }
@@ -91,6 +93,7 @@ div.cbox {
     overflow: hidden;
     border: 1px dotted lightgray;
     background-color: lightgray;
+
 }   
 
 div.cbox .ui-selected {
