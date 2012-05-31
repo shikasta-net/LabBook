@@ -11,18 +11,18 @@
 <script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
-
+<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 <script type="text/javascript">
 var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
-var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button" style="width:90%;" /></button>');
+//var buttonRemoveContainer = $('<button type="button" id="delbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_View_remove.png")}} class="side_button" style="width:90%;" /></button>');
 
 var serviceURL = "{{=URL('call/run')}}";
 
 function handleUpdateTitle(value, settings) { 
    jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:value }, function(data){ value = data.title_content; console.log("title update : ");console.log(data); }, "json"); 
     return(value);
-}   
-
+}
+   
 var pxPerem = false;
 $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
@@ -37,15 +37,18 @@ $(document).ready(function(){
                     var dom = ed.dom;
                     var doc = ed.getDoc();            
                     tinymce.dom.Event.add(doc, 'blur', function(e) { //chose between save and hide or remove editor.
-                        tinyMCE.execCommand('mceRemoveControl', false, ed.id);  
+                        tinyMCE.execCommand('mceRemoveControl', false, ed.id);
+                        //Uncomment if add and remove of tiny mce is too slow.
+                        //ed.save();
+                        //ed.hide();  
                         setContainersMobile($('#'+ed.id.replace('txt','c')));
                     });
                 }); 
                 ed.onSaveContent.add(function(ed, o) {
                     if (o.content == '') { //set as blank again.
-                       $('#' + ed.id).remove();
-                       $('#' + ed.id.replace('txt','c')).unbind('dblclick'); 
-                       defineIsBlank($('#' + ed.id.replace('txt','c')));
+                        $('#' + ed.id).remove();
+                        $('#' + ed.id.replace('txt','c')).unbind('dblclick'); 
+                        containers.defineIsBlank($('#' + ed.id.replace('txt','c')));
                     } else {      
                         content.handleSaveContent(ed.id.replace('txt',''), o.content, { name:'textbox'+ed.id.replace('txt','')+'.'+o.format, type:'text/'+o.format, size: 8*unescape(encodeURIComponent(content)).length });
                         console.log("The content has been submitted for saving");
@@ -60,24 +63,18 @@ $(document).ready(function(){
     $(".empty").each(function(index) { containers.defineIsBlank($(this)); });
     $(".textbox").each(function(index) { containers.defineIsEditable($('#'+$(this).attr('id').replace('txt','c'))); })
     
-    //Double click to edit Press enter to save changes. Press Esc to cancel them.
+    //Doubdle click to edit Press enter to save changes. Press Esc to cancel them.
     $("#title_bar")
         .bind('focusin', function() { 
-        
-            $("#main_page").enableTextSelect()
-             
-        }).bind('focusout', function() { 
-        
-            $("#main_page").disableTextSelect()
-             
+            $("#main_page").enableTextSelect() 
+        }).bind('focusout', function() {
+            $("#main_page").disableTextSelect() 
         }).editable(handleUpdateTitle, { 
-        
             tooltip   : "DoubleClick to edit...",
             event     : "dblclick"
-            
-        });  
+    });  
        
-    $('#side_bar_l').append(buttonAddContainer,buttonRemoveContainer);
+    $('#side_bar_l').append(buttonAddContainer);
     
     $("button#mknewbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
@@ -89,6 +86,8 @@ $(document).ready(function(){
             $(".selected").removeClass("selected");
         }
     });   
+
+
     
     $("button#delbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
@@ -101,7 +100,9 @@ $(document).ready(function(){
         }
     });
      
-    $("#content_area").mousedown(function(e){    
+    $("#content_area").click( function(event){ 
+        optionBarHide();
+    }).mousedown(function(e){   
         if ($("button#mknewbox").hasClass("selected")) {   
             new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
             new_cont['y1'] = (e.pageY - $("div.content_area").offset().top);
@@ -136,8 +137,8 @@ $(document).ready(function(){
         containers.defineContainerMobile($(this));  
     });
     
-    $(".imgbox").on("dblclick", function(event) {        
-        containers.toggleMoveResize(this);
+    $(".imgbox").on("dblclick", function(event) {
+        containers.toggleMoveResize(this); 
     });
   
     //newly created divs have cross box underneither somhow???
@@ -160,6 +161,5 @@ $(document).ready(function(){
             {{pass}}
         </div>
     </div>
-<!--    <button type="button" id="mknewbox">Create box</button>
-    <button type="button" id="delbox">Delete box</button> -->
+    <button type="button" id="mknewbox">Create box</button>
 </body>

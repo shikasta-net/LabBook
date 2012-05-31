@@ -24,6 +24,7 @@ div.content_area {
     margin: 3em;
     width: 64em;
     height: 44em;
+    z-index:0;
 }   
 
 div.title_bar{
@@ -32,7 +33,8 @@ div.title_bar{
     height: 2em; 
     margin-left: 3em;
     width: 64em;           
-    text-align: center;         
+    text-align: center;   
+    z-index:1;      
 }
 span.title_bar{
     font-family: Times, serif;
@@ -40,11 +42,19 @@ span.title_bar{
     font-size: 14pt;        
 }
 
+#option_bar{
+    position : relative;
+    float : right;
+    left : 30px;
+    width : 20px;
+    z-index : 10;
+}
 div.side_bar{
     position:absolute;
     margin-top:3em;
     height: 44em;
     width: 3em;   
+    z-index:1;
 }
 button.side_button{
     width:inherit;
@@ -77,20 +87,20 @@ div.line {
 
 .crossbox {
     display: block;
-    z-index: 10;
-    position: absolute;
     background: #fff;
     border: 3px solid gray;
     opacity: 0.4;
+    z-index:10;
 }
 
 div.empty {
-    border: 2px dashed gray;
+    border: 3px dashed gray;
+    z-index:2;
 }
 div.cbox {
     opacity: 1; 
     position: absolute;
-    overflow: hidden;
+    z-index:1;
     border: 1px dotted lightgray;
     background-color: lightgray;
 
@@ -100,6 +110,15 @@ div.cbox .ui-selected {
     background-color: red;
 }
 
+
+div.imgbox {
+}
+div.clipbox {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+}
 div.textbox {  
     width: 100%;
     height: 100%;

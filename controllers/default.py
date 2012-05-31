@@ -158,7 +158,7 @@ def default_image_get_handler(page_id, box_id, file_name):
 #    print "Get handler called for: " + file_name
     img_box = db(db.image_box.page_id==page_id and db.image_box.box_id==box_id).select().first()
     img_box_style = 'position: relative; left: %fem; top: %fem; width: %fem; height: %fem' % (img_box.position_x, img_box.position_y, img_box.width, img_box.height)
-    return DIV(IMG(_src=URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, file_name)), _alt=file_name, _style='width: 100%; height: 100%'), _id='i'+str(img_box.id), _class="imgbox", _style=img_box_style)
+    return DIV(DIV(IMG(_src=URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, file_name)), _alt=file_name, _style='width: 100%; height: 100%'), _id='i'+str(img_box.id), _class="imgbox", _style=img_box_style), _class="clipbox")
 
 def default_text_get_handler(page_id, box_id, file_name):
 #    print "Get handler called for: " + file_name

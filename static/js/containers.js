@@ -36,13 +36,9 @@ containers.defineContainerMobile = function(target) {
     }).resizable({ 
         containment: "parent",       
         stop: function(event, ui) { containers.handleResizeContainer(event, ui); }
-    }).click( function() {
-        if ($("button#delbox").hasClass("selected")) {
-            jQuery.post(serviceURL+'/del_box', { box_id:$(this).attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
-            $(this).detach();
-            containers.setContainersMobile();
-            $(".selected").removeClass("selected");
-        }
+    }).click( function(event) {
+        event.stopImmediatePropagation();        
+        optionBarShow(this);        
     }); 
 }
 
@@ -107,4 +103,11 @@ containers.toggleMoveResize = function(toggleElement) {
         $(toggleElement).draggable({stop: function(event, ui) { containers.handleMoveContainer(event, ui); }});
         $(toggleElement).resizable({stop: function(event, ui) { containers.handleResizeContainer(event, ui); }});
     }
+}
+
+containers.deleteBox =  function(target) {  
+    jQuery.post(serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
+    target.detach();
+    containers.setContainersMobile();
+    $(".selected").removeClass("selected");
 }
