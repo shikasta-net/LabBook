@@ -19,8 +19,12 @@ div.page {
     height: 50em;
 }
 
-#textEditor {
-    position: fixed;    
+#textEditorContainer {
+    position: absolute;
+    top: 0px;
+    height: 12em;
+    width: 20em;
+    z-index: 20;
 }
 
 div.content_area {
@@ -28,7 +32,7 @@ div.content_area {
     margin: 3em;
     width: 64em;
     height: 44em;
-    z-index:0;
+    z-index: 0;
 }   
 
 div.title_bar{

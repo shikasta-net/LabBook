@@ -4,6 +4,11 @@
 {{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
 {{include 'web2py_ajax.html'}}
 <link rel="stylesheet" type="text/css" href="{{=URL('css','page_layout.css', vars=dict(id=page.id))}}" />
+
+<script type="text/javascript">
+var pageID = "{{=page.id}}";
+var serviceURL = "{{=URL('call/run')}}";
+</script>
 <script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
@@ -14,9 +19,7 @@
 <script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 <script type="text/javascript">
-var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
-
-var serviceURL = "{{=URL('call/run')}}";
+//var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
 
 function handleUpdateTitle(value, settings) { 
    jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:value }, function(data){ value = data.title_content; console.log("title update : ");console.log(data); }, "json"); 
@@ -28,7 +31,7 @@ $(document).ready(function(){
     pxPerem = $("div.page").width()/70.0; 
     var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""}; 
     
-       
+/*       
     tinyMCE.init({
         mode : "none",
         theme : "simple",
@@ -82,7 +85,7 @@ $(document).ready(function(){
         init_instance_callback : function(ed) { ed.focus() }
     });
     
-        
+*/    
    
      
     $("#main_page").disableTextSelect();
@@ -100,7 +103,7 @@ $(document).ready(function(){
             event     : "dblclick"
     });  
        
-    $('#side_bar_l').append(buttonAddContainer);
+/*    $('#side_bar_l').append(buttonAddContainer);
     
     $("button#mknewbox").click(function(){ 
         if (!$(this).hasClass("selected")) {       
@@ -112,10 +115,12 @@ $(document).ready(function(){
             $(".selected").removeClass("selected");
         }
     });   
-
+*/
          
     $("#content_area").click( function(event){ 
         optionBarHide();
+        saveEditor();
+        hideEditor();
     }).mousedown(function(e){   
         if ($("button#mknewbox").hasClass("selected")) {   
             new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
@@ -157,11 +162,9 @@ $(document).ready(function(){
     });
   
     //newly created divs have cross box underneither somhow???
-    $('#content_area').append(content.dropCrossBox.crossDiv);
-/*    $('body').append("<div id='textEditor'></div>");    
+    $('#content_area').append(content.dropCrossBox.crossDiv);      
     initialiseEditor();
-    hideEditor();
-*/    
+    
 });
 </script>
 </head>

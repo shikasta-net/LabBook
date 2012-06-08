@@ -4,7 +4,7 @@ var delButton = $('<img class="side_button" id="del_button" style="width:100%;ba
 $(delButton).on('click', function(event) { event.stopImmediatePropagation(); containers.deleteBox(activeContainer); });
 
 var testButton = $('<img class="side_button" id="test_button" style="width:100%;background:blue;" />');
-$(testButton).on('click', function(event) { event.stopImmediatePropagation(); showEditor(activeContainer) });
+$(testButton).on('click', function(event) { console.log('test button'); event.stopImmediatePropagation(); showEditor(activeContainer) });
 
 var activeContainer = false;
 
@@ -42,12 +42,12 @@ function attach(target) {
 
 
 function optionBarHide() {
-    optionBar.empty();
+    optionBar.children().detach();
     optionBar.remove();
 }
 
 function optionBarShow(target) {
-    optionBar.empty();
+    optionBar.children().detach();
     optionBar.remove();
     attach(target);
 }

@@ -142,10 +142,7 @@ def default_save_handler(page_id, box_id, file_name, file_content):
         shutil.copy(content_file, content_file+'.old')
     f = open(content_file, 'w')
     # TODO: better checking of content type for writing method
-    if ".html" in file_name :
-        f.write(file_content)
-    else :
-        shutil.copyfileobj(file_content.file, f)        
+    shutil.copyfileobj(file_content.file, f)        
     f.close()
 
 def get_content_reldir(page_id, box_id):
