@@ -1,9 +1,10 @@
 var optionBar = $('<div id="option_bar"></div>');
 
 var delButton = $('<img class="side_button" id="del_button" style="width:100%;background:red;" />');
-$(delButton).on('click', function() { containers.deleteBox(activeContainer); });
+$(delButton).on('click', function(event) { event.stopImmediatePropagation(); containers.deleteBox(activeContainer); });
 
 var testButton = $('<img class="side_button" id="test_button" style="width:100%;background:blue;" />');
+$(testButton).on('click', function(event) { event.stopImmediatePropagation(); showEditor(activeContainer) });
 
 var activeContainer = false;
 
@@ -19,7 +20,6 @@ function attach(target) {
     if (activeContainer.hasClass("empty")) {
         console.log('Empty box options displayed');
         $(optionBar).append(delButton);
-        $(optionBar).append(testButton);
 
         activeContainer.prepend(optionBar);
     } else if (activeContainer.find('*').hasClass("imgbox")) {
@@ -30,6 +30,7 @@ function attach(target) {
     } else if (activeContainer.find('*').hasClass("textbox")) {
         console.log('Text box options displayed');
         $(optionBar).append(delButton);
+        $(optionBar).append(testButton);
 
         activeContainer.prepend(optionBar);
     } else {

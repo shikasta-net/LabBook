@@ -19,6 +19,10 @@ div.page {
     height: 50em;
 }
 
+#textEditor {
+    position: fixed;    
+}
+
 div.content_area {
     position: relative;
     margin: 3em;

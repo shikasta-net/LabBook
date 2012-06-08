@@ -8,7 +8,7 @@
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script>
-
+<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
@@ -81,6 +81,8 @@ $(document).ready(function(){
         },
         init_instance_callback : function(ed) { ed.focus() }
     });
+    
+        
    
      
     $("#main_page").disableTextSelect();
@@ -156,7 +158,10 @@ $(document).ready(function(){
   
     //newly created divs have cross box underneither somhow???
     $('#content_area').append(content.dropCrossBox.crossDiv);
-    
+/*    $('body').append("<div id='textEditor'></div>");    
+    initialiseEditor();
+    hideEditor();
+*/    
 });
 </script>
 </head>
