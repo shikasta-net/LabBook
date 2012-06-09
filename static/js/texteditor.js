@@ -37,6 +37,10 @@ function hideEditor() {
 }
 
 function saveEditor() {
+    if (currentTarget == false) {
+	// Not currently editing, abort quietly
+	return;
+    }
     textEd.setProgressState(1);
     if (window.BlobBuilder) {
         var bb = new BlobBuilder();
