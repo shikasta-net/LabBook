@@ -102,6 +102,30 @@ div.line {
     position: absolute;
 }
 
+.eqn {
+    color: gray;
+}
+
+.inline:before {
+	content: "$\0020";
+	color: inherit;
+}
+
+.inline:after {
+	content: "\0020$";
+	color: inherit;
+}
+
+.display:before {
+	content: "$$\0020";
+	color: inherit;
+}
+
+.display:after {
+	content: "\0020$$";
+	color: inherit;
+}
+
 div.empty {
     border: 3px dashed gray;
     z-index:2;
