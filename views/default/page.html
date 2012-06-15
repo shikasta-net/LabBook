@@ -18,8 +18,9 @@ var serviceURL = "{{=URL('call/run')}}";
 <script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static/js', 'MathJax/MathJax.js')}}?config=TeX-AMS-MML_HTMLorMML,LabBookConfig"></script>
 <script type="text/javascript">
-//var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
+var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
 
 function handleUpdateTitle(value, settings) { 
    jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:value }, function(data){ value = data.title_content; console.log("title update : ");console.log(data); }, "json"); 
