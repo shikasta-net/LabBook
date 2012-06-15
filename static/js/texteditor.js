@@ -5,27 +5,27 @@ var KEYRIGHT = 39;
 var DOLLAR = 36;
 var CTRLDOLLAR = 52;
 
-function initialiseEditor() { 
-    $('body').append("<div id='textEditorContainer'><div id='textEditor'></div></div>");  
-    textEd = new tinyMCE.Editor('textEditor', {
-            mode : "none",
-            theme : "simple",
-            skin: "default",
-            content_css : "../../css/page_layout.css",
-	    forced_root_block: false,
-            setup: function(ed) {
+function initialiseEditor() {
+	$('body').append("<div id='textEditorContainer'><div id='textEditor'></div></div>");
+	textEd = new tinyMCE.Editor('textEditor', {
+			mode : "none",
+			theme : "simple",
+			skin: "default",
+			content_css : "../../css/page_layout.css",
+		forced_root_block: false,
+			setup: function(ed) {
 		ed.onNodeChange.add(function(ed, cm, e) {
 		});
-                ed.onKeyPress.add(function(ed, e) {
+				ed.onKeyPress.add(function(ed, e) {
 
-			/*if (e.keyCode == KEYLEFT 
-				&& ed.selection.isCollapsed() 
+			/*if (e.keyCode == KEYLEFT
+				&& ed.selection.isCollapsed()
 				&& ed.selection.getRng(true).startOffset == 0
 				&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
 					e.preventDefault();
 					e.stopPropagation();
 					console.log('cursor leaving SPAN keypress');
-			}*/	
+			}*/
 			// If we're currently editing an equation...
 			if (ed.dom.hasClass(ed.selection.getNode(), 'eqn')) {
 				// Pressed $ in inline eqn? Boost eqn to display
@@ -62,30 +62,30 @@ function initialiseEditor() {
 					ed.selection.select(ed.dom.select('#'+newEqnID)[0].firstChild);
 				}
 			}
-	
+
 		});
 
 		// Update content box every time user presses a key.
 		// TODO: Less intensive update scheme? (eg track caret position and update only updated elements?) Complicated!
 		ed.onKeyUp.add(function(ed, e) {
-			
-			/*if (e.keyCode == KEYLEFT 
-				&& ed.selection.isCollapsed() 
+
+			/*if (e.keyCode == KEYLEFT
+				&& ed.selection.isCollapsed()
 				&& ed.selection.getRng(true).startOffset == 0
 				&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
 					e.preventDefault();
 					e.stopPropagation();
 					console.log('cursor leaving SPAN keyup');
 			}*/
-	
+
 			loadEditorToBox(edCurrentTarget);
 		});
 
 		ed.onKeyDown.add(function(ed, e) {
 
-			/*if (e.keyCode == KEYLEFT 
-				&& ed.selection.isCollapsed() 
-				&& ed.selection.getRng(true).startOffset == 1 
+			/*if (e.keyCode == KEYLEFT
+				&& ed.selection.isCollapsed()
+				&& ed.selection.getRng(true).startOffset == 1
 				&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
 					e.preventDefault();
 					e.stopPropagation();
@@ -94,17 +94,17 @@ function initialiseEditor() {
 					//rng.setStart(rng.startContainer, 0);
 					//rng.collapse(true);
 			} else if (e.keyCode == KEYRIGHT
-				&& ed.selection.isCollapsed() 
+				&& ed.selection.isCollapsed()
 				&& ed.selection.getRng(true).startOffset == ed.selection.getRng(true).startContainer.nodeValue.length
 				&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
 					e.preventDefault();
 					e.stopPropagation();
 					console.log('cursor right leaving SPAN keydown');
 			}*/
-	
+
 			// Prevent carriage return in box. tinyMCE gets overactive with the <br /> if you don't.
 			if (ed.dom.hasClass(ed.selection.getNode(), 'eqn')) {
-				
+
 				switch (e.keyCode) {
 					case 13:
 						// Prevent enter key in equations
@@ -114,34 +114,34 @@ function initialiseEditor() {
 				}
 			}
 		});
-            }
-    });     
-    textEd.render();
-    hideEditor();
+			}
+	});
+	textEd.render();
+	hideEditor();
 }
 
 // Content box to editor conversion
 // Copies content box, rips out any display mathjax (leaving script elements behind), converts script elements to spans.
 function loadBoxToEditor(target) {
 
-    var tbox_contents = target.children(".textbox").clone();
-    tbox_contents.find('.MathJax_Display').remove();
-    tbox_contents.find('.MathJax').remove();
-    tbox_contents.find('script').replaceWith(function() {
+	var tbox_contents = target.children(".textbox").clone();
+	tbox_contents.find('.MathJax_Display').remove();
+	tbox_contents.find('.MathJax').remove();
+	tbox_contents.find('script').replaceWith(function() {
 	var newSpan = $('<span></span>');
 	newSpan.attr('id', $(this).attr('id'));
-        newSpan.addClass('eqn');
+		newSpan.addClass('eqn');
 	if ($(this).attr('type') == "math/tex; mode=display") {
 		newSpan.addClass('display');
 	} else if ($(this).attr('type') == "math/tex; mode=inline") {
 		newSpan.addClass('inline');
 	} else {
 		throw "Mangled MathJax type attribute: " + $(this).attr('type');
-	} 
+	}
 	newSpan.html($(this).text());
 	return newSpan;
-    });
-    textEd.setContent(tbox_contents.html());
+	});
+	textEd.setContent(tbox_contents.html());
 
 }
 
@@ -162,45 +162,54 @@ function loadEditorToBox(target) {
 }
 
 function showEditor(target) {
-    edCurrentTarget = target;
-    textEd.setContent('<p></p>');
-    $('#textEditorContainer').slideDown('1000');
-    textEd.setProgressState(1);
-    loadBoxToEditor(target);
-    textEd.setProgressState(0);
-    textEd.focus();
+	edCurrentTarget = target;
+	textEd.setContent('<p></p>');
+	$('#textEditorContainer').slideDown('1000');
+	textEd.setProgressState(1);
+	if (target.hasClass('empty')) {
+		console.log("Text editor called on something empty.");
+		target.find('#option_bar').after("<div class='textbox' id='"+target.attr('id').replace('c','txt')+"'><p></p></div>");
+ 		//the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
+		target.removeClass("empty");
+	} else if (target.hasClass('textbox')) {
+		loadBoxToEditor(target);
+	} else {
+		console.log("Text editor called on something which was neither a textbox nor empty.");
+	}
+	textEd.setProgressState(0);
+	textEd.focus();
 }
 
 function hideEditor() {
-    edCurrentTarget = false;
-    $('#textEditorContainer').slideUp('1000');
+	edCurrentTarget = false;
+	$('#textEditorContainer').slideUp('1000');
 }
 
 function saveEditor() {
-    if (edCurrentTarget == false) {
+	if (edCurrentTarget == false) {
 	// Not currently editing, abort quietly
 	return;
-    }
-    loadEditorToBox(edCurrentTarget);
-    textEd.setProgressState(1);
-    if (window.BlobBuilder) {
-        var bb = new BlobBuilder();
-    } else if (window.MozBlobBuilder) {
-        var bb = new MozBlobBuilder();
-    } else if (window.MSBlobBuilder) {
-        var bb = new MSBlobBuilder();
-    } else if (window.WebKitBlobBuilder) {
-        var bb = new WebKitBlobBuilder();
-    } else {
-        throw "No BlobBuilder implementation";
-    }
-    // Saving - like boxToEditor, but keep script tags (remove ids so they are auto-generated each time page is loaded)
-    var boxContent = $(edCurrentTarget).children(".textbox").clone();
-    boxContent.find('.MathJax_Display').remove();
-    boxContent.find('.MathJax').remove();
-    boxContent.find('script').removeAttr('id');
-    bb.append(boxContent.html());
-    var blob = bb.getBlob('text/html');
-    content.handleSaveContent(pageID, edCurrentTarget.attr("id").replace('c',''), blob, { name:'textbox'+edCurrentTarget.attr("id").replace('c','')+'.html', type:'text/html', size: blob.size });
-    textEd.setProgressState(0);
+	}
+	loadEditorToBox(edCurrentTarget);
+	textEd.setProgressState(1);
+	if (window.BlobBuilder) {
+		var bb = new BlobBuilder();
+	} else if (window.MozBlobBuilder) {
+		var bb = new MozBlobBuilder();
+	} else if (window.MSBlobBuilder) {
+		var bb = new MSBlobBuilder();
+	} else if (window.WebKitBlobBuilder) {
+		var bb = new WebKitBlobBuilder();
+	} else {
+		throw "No BlobBuilder implementation";
+	}
+	// Saving - like boxToEditor, but keep script tags (remove ids so they are auto-generated each time page is loaded)
+	var boxContent = $(edCurrentTarget).children(".textbox").clone();
+	boxContent.find('.MathJax_Display').remove();
+	boxContent.find('.MathJax').remove();
+	boxContent.find('script').removeAttr('id');
+	bb.append(boxContent.html());
+	var blob = bb.getBlob('text/html');
+	content.handleSaveContent(pageID, edCurrentTarget.attr("id").replace('c',''), blob, { name:'textbox'+edCurrentTarget.attr("id").replace('c','')+'.html', type:'text/html', size: blob.size });
+	textEd.setProgressState(0);
 }
