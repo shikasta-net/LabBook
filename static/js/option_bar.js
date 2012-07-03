@@ -35,12 +35,12 @@ function attach(target) {
 	} else if (activeContainer.find('*').hasClass("imgbox")) {
 		console.log('Image box options displayed');
 		$(optionBar).append(delButton);
-		$(optionBar).append(editTextButton);
 
 		activeContainer.prepend(optionBar);
 	} else if (activeContainer.find('*').hasClass("textbox")) {
 		console.log('Text box options displayed');
 		$(optionBar).append(delButton);
+		$(optionBar).append(editTextButton);
 
 		activeContainer.prepend(optionBar);
 	} else {

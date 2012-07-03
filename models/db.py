@@ -2,46 +2,53 @@ db = DAL('sqlite://storage.sqlite')
 from gluon.tools import *
 service = Service()
 crud = Crud(db)
-                
+
 
 db.define_table('page',
-                Field('title'),
-                Field('created_on', 'datetime', default=request.now),
-                Field('modified_on', 'datetime', default=request.now))  
-                                
+				Field('title'),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', default=request.now))
+
 #db.define_table('section',
-#                Field('title'),
-#                Field('previous_page', db.page),
-#                Field('next_page', db.page),
-#                Field('parent_page', db.page),
-#                format='%(title)s')
-                
+#				Field('title'),
+#				Field('previous_page', db.page),
+#				Field('next_page', db.page),
+#				Field('parent_page', db.page),
+#				format='%(title)s')
+
 db.define_table('content',
-                Field('file_type', 'string'),
-                Field('file_name', 'string'),
-                Field('created_on', 'datetime', default=request.now),
-                Field('modified_on', 'datetime', default=request.now))              
-                                             
+				Field('file_type', 'string'),
+				Field('file_name', 'string'),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', default=request.now))
+
 db.define_table('container_box',
-                Field('page_id', db.page),     
-                Field('content_id', db.content),
-                Field('position_x', 'double', default='1'),  
-                Field('position_y', 'double', default='1'),      
-                Field('width', 'double', default='1'),      
-                Field('height', 'double', default='1'),         
-                Field('created_on', 'datetime', default=request.now),
-                Field('modified_on', 'datetime', default=request.now))
-                
+				Field('page_id', db.page),
+				Field('content_id', db.content),
+				Field('position_x', 'double', default='1'),
+				Field('position_y', 'double', default='1'),
+				Field('width', 'double', default='1'),
+				Field('height', 'double', default='1'),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', default=request.now))
+
 db.define_table('image_box',
-                Field('page_id', db.page),     
-                Field('box_id', db.container_box),
-                Field('position_x', 'double', default='1'),  
-                Field('position_y', 'double', default='1'),      
-                Field('width', 'double', default='1'),      
-                Field('height', 'double', default='1'),         
-                Field('created_on', 'datetime', default=request.now),
-                Field('modified_on', 'datetime', default=request.now))
-                                
+				Field('page_id', db.page),
+				Field('box_id', db.container_box),
+				Field('position_x', 'double', default='1'),
+				Field('position_y', 'double', default='1'),
+				Field('width', 'double', default='1'),
+				Field('height', 'double', default='1'),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', default=request.now))
+
+db.define_table('preferences',
+				Field('preference', unique=True),
+				Field('value', 'string'),
+				Field('type', 'string'),
+				format='%(preference)s')
+
+
 #db.page.created_on.readable = db.page.created_on.writable = False
 #db.page.modified_on.readable = db.page.modified_on.writable = False
 

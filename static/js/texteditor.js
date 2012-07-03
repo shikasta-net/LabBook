@@ -12,58 +12,60 @@ function initialiseEditor() {
 			theme : "simple",
 			skin: "default",
 			content_css : "../../css/page_layout.css",
-		forced_root_block: false,
+		//~ forced_root_block: false,
 			setup: function(ed) {
 		ed.onNodeChange.add(function(ed, cm, e) {
 		});
-				ed.onKeyPress.add(function(ed, e) {
+			ed.onKeyPress.add(function(ed, e) {
 
-			/*if (e.keyCode == KEYLEFT
-				&& ed.selection.isCollapsed()
-				&& ed.selection.getRng(true).startOffset == 0
-				&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('cursor leaving SPAN keypress');
-			}*/
-			// If we're currently editing an equation...
-			if (ed.dom.hasClass(ed.selection.getNode(), 'eqn')) {
-				// Pressed $ in inline eqn? Boost eqn to display
-				if (e.charCode == DOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'inline')) {
-					e.preventDefault();
-					e.stopPropagation();
-					ed.dom.removeClass(ed.selection.getNode(), 'inline');
-					ed.dom.addClass(ed.selection.getNode(), 'display');
-				}
-				// Pressed Ctrl-$ in inline? Remove eqn and leave plaintext
-				if (e.charCode == CTRLDOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'inline')) {
-					e.preventDefault();
-					e.stopPropagation();
-					var temp = ed.selection.getNode().innerHTML;
-					ed.dom.remove(ed.selection.getNode());
-					ed.selection.setContent(temp);
-				}
-				// Pressed Ctrl-$ in display eqn? Reduce to inline eqn
-				if (e.charCode == CTRLDOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'display')) {
-					e.preventDefault();
-					e.stopPropagation();
-					ed.dom.removeClass(ed.selection.getNode(), 'display');
-					ed.dom.addClass(ed.selection.getNode(), 'inline');
+				/*if (e.keyCode == KEYLEFT
+					&& ed.selection.isCollapsed()
+					&& ed.selection.getRng(true).startOffset == 0
+					&& ed.selection.getRng(true).startContainer.parentElement.nodeName == 'SPAN') {
+						e.preventDefault();
+						e.stopPropagation();
+						console.log('cursor leaving SPAN keypress');
+				}*/
+				// If we're currently editing an equation...
+				if (ed.dom.hasClass(ed.selection.getNode(), 'eqn')) {
+					// Pressed $ in inline eqn? Boost eqn to display
+					if (e.charCode == DOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'inline')) {
+						e.preventDefault();
+						e.stopPropagation();
+						ed.dom.removeClass(ed.selection.getNode(), 'inline');
+						ed.dom.addClass(ed.selection.getNode(), 'display');
+					}
+					// Pressed Ctrl-$ in inline? Remove eqn and leave plaintext
+					if (e.charCode == CTRLDOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'inline')) {
+						e.preventDefault();
+						e.stopPropagation();
+						var temp = ed.selection.getNode().innerHTML;
+						ed.dom.remove(ed.selection.getNode());
+						ed.selection.setContent(temp);
+					}
+					// Pressed Ctrl-$ in display eqn? Reduce to inline eqn
+					if (e.charCode == CTRLDOLLAR && ed.dom.hasClass(ed.selection.getNode(), 'display')) {
+						e.preventDefault();
+						e.stopPropagation();
+						ed.dom.removeClass(ed.selection.getNode(), 'display');
+						ed.dom.addClass(ed.selection.getNode(), 'inline');
+					}
+
+				} else {
+					// $ pressed outside equation? Make new eqn.
+					if (e.charCode == DOLLAR) {
+						e.preventDefault();
+						e.stopPropagation();
+						var newEqnID = ed.dom.uniqueId('eqn_');
+						var newEqn = ed.dom.create('span', {id: newEqnID, class: 'eqn inline'}, 'x');
+						console.log(newEqnID)
+						console.log(newEqn);
+						ed.selection.setNode(newEqn);
+						ed.selection.select(ed.dom.select('#'+newEqnID)[0].firstChild);
+					}
 				}
 
-			} else {
-				// $ pressed outside equation? Make new eqn.
-				if (e.charCode == DOLLAR) {
-					e.preventDefault();
-					e.stopPropagation();
-					var newEqnID = ed.dom.uniqueId('eqn_');
-					var newEqn = ed.dom.create('span', {id: newEqnID, class: 'eqn inline'}, 'x');
-					ed.selection.setContent(newEqn.outerHTML);
-					ed.selection.select(ed.dom.select('#'+newEqnID)[0].firstChild);
-				}
-			}
-
-		});
+			});
 
 		// Update content box every time user presses a key.
 		// TODO: Less intensive update scheme? (eg track caret position and update only updated elements?) Complicated!
@@ -168,16 +170,22 @@ function showEditor(target) {
 	textEd.setProgressState(1);
 	if (target.hasClass('empty')) {
 		console.log("Text editor called on something empty.");
-		target.find('#option_bar').after("<div class='textbox' id='"+target.attr('id').replace('c','txt')+"'><p></p></div>");
+		console.log(target);
+		target.find('#option_bar').after("<div class='textbox' id='"+target.attr('id').replace('c','txt')+"'></div>");
  		//the p is needed to force mce to be the size of the container, sadly it removes it if you dont put anything in it first time
 		target.removeClass("empty");
-	} else if (target.hasClass('textbox')) {
 		loadBoxToEditor(target);
+		textEd.setProgressState(0);
+		textEd.focus();
 	} else {
+		loadBoxToEditor(target);
+		textEd.setProgressState(0);
+		textEd.focus();
+	} /*else {
 		console.log("Text editor called on something which was neither a textbox nor empty.");
-	}
-	textEd.setProgressState(0);
-	textEd.focus();
+		textEd.setProgressState(0);
+		hideEditor();
+	}*/
 }
 
 function hideEditor() {
