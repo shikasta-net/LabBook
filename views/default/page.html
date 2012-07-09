@@ -11,8 +11,13 @@ var serviceURL = "{{=URL('call/run')}}";
 </script>
 <script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script>
+<!-- <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script> -->
+<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
+<style type="text/css">
+    /* bring in the claro theme */
+    @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
+</style>
 <script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
@@ -21,6 +26,7 @@ var serviceURL = "{{=URL('call/run')}}";
 <script type="text/javascript" src="{{=mathjax_URL}}"></script>
 <script type="text/javascript">
 MathJax.Hub.Config({ elements: ["content_area"] });
+
 //var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
 
 function handleUpdateTitle(value, settings) {

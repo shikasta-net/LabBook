@@ -20,7 +20,7 @@ div.page {
 }
 
 #textEditorContainer {
-    position: absolute;
+    position: fixed;
     top: 0px;
     height: 12em;
     width: 20em;
@@ -107,23 +107,33 @@ div.line {
     color: gray;
 }
 
+.inline {
+	border-bottom: solid;
+	color: inherit;
+}
+
+.display {
+	border-bottom: double;
+	color: inherit;
+}
+
 .inline:before {
-	content: "$\0020";
+//	content: "$\0020";
 	color: inherit;
 }
 
 .inline:after {
-	content: "\0020$";
+//	content: "\0020$";
 	color: inherit;
 }
 
 .display:before {
-	content: "$$\0020";
+//	content: "$$\0020";
 	color: inherit;
 }
 
 .display:after {
-	content: "\0020$$";
+//	content: "\0020$$";
 	color: inherit;
 }
 
