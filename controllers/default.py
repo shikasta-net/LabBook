@@ -4,10 +4,10 @@ def index():
 
 def page():
 	if get_preference('useLocalMathJax') :
-		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
+		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')
 		print 'using local mathjax'
 	else :
-		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js'
 		print 'using remote mathjax'
 	this_page = db.page(request.args(0)) or redirect(URL('index'))
 	db.container_box.page_id.default = this_page.id
@@ -18,9 +18,141 @@ def page():
 	return dict(page=this_page, boxes=boxes, contents=contents, mathjax_URL=mathjax_URL)
 
 
+def sections():
+	#return pages in root, and first page of sections of root
+	thumbs = None
+	return dict(thumbs=thumbs)
+
+
 def call():
 	session.forget()
 	return service()
+
+#All sections must be born with title and parent, the entry for the root will be created when the labbook is first set up with no parent.
+@service.run
+def create_section(title, parent):
+	try :
+		new_page = db.page.insert(title=title, parent=parent)
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode))
+
+@service.run
+def delete_section(section_id):
+	try :
+		for s in db(db.section.parent==section_id).select() :
+			delete_section(s.id)
+		for p in db(db.page.section==section_id).select() :
+			delete_page(p.id)
+
+		db(db.section.id==section_id).delete()
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode))
+
+# A pair of methods to move a page (or section) into a specific position (page_number) within a section.
+# This back shifts all page numbers of the elements of the original section to fill the gap left by the removed element
+# and also down shifts all the page numbers in the target section to accomodate the move.
+@service.run
+def move_to_section(page_id, section_id, page_number):
+	try :
+		this_page = db(db.page.id==page_id).select().first()
+
+		for p in db((db.page.section==this_page.section) & (db.page.number>this_page.number)).select() :
+			p.update_record(number=(p.number-1), modified_on=request.now)
+		for s in db((db.section.parent==this_page.section) & (db.section.number>this_page.number)).select() :
+			s.update_record(number=(s.number-1), modified_on=request.now)
+
+		for p in db((db.page.section==section_id) & (db.page.number>=page_number)).select() :
+			p.update_record(number=(p.number+1), modified_on=request.now)
+		for s in db((db.section.parent==section_id) & (db.section.number>=page_number)).select() :
+			s.update_record(number=(s.number+1), modified_on=request.now)
+
+		this_page.update_record(section=section_id, number=page_number, modified_on=request.now)
+
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode))
+
+@service.run
+def move_to_section(child_section_id, parent_section_id, page_number):
+	try :
+		if child_section_id == parent_section_id :
+			raise Exception('Cyclically deffined sectioning attempted.')
+		else :
+			this_section = db(db.section.id==child_section_id).select().first()
+
+			for p in db((db.page.section==this_section.parent) & (db.page.number>this_section.number)).select() :
+				p.update_record(number=(p.number-1), modified_on=request.now)
+			for s in db((db.section.parent==this_section.parent) & (db.section.number>this_section.number)).select() :
+				s.update_record(number=(s.number-1), modified_on=request.now)
+
+			for p in db((db.page.section==section_id) & (db.page.number>=page_number)).select() :
+				p.update_record(number=(p.number+1), modified_on=request.now)
+			for s in db((db.section.parent==section_id) & (db.section.number>=page_number)).select() :
+				s.update_record(number=(s.number+1), modified_on=request.now)
+
+			this_section.update_record(parent=parent_section_id, number=page_number, modified_on=request.now)
+
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode))
+
+#Page can be created as part of a section, or not
+@service.run
+def create_page(section=None):
+	try :
+		new_page = db.page.insert(title='',section=section)
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode, page_id=new_page))
+
+
+@service.run
+def delete_page(page_id):
+	try :
+		for box in db(db.container_box.page_id==page_id).select() :
+			del_box(box.id)
+
+		page_dir = os.path.join(os.getcwd(), get_page_dir(page_id))
+		if os.path.isdir(page_dir) :
+			shutil.rmtree(page_dir)
+
+		db(db.page.id==page_id).delete()
+	except Exception, e :
+		print 'oops: %s' % e
+		response.headers['Status'] = '400'
+		rcode = 400
+	else :
+		rcode = 200
+	finally :
+		return response.json(dict(return_code=rcode))
+
 
 # Function to update the page title
 @service.run
@@ -151,6 +283,11 @@ def default_save_handler(page_id, box_id, file_name, file_content):
 	# TODO: better checking of content type for writing method
 	shutil.copyfileobj(file_content.file, f)
 	f.close()
+
+
+
+def get_page_dir(page_id):
+	return os.path.join("static/content", str(page_id))
 
 def get_content_reldir(page_id, box_id):
 	return os.path.join("static/content", str(page_id), str(box_id))

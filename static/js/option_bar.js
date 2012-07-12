@@ -41,6 +41,7 @@ function attach(target) {
 		console.log('Text box options displayed');
 		$(optionBar).append(delButton);
 		$(optionBar).append(editTextButton);
+		/* Option bar makes display equations jump about */
 
 		activeContainer.prepend(optionBar);
 	} else {

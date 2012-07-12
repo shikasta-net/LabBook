@@ -13,17 +13,18 @@ var serviceURL = "{{=URL('call/run')}}";
 <script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 <!-- <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script> -->
-<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
 <style type="text/css">
     /* bring in the claro theme */
-    @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
+    @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css";
+    // @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojox/editor/plugins/resources/editorPlugins.css";
 </style>
 <script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
 <script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
-<script type="text/javascript" src="{{=mathjax_URL}}"></script>
+<script type="text/javascript" src="{{=mathjax_URL}}?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/javascript">
 MathJax.Hub.Config({ elements: ["content_area"] });
 
