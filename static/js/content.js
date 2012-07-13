@@ -2,6 +2,8 @@ var content = content||{};
 
 content.dropCrossBox = new crossBox();
 
+content.serviceURL = '/LabBook/content/call/run';
+
 content.handleDragEnter = function(event) {
 	event.stopPropagation();
 	event.preventDefault();
@@ -30,7 +32,7 @@ content.handleSaveContent = function(page_id, box_id, content, metadata) {
 	fd.append("contentFileType", metadata.type);
 	fd.append("contentFileSize", metadata.size);
 	$.ajax({
-		url: serviceURL+"/upload_content",
+		url: content.serviceURL + "/upload_content",
 		data: fd,
 		cache: false,
 		contentType: false,

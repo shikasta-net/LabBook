@@ -1,18 +1,18 @@
 var containers = containers||{};
 
-containers.serviceURL = '/LabBook/containers/call/run';
+var serviceURL = "{{=URL('call/run')}}";
 
 containers.handleMoveContainer = function (event, ui) {
-	jQuery.post(containers.serviceURL + '/move_box', { id:$(ui.helper).attr("id"), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
+	jQuery.post(serviceURL + '/move_box', { id:$(ui.helper).attr("id"), x:$(ui.position).attr("left")/pxPerem, y:$(ui.position).attr("top")/pxPerem }, function(data){ console.log("move container : ");console.log(data); }, "json");
 }
 
 containers.handleResizeContainer = function(event, ui) {
-	jQuery.post(containers.serviceURL + '/resize_box', { id:$(ui.helper).attr("id"), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
+	jQuery.post(serviceURL + '/resize_box', { id:$(ui.helper).attr("id"), w:$(ui.size).attr("width")/pxPerem, h:$(ui.size).attr("height")/pxPerem }, function(data){ console.log("resize container : ");console.log(data); }, "json");
 }
 
 containers.handleCreateContainer = function(new_cont) {
 	var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
-	jQuery.post(containers.serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){
+	jQuery.post(serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){
 		$("#content_area").append( "<div class='cbox empty' id='c"+data.new_id+"'></div>" );
 		$("div#c" + data.new_id).css({
 			'top':dims['y']+'px',
@@ -124,7 +124,7 @@ containers.toggleMoveResize = function(toggleElement) {
 }
 
 containers.deleteBox =  function(target) {
-	jQuery.post(containers.serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
+	jQuery.post(serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
 	target.detach();
 	containers.setContainersMobile();
 	$(".selected").removeClass("selected");
