@@ -5,6 +5,11 @@
 	
 #{{=id}} .ssec_info div.expand {
 	background-color: rgb{{=colours[id]}};
+	cursor: pointer;
+}
+
+#{{=id}} .pages_canvas {
+	width: {{=lengths[id]*14}}em;
 }
 {{pass}}
 
@@ -43,8 +48,13 @@ header {
 .ssec {
 	float: left;	
 	padding-left: 2em;
-	width: 15em;
-	height: 100%;
+	width: 14em;
+	height: 15em;
+}
+
+.expanded.ssec {
+	height: 45em;
+	width: 57em;
 }
 
 .ssec_info {
@@ -55,6 +65,8 @@ header {
 
 
 .ssec_info div.expand {
+		width: 1em;
+		text-align: center;
 		font-size: xx-large;
 		float: right;
 		font-weight: 700;
@@ -74,26 +86,46 @@ header {
 }
 
 .page {
-	border: 1px solid lightgray;
+	/*border: 1px solid lightgray;*/
+	background-color: lightgray;
 	width: 12em;
 	line-height: 9em;
 	text-align: center;
 	color: black;
 	float:left;
-	margin-left: 2em;
+	margin-left: 1em;
+	margin-right: 1em;
+	margin-bottom: 0.75em;
+	margin-top: 0.75em;
 }
 
-.page:first-child {
+/*.page:first-child {
 	margin-left: 0;
-}
+}*/
 
 .pages_scrollhide {
 	overflow: hidden;
        	height: 15em;
 }
 
+.expanded .pages_scrollhide {
+	height: 31.5em;
+}
+
 .pages_scroller {
-	overflow-x: auto;
+	overflow-x: scroll;
 	height: 16em;
        	padding-bottom: 1em;
+}
+
+.expanded .pages_scroller {
+	overflow-y: scroll;
+}
+
+.expanded .pages_scroller {
+	height: 32em;
+}
+
+.expanded .pages_canvas {
+	width: 56em !important;
 }

@@ -17,8 +17,10 @@ def index():
 
 def css():
 	colours = dict()
+	lengths = dict()
 	for i, section in enumerate(session.testdict['sections']):
 		for j, subsection in enumerate(section['subsections']):
 			colours[subsection['id']] = subsection['colour']
-	return dict(colours=colours)
+			lengths[subsection['id']] = len(subsection['pages'])
+	return dict(colours=colours, lengths=lengths)
 

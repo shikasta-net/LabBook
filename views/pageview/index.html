@@ -1,7 +1,28 @@
 <html>
 	<head>
-		<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
-		<link href='{{=URL("css.css")}}' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css' />
+		<link href='{{=URL("css.css")}}' rel='stylesheet' type='text/css' />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script type="text/javascript">
+		$(document).ready(function() {
+			console.log('boom');	
+			$('.expand').on('click', function(e) {
+				var ssec_div = $(this).parent().parent();
+				/*ssec_div.css({'width': ssec_div.width() * 4, 'height': ssec_div.height() * 3});
+				ssec_div.parent().css({'height': ssec_div.height()});
+				ssec_div.children('.pages_scrollhide').css({'height': ssec_div.height()})
+				.children('.pages_scroller').css({'height': ssec_div.height(), 'width': ssec_div.width()})
+				.children('div').css({'width': ssec_div.width()});*/
+				if(ssec_div.hasClass('expanded')) {
+					$(this).html('+');
+					ssec_div.removeClass('expanded');
+				} else {
+					$(this).html('&#8722;');
+					ssec_div.addClass('expanded');
+				}
+			});
+		});
+		</script>
 	</head>
 	<body>
                 <header>
@@ -22,7 +43,7 @@
 				</div>
 				<div class="pages_scrollhide">
 					<div class="pages_scroller">
-						<div style="width: {{=1+14*len(subsection['pages'])}}em;">
+						<div class="pages_canvas">
 							{{for i, page in enumerate(subsection['pages']):}}
 							<div class="page">Page {{=i+1}}</div>
 							{{pass}}
