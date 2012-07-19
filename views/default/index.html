@@ -1,10 +1,26 @@
 {{extend 'layout.html'}}
-<h1>Available pages</h1>
+
+<script type="text/javascript">
+var serviceURL = "{{=URL('call/run')}}";
+</script>
+{{=A(H1('Available sections'), _href=URL('sections'))}}
+{{=H1('Available pages')}}
 <ul>{{for page in pages:}}
      {{if page.title != '':}}
-       {{ttl=page.title}}
+       {{ttl=str(page.id) + " " + page.title}}
      {{else:}}
-       {{ttl='*'}}
+       {{ttl=page.id}}
      {{pass}}
      {{=LI(A(ttl, _href=URL('page', args=page.id)))}}
 {{pass}}</ul>
+
+<div>
+<button type="button" onclick="jQuery.post(serviceURL + '/create_page', function(data){ console.log('create page :');console.log(data); }, 'json')">Add page</button>
+<br />
+<button type="button" onclick="jQuery.post(serviceURL + '/delete_page', { page_id:$('select#delpg').val() }, function(data){ console.log('delete page :');console.log(data); }, 'json')">Delete page</button><select id='delpg'>
+	{{for page in pages:}}
+		<option value='{{=page.id}}'>{{=page.id}}</option>
+	{{pass}}
+</select>
+</div>
+

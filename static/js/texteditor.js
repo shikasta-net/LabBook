@@ -12,10 +12,27 @@ function initialiseEditor() {
 		"dojo/domReady!",
 		"dijit/_editor/plugins/FontChoice",
 		"dijit/_editor/plugins/LinkDialog",
-		"dojox/editor/plugins/TextColor"],
+		"dojox/editor/plugins/TextColor"
+		// ,
+		// "dojox/editor/plugins/TablePlugins",
+		// "dojox/editor/plugins/ResizeTableColumn"
+		],
 		function(Editor){
 			textEd = new Editor({
-				plugins: ["bold","italic","|","cut","copy","paste","|","insertUnorderedList"],
+				plugins: ["bold","italic","|","cut","copy","paste","|","insertUnorderedList"
+					// ,"|",
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'modifyTable'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowBefore'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowAfter'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnBefore'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnAfter'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableRow'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableColumn'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'colorTableCell'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},
+					// {name: 'dojox.editor.plugins.TablePlugins', command: 'ResizeTableColumn'}
+				],
 				extraPlugins : ["fontName","fontSize","formatBlock","foreColor","hiliteColor","|","createLink"],
 				setupDefaultShortcuts: function(){}
 			}, "textEditor");

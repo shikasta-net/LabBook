@@ -3,18 +3,20 @@ from gluon.tools import *
 service = Service()
 crud = Crud(db)
 
+db.define_table('section',
+				Field('title', 'text', requires=IS_NOT_EMPTY()),
+				Field('number', 'integer', requires=IS_NOT_EMPTY()),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', default=request.now),
+				Field('parent', 'reference section', requires=IS_NULL_OR(IS_IN_DB(db, 'section.id', 'section.title'))),
+				format='%(title)s')
 
 db.define_table('page',
-				Field('title'),
+				Field('title', 'text'),
+				Field('number', 'integer', requires=IS_NOT_EMPTY()),
 				Field('created_on', 'datetime', default=request.now),
-				Field('modified_on', 'datetime', default=request.now))
-
-#db.define_table('section',
-#				Field('title'),
-#				Field('previous_page', db.page),
-#				Field('next_page', db.page),
-#				Field('parent_page', db.page),
-#				format='%(title)s')
+				Field('modified_on', 'datetime', default=request.now),
+				Field('section', db.section, requires=IS_IN_DB(db, 'section.id', 'section.title')))
 
 db.define_table('content',
 				Field('file_type', 'string'),
@@ -48,19 +50,24 @@ db.define_table('preferences',
 				Field('type', 'string'),
 				format='%(preference)s')
 
+#~ db.section.parent.requires=IS_NULL_OR(IS_IN_DB(db, db.section.id, '%(title)s'))
+#~ db.section.created_on.readable = db.section.created_on.writable = False
+#~ db.section.modified_on.readable = db.section.modified_on.writable = False
 
-#db.page.created_on.readable = db.page.created_on.writable = False
-#db.page.modified_on.readable = db.page.modified_on.writable = False
+#~ db.page.section.requires=IS_IN_DB(db, db.section.id, '%(title)s')
+#~ db.page.created_on.readable = db.page.created_on.writable = False
+#~ db.page.modified_on.readable = db.page.modified_on.writable = False
 
-db.container_box.page_id.readable = db.container_box.page_id.writable = False
-db.container_box.content_id.readable = db.container_box.content_id.writable = False
-db.container_box.created_on.readable = db.container_box.created_on.writable = False
-db.container_box.modified_on.readable = db.container_box.modified_on.writable = False
+#~ db.content.created_on.readable = db.content.created_on.writable = False
+#~ db.content.modified_on.readable = db.content.modified_on.writable = False
 
-db.image_box.page_id.readable = db.image_box.page_id.writable = False
-db.image_box.box_id.readable = db.image_box.box_id.writable = False
-db.image_box.created_on.readable = db.image_box.created_on.writable = False
-db.image_box.modified_on.readable = db.image_box.modified_on.writable = False
+#~ db.container_box.page_id.readable = db.container_box.page_id.writable = False
+#~ db.container_box.content_id.readable = db.container_box.content_id.writable = False
+#~ db.container_box.created_on.readable = db.container_box.created_on.writable = False
+#~ db.container_box.modified_on.readable = db.container_box.modified_on.writable = False
 
-db.content.created_on.readable = db.content.created_on.writable = False
-db.content.modified_on.readable = db.content.modified_on.writable = False
+#~ db.image_box.page_id.readable = db.image_box.page_id.writable = False
+#~ db.image_box.box_id.readable = db.image_box.box_id.writable = False
+#~ db.image_box.created_on.readable = db.image_box.created_on.writable = False
+#~ db.image_box.modified_on.readable = db.image_box.modified_on.writable = False
+
