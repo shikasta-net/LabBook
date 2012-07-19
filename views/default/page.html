@@ -1,195 +1,147 @@
-<head>
-{{response.files.append("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")}}
-{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
-{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
-{{include 'web2py_ajax.html'}}
-<link rel="stylesheet" type="text/css" href="{{=URL('css','page_layout.css', vars=dict(id=page.id))}}" />
+<html>
+	<head>
+		<!-- Load css, including custom box css -->
+		<link rel="stylesheet" type="text/css" href="{{=URL('css','page_layout.css', vars=dict(id=page.id))}}" />
+		<!-- Load jQuery and jQuery-ui -->
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" />
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>
+		<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
+		
+		<!-- Load MathJax -->
+		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
+		
+		<!-- Load text editor (dojo) -->
+		<!-- <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script> -->
+		<!-- <script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script> -->
+		<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
+		<style type="text/css">
+			/* bring in the claro theme */
+			@import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
+		</style>
+		
+		<!-- Load our scripts! -->
+		<script type="text/javascript">
+			var pageID = "{{=page.id}}";
+		</script>
+		<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 
-<script type="text/javascript">
-var pageID = "{{=page.id}}";
-var serviceURL = "{{=URL('call/run')}}";
-</script>
-<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
-<!-- <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script> -->
-<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
-<style type="text/css">
-    /* bring in the claro theme */
-    @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css";
-    // @import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojox/editor/plugins/resources/editorPlugins.css";
-</style>
-<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
-<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
-<script type="text/javascript" src="{{=mathjax_URL}}?config=TeX-AMS-MML_HTMLorMML"></script>
-<script type="text/javascript">
-MathJax.Hub.Config({ elements: ["content_area"] });
 
-//var buttonAddContainer = $('<button type="button" id="mknewbox" class="side_button"><img src={{=URL("static/images","Crystal_Project_New_window.png")}} class="side_button" style="width:90%;" /></button>');
+		<!-- Initialisation and odds and ends -->
+		<script type="text/javascript">
+			MathJax.Hub.Config({ elements: ["content_area"] });
 
-function handleUpdateTitle(value, settings) {
-   jQuery.post('{{=URL("call/run/update_title")}}', { page_id:{{=page.id}}, title_content:value }, function(data){ value = data.title_content; console.log("title update : ");console.log(data); }, "json");
-	return(value);
-}
+			function handleUpdateTitle(value, settings) {
+				jQuery.post('{{=URL("call/run/update_title")}}',
+						{ page_id:{{=page.id}}, title_content:value }, 
+						function(data){	value = data.title_content; console.log("title update : "); console.log(data); }, 
+						"json");
+				return(value);
+			}
 
-var pxPerem = false;
-$(document).ready(function(){
-	pxPerem = $("div.page").width()/70.0;
-	var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""};
+				var pxPerem = false;
 
-/*
-	tinyMCE.init({
-		mode : "none",
-		theme : "simple",
-		skin: "default",
-		content_css : "{{=URL('/static/css','tinyMCE_custom.css')}}",
-		setup: function(ed) {
-				ed.onInit.add(function(ed, evt) {
-					var styles = [
-						'color',
-						'background-color',
-						'font-family',
-					//  'any css you want can go in here'
-					];
-					var i = styles.length;
-					var e = ed.getElement();
-					var st = ''; var str = ''; var n = 0;
-					while (i--) {
-						if (getStyle(e, styles[i])) {
-								st = styles[i].split('-');
-								str = st[0];
-								for (n = 1; n < st.length; n++) {
-									str += st[n];
-								}
-							ed.getBody().style[str] = getStyle(e, styles[i]);
+			<!-- ON DOCUMENT READY -->
+			$(document).ready(function(){
+				pxPerem = $("div.page").width()/70.0;
+
+				var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""};
+
+				$("#main_page").disableTextSelect();
+
+				$(".empty").each(function(index) { containers.defineIsBlank($(this)); });
+
+				//Doubdle click to edit Press enter to save changes. Press Esc to cancel them.
+				$("#title_bar").bind('focusin', function() {
+					$("#main_page").enableTextSelect()
+				}).bind('focusout', function() {
+					$("#main_page").disableTextSelect()
+				}).editable(handleUpdateTitle, {
+					tooltip : "DoubleClick to edit...",
+					event : "dblclick"
+				});
+				$("button#mknewbox").click(function(){
+					if (!$(this).hasClass("selected")) {
+						$(".selected").removeClass("selected");
+						$(this).addClass("selected");
+						containers.unsetContainersMobile();
+					} else {
+						containers.setContainersMobile();
+						$(".selected").removeClass("selected");
+					}
+				});
+
+				$("#content_area").click( function(event){
+					optionBarHide();
+					saveEditor();
+					hideEditor();
+				}).mousedown(function(e){
+					if ($("button#mknewbox").hasClass("selected")) {
+						new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
+						new_cont['y1'] = (e.pageY - $("div.content_area").offset().top);
+						if (!(new_cont['x1'] > 0 && new_cont['y1'] > 0 && new_cont['x1'] < $("div.content_area").width() && new_cont['y1'] < $("div.content_area").height()))  {
+							new_cont['x1'] = -1;
+							new_cont['y1'] = -1;
 						}
 					}
-
-					var dom = ed.dom;
-					var doc = ed.getDoc();
-					tinymce.dom.Event.add(doc, 'blur', function(e) { //chose between save and hide or remove editor.
-						tinyMCE.execCommand('mceRemoveControl', false, ed.id);
-						//Uncomment if add and remove of tiny mce is too slow.
-						//ed.save();
-						//ed.hide();
-						containers.defineIsEditable($('#'+ed.id.replace('txt','c')));
-						containers.setContainersMobile($('#'+ed.id.replace('txt','c')));
-						containers.enableOptionBar($('#'+ed.id.replace('txt','c')));
-					});
-				});
-				ed.onSaveContent.add(function(ed, o) {
-					if (o.content == '') { //set as blank again.
-						$('#' + ed.id).remove();
-						$('#' + ed.id.replace('txt','c')).unbind('dblclick');
-						containers.defineIsBlank($('#' + ed.id.replace('txt','c')));
-					} else {
-						content.handleSaveContent("{{=page.id}}", ed.id.replace('txt',''), o.content, { name:'textbox'+ed.id.replace('txt','')+'.'+o.format, type:'text/'+o.format, size: 8*unescape(encodeURIComponent(content)).length });
-						console.log("The content has been submitted for saving");
+				}).mouseup(function(e){
+					if ($("button#mknewbox").hasClass("selected")) {
+						new_cont['x2'] = (e.pageX - $("div.content_area").offset().left);
+						new_cont['y2'] = (e.pageY - $("div.content_area").offset().top);
+						if (!(new_cont['x2'] > 0 && new_cont['y2'] > 0 && new_cont['x2'] < $("div.content_area").width() && new_cont['y2'] < $("div.content_area").height())) {
+							new_cont['x2'] = -1;
+							new_cont['y2'] = -1;
+						}
+						if (new_cont['x1'] > 0 && new_cont['x2'] > 0 && new_cont['y1'] > 0 && new_cont['y2'] > 0) {
+							containers.handleCreateContainer(new_cont);
+							$(".selected").removeClass("selected");
+							containers.setContainersMobile();
+							new_cont['x1'] = -1;
+							new_cont['y1'] = -1;
+							new_cont['x2'] = -1;
+							new_cont['y2'] = -1;
+						}
 					}
 				});
-		},
-		init_instance_callback : function(ed) { ed.focus() }
-	});
 
-*/
+				$(".cbox").each(function(index) {
+					$(this).on('dragenter', content.handleDragEnter);
+					$(this).on('drop', content.handleDrop);
+					containers.defineContainerMobile($(this));
+					containers.enableOptionBar($(this));
+				});
 
+				$(".imgbox").on("dblclick", function(event) {
+					containers.toggleMoveResize(this);
+				});
 
-	$("#main_page").disableTextSelect();
+				//newly created divs have cross box underneither somhow???
+				$('#content_area').append(content.dropCrossBox.crossDiv);
+				initialiseEditor();
 
-	$(".empty").each(function(index) { containers.defineIsBlank($(this)); });
-//	$(".textbox").each(function(index) { containers.defineIsEditable($('#'+$(this).attr('id').replace('txt','c'))); })
-
-	//Doubdle click to edit Press enter to save changes. Press Esc to cancel them.
-	$("#title_bar")
-		.bind('focusin', function() {
-			$("#main_page").enableTextSelect()
-		}).bind('focusout', function() {
-			$("#main_page").disableTextSelect()
-		}).editable(handleUpdateTitle, {
-			tooltip   : "DoubleClick to edit...",
-			event	 : "dblclick"
-	});
-
-//	$('#side_bar_l').append(buttonAddContainer);
-
-	$("button#mknewbox").click(function(){
-		if (!$(this).hasClass("selected")) {
-			$(".selected").removeClass("selected");
-			$(this).addClass("selected");
-			containers.unsetContainersMobile();
-		} else {
-			containers.setContainersMobile();
-			$(".selected").removeClass("selected");
-		}
-	});
-
-	$("#content_area").click( function(event){
-		optionBarHide();
-		saveEditor();
-		hideEditor();
-	}).mousedown(function(e){
-		if ($("button#mknewbox").hasClass("selected")) {
-			new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
-			new_cont['y1'] = (e.pageY - $("div.content_area").offset().top);
-			if (!(new_cont['x1'] > 0 && new_cont['y1'] > 0 && new_cont['x1'] < $("div.content_area").width() && new_cont['y1'] < $("div.content_area").height()))  {
-				new_cont['x1'] = -1;
-				new_cont['y1'] = -1;
-			}
-		}
-	}).mouseup(function(e){
-		if ($("button#mknewbox").hasClass("selected")) {
-			new_cont['x2'] = (e.pageX - $("div.content_area").offset().left);
-			new_cont['y2'] = (e.pageY - $("div.content_area").offset().top);
-			if (!(new_cont['x2'] > 0 && new_cont['y2'] > 0 && new_cont['x2'] < $("div.content_area").width() && new_cont['y2'] < $("div.content_area").height())) {
-				new_cont['x2'] = -1;
-				new_cont['y2'] = -1;
-			}
-			if (new_cont['x1'] > 0 && new_cont['x2'] > 0 && new_cont['y1'] > 0 && new_cont['y2'] > 0) {
-				containers.handleCreateContainer(new_cont);
-				$(".selected").removeClass("selected");
-				containers.setContainersMobile();
-				new_cont['x1'] = -1;
-				new_cont['y1'] = -1;
-				new_cont['x2'] = -1;
-				new_cont['y2'] = -1;
-			}
-		}
-	});
-
-	$(".cbox").each(function(index) {
-		$(this).on('dragenter', content.handleDragEnter);
-		$(this).on('drop', content.handleDrop);
-		containers.defineContainerMobile($(this));
-		containers.enableOptionBar($(this));
-	});
-
-	$(".imgbox").on("dblclick", function(event) {
-		containers.toggleMoveResize(this);
-	});
-
-	//newly created divs have cross box underneither somhow???
-	$('#content_area').append(content.dropCrossBox.crossDiv);
-	initialiseEditor();
-
-});
-</script>
-</head>
-<body class="page">
-	<div id="main_page" class="page">
-		{{=DIV(SPAN(page.title, _id="title_bar", _class="title_bar"), _class="title_bar")}}
-		{{=DIV(_id="side_bar_l", _class="side_bar")}}
-		<div id="content_area" class="content_area">
-			{{for tbox in boxes:}}
+			});
+			<!-- END DOCUMENT READY -->
+		</script>
+	</head>
+	<body class="page">
+		<div id="main_page" class="page">
+			{{=DIV(SPAN(page.title, _id="title_bar", _class="title_bar"), _class="title_bar")}}
+			{{=DIV(_id="side_bar_l", _class="side_bar")}}
+			<div id="content_area" class="content_area">
+				{{for tbox in boxes:}}
 				{{if contents[tbox.id] is not "" :}}
-					{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+				{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
 				{{else:}}
-					{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
+				{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
 				{{pass}}
-			{{pass}}
+				{{pass}}
+			</div>
 		</div>
-	</div>
 	<button type="button" id="mknewbox">Create box</button>
-</body>
+	</body>
+</html>
