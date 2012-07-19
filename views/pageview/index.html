@@ -3,16 +3,12 @@
 		<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css' />
 		<link href='{{=URL("css.css")}}' rel='stylesheet' type='text/css' />
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>
+		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 		$(document).ready(function() {
-			console.log('boom');	
 			$('.expand').on('click', function(e) {
 				var ssec_div = $(this).parent().parent();
-				/*ssec_div.css({'width': ssec_div.width() * 4, 'height': ssec_div.height() * 3});
-				ssec_div.parent().css({'height': ssec_div.height()});
-				ssec_div.children('.pages_scrollhide').css({'height': ssec_div.height()})
-				.children('.pages_scroller').css({'height': ssec_div.height(), 'width': ssec_div.width()})
-				.children('div').css({'width': ssec_div.width()});*/
 				if(ssec_div.hasClass('expanded')) {
 					$(this).html('+');
 					ssec_div.removeClass('expanded');
@@ -21,6 +17,13 @@
 					ssec_div.addClass('expanded');
 				}
 			});
+
+			$('.sec_container').sortable({
+				items: '.page',
+				start: function(e, ui) { console.log('sort start'); },
+				stop: function(e, ui) { console.log('sort stop'); },
+				update: function(e, ui) { console.log('sort update'); },
+				}).disableSelection();
 		});
 		</script>
 	</head>
@@ -28,31 +31,35 @@
                 <header>
                 	<h1>LabBook - Alastair Mailer</h1>
 		</header>
+		<div class="sec_container">
 		{{for section in labbook['sections']:}}
-		<div class="sec" style="width: {{=15 + 2 + 0.5 + len(section['subsections'])*(15 + 2)}}em">
+		<div class="sec">
 			<div class="sec_info">
 				<div class="title">{{=section['title']}}</div>
 				<div class="details">{{=len(section['subsections'])}} subsection(s)</div>
 			</div>
-			{{for subsection in section['subsections']:}}
-			<div class="ssec" id="{{=subsection['id']}}">
-				<div class="ssec_info">
-					<div class="expand">+</div>
-					<div class="title">{{=subsection['title']}}</div>
-					<div class="details">{{=len(subsection['pages'])}} page(s)</div>
-				</div>
-				<div class="pages_scrollhide">
-					<div class="pages_scroller">
-						<div class="pages_canvas">
-							{{for i, page in enumerate(subsection['pages']):}}
-							<div class="page">Page {{=i+1}}</div>
-							{{pass}}
+			<div class="ssec_container">
+				{{for subsection in section['subsections']:}}
+				<div class="ssec" id="{{=subsection['id']}}">
+					<div class="ssec_info">
+						<div class="expand">+</div>
+						<div class="title">{{=subsection['title']}}</div>
+						<div class="details">{{=len(subsection['pages'])}} page(s)</div>
+					</div>
+					<div class="pages_scrollhide">
+						<div class="pages_scroller">
+							<div class="pages_canvas">
+								{{for i, page in enumerate(subsection['pages']):}}
+								<div class="page">Page {{=i+1}}</div>
+								{{pass}}
+							</div>
 						</div>
 					</div>
 				</div>
+				{{pass}}
 			</div>
-			{{pass}}
 		</div>
 		{{pass}}
+	</div>
 	</body>
 </html>
