@@ -1,14 +1,12 @@
-__init__.py
-__init__.pyc
 cache/
 cron/
 databases/
 errors/
 languages/
-modules/
 private/
 sessions/
 *.bak
 static/content/
 static/tinymce_3.5_jquery.zip
 *~
+*.pyc
