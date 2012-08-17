@@ -26,11 +26,20 @@ function crossBox(css) {
             } 
         });
                                                     
-    this.crossDiv.on('drop', function(event) { 
-            this.hide();
-            content.handleDrop(event);
-            this.elementOver = false;
-    });
+    this.crossDiv.on('drop', null, {crossBox: this},
+	    function(event) {
+	    	event.preventDefault();
+	    	event.stopPropagation(); 
+            	thisCrossBox = event.data.crossBox;
+		event = event.originalEvent;
+		if (event.target.id == "crossbox" + thisCrossBox.crossBoxID) {
+		    if (!($(event.relatedTarget).hasClass('line'))) {
+		    	thisCrossBox.hide();
+            		content.handleDrop(event);
+            		thisCrossBox.elementOver = false;
+		    }
+		}
+            });
     
     this.crossDiv.on('dragover', function (event) {
         event.stopPropagation();

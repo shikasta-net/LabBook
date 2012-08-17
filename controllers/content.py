@@ -81,22 +81,24 @@ handlers['text/html'] = FileHandler(default_save_handler, default_text_get_handl
 # Described above
 @service.run
 def upload_content():
-	try:
+	#try:
 		#print "upload_content service called on " + request.vars['page_id'] + "/" + request.vars['box_id'] + "/" + request.vars['contentFileName']
-		print request.vars
+		#print request.vars
 		handler = handlers[request.vars['contentFileType']]
 		if handler is not None:
-			print request.vars['contentFile']
+			#print request.vars['contentFileType']
+			print "Received content for box %s on page %s, file name %s, file size %s" % (request.vars['box_id'], request.vars['page_id'], request.vars['contentFileName'], request.vars['contentFileSize'])
 			handler.save_file(request.vars['page_id'], request.vars['box_id'], request.vars['contentFileName'], request.vars['contentFile'])
 			c_id = db.content.insert(file_type=request.vars['contentFileType'], file_name=request.vars['contentFileName'])
 			db(db.container_box.id == request.vars['box_id']).update(content_id = c_id)
 			return response.json(dict(content=str(get_content(request.vars['box_id'])), box_id=request.vars['box_id']))
 		else:
 			print "No file handler for " + request.vars['contentFileType']
-			response.headers['Status'] = '500'
-			return response.json({'error': 'Error in upload, file type ' + request.vars['contentFileType'] + ' not supported.'})
-	except Exception, e:
-		print "Oh no! " + str(e)
+			raise HTTP(400, "No file handler for mime type %s." % request.vars['contentFileType'])
+			#response.headers['Status'] = '500'
+			#return response.json({'error': 'Error in upload, file type ' + request.vars['contentFileType'] + ' not supported.'})
+	#except Exception, e:
+	#	print "Oh no! " + str(e)
 
 # Get content service
 @service.run
