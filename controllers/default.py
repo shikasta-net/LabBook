@@ -73,7 +73,7 @@ def delete_section(section_id):
 # This back shifts all page numbers of the elements of the original section to fill the gap left by the removed element
 # and also down shifts all the page numbers in the target section to accomodate the move.
 @service.run
-def move_to_section(page_id, section_id, page_number):
+def move_page(page_id, section_id, page_number):
 	try :
 		this_page = db(db.page.id==page_id).select().first()
 
@@ -99,7 +99,7 @@ def move_to_section(page_id, section_id, page_number):
 		return response.json(dict(return_code=rcode))
 
 @service.run
-def move_to_section(child_section_id, parent_section_id, page_number):
+def move_section(child_section_id, parent_section_id, page_number):
 	try :
 		if child_section_id == parent_section_id :
 			raise Exception('Cyclically deffined sectioning attempted.')
@@ -129,18 +129,17 @@ def move_to_section(child_section_id, parent_section_id, page_number):
 
 #Page can be created as part of a section, or not
 @service.run
-def create_page(section=None):
+def create_page(page_num, title='New page', section=None):
 	try :
-		new_page = db.page.insert(title='',section=section)
+		new_page = db.page.insert(number=page_num, title=title, section=section)
+		if (section != None):
+			move_page(new_page, section, page_num)
+		return response.json(dict(page_id=new_page, title=title, section=section))
 	except Exception, e :
 		print 'oops: %s' % e
-		response.headers['Status'] = '400'
-		rcode = 400
-	else :
-		rcode = 200
-	finally :
-		return response.json(dict(return_code=rcode, page_id=new_page))
-
+		# Roll back changes
+		if (new_page): db(db.page.id==new_page).delete()
+		raise 500
 
 @service.run
 def delete_page(page_id):

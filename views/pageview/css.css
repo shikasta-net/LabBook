@@ -1,16 +1,22 @@
 {{for id in colours.keys():}}
 #{{=id}} {
-	color: rgb{{=colours[id]}};
+	color: {{=colours[id]}};
 }
 	
 #{{=id}} .ssec_info div.expand {
-	background-color: rgb{{=colours[id]}};
+	background-color: {{=colours[id]}};
 	cursor: pointer;
 }
 
 #{{=id}} .pages_canvas {
-	width: {{=lengths[id]*14}}em;
+	width: {{=lengths[id]*16 + 2}}em;
 }
+
+#{{=id}} .before:hover, #{{=id}} .at_end:hover {
+	background-color: {{=colours[id]}};
+	opacity: 0.3;
+}
+
 {{pass}}
 
 body {
@@ -24,7 +30,58 @@ header {
 	padding-left: 1em;
 }
 
-.sec_container {
+.add_page {
+	height: 9em;
+	width: 1em;
+	display: block;
+	float: left;
+	background-color: white;
+}
+
+.before {
+	position: relative;
+	left: -1.5em;
+}
+
+.at_end {
+	margin-top: 0.75em;
+}
+
+button {
+	float: right;
+	margin-left: 1em;
+}
+
+.new_page_dialog {
+	width: 17em;
+	position: absolute;
+	background-color: white;
+}
+
+.page-placeholder {
+	margin-top: 0.5em;
+	height: 9em;
+	border: 0.25em dotted gray;
+	width: 4em;
+	display: block;
+	font-variant: small-caps;
+	content: 'Insert new page';
+	float: left;
+}
+
+.ui-draggable-dragging {
+	opacity: 0.5;
+}
+#toolbox {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	background-color: white;
+	border-top-style: dashed;
+	border-top-color: lightgray;
+}
+
+#sec_container {
 	display: table;
 }
 
@@ -116,8 +173,8 @@ header {
 	text-align: center;
 	color: black;
 	float:left;
-	margin-left: 1em;
-	margin-right: 1em;
+	margin-left: 1.5em;
+	margin-right: 0.5em;
 	margin-bottom: 0.75em;
 	margin-top: 0.75em;
 }

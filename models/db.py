@@ -9,6 +9,7 @@ db.define_table('section',
 				Field('created_on', 'datetime', default=request.now),
 				Field('modified_on', 'datetime', default=request.now),
 				Field('parent', 'reference section', requires=IS_NULL_OR(IS_IN_DB(db, 'section.id', 'section.title'))),
+				Field('colour', 'text', default='black'),
 				format='%(title)s')
 
 db.define_table('page',

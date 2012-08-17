@@ -18,20 +18,82 @@
 				}
 			});
 
-			$('.sec_container').sortable({
+			$('#sec_container').sortable({
 				items: '.page',
-				start: function(e, ui) { console.log('sort start'); },
-				stop: function(e, ui) { console.log('sort stop'); },
-				update: function(e, ui) { console.log('sort update'); },
-				}).disableSelection();
+				change: function(event, ui) { 
+					console.log(ui.placeholder);
+					var placeholder_canvas = $(ui.placeholder).parents('.pages_canvas');
+					placeholder_canvas.css('width', (placeholder_canvas.children('.page').length * 14 + 4.5) + 'em');
+				},
+				placeholder: 'page-placeholder',
+				stop: function (event, ui) {
+						moved_page = $(ui.item);
+						var moved_page_number = moved_page.index() + 1;
+						var moved_parent_section = moved_page.parents('.ssec')
+						if (moved_parent_section.length != 0) {
+							var moved_parent_section_id = moved_parent_section.attr('id').substring(3);
+						}
+						var moved_page_id = moved_page.attr('pageid');
+						console.log('Page moved: section ' + moved_parent_section_id + ' number ' + moved_page_number);
+						$.get('default/call/run/move_page', 
+							{ page_id: moved_page_id, section_id: moved_parent_section_id, page_number: moved_page_number });
+
+			       	}
+			}).disableSelection();
+
+			$('.page').on('dblclick', function(e) {
+				window.open('{{=URL(c='default', f='page')}}' + '/' + $(this).attr('pageid'));
+			});
+
+			var new_page_num;
+			var new_page_title;
+			var new_page_section;
+			$('.before').on('click', function(e) {
+					$('.new_page_dialog input[name="page_num"]').val($(this).parent('.page').index() + 1);
+					$('.new_page_dialog input[name="section"]').val($(this).closest('.sec, .ssec').attr('id').substring(3));
+					$('.new_page_dialog').offset({left: e.pageX, top: e.pageY}).fadeIn();
+					$('.new_page_dialog input').focus();
+					});
+			$('.at_end').on('click', function(e) {
+					$('.new_page_dialog input[name="page_num"]').val($(this).siblings().length);
+					$('.new_page_dialog input[name="section"]').val($(this).closest('.sec, .ssec').attr('id').substring(3));
+					$('.new_page_dialog').offset({left: e.pageX, top: e.pageY}).fadeIn();
+					$('.new_page_dialog input').focus();
+					});
+			$('.new_page_dialog form').submit(function(e) {
+				e.preventDefault();
+				console.log('default/call/run/create_page?' + $(this).serialize());
+				$.ajax({
+					url: 'default/call/run/create_page?' + $(this).serialize(),
+					dataType: 'json',
+					success: function (data) { 
+					console.log(data['title']);
+					console.log('#sec' + data['section'] + ' .page:eq(' + ($('.new_page_dialog input[name="page_num"]').val() - 1) + ')');
+						$('#sec' + data['section'] + ' .page:eq(' + ($('.new_page_dialog input[name="page_num"]').val() - 2) + ')')
+							.after('<div class="page" pageid="' + data['page_id'] + '">' + data['title'] + '<div class="add_page before"></div></div>');
+					       	},
+				});
+				$('.new_page_dialog').hide();
+			});
+			$('.new_page_dialog').hide();
+			
+
 		});
-		</script>
+			
+	</script>
+	<style>
+		.drop-page {
+			width: 5em;
+			height: 5em;
+			background-color: red;
+		}
+	</style>
 	</head>
 	<body>
                 <header>
                 	<h1>LabBook - Alastair Mailer</h1>
 		</header>
-		<div class="sec_container">
+		<div id="sec_container">
 		{{for section in labbook['sections']:}}
 		<div class="sec">
 			<div class="sec_info">
@@ -49,9 +111,13 @@
 					<div class="pages_scrollhide">
 						<div class="pages_scroller">
 							<div class="pages_canvas">
-								{{for i, page in enumerate(subsection['pages']):}}
-								<div class="page">Page {{=i+1}}</div>
+								{{for page in sorted(subsection['pages'], key=lambda pg: pg['number']):}}
+								<div class="page" pageid="{{=page['id']}}">
+									{{=page['title']}}
+									<div class="add_page before"></div>
+								</div>
 								{{pass}}
+								<div class="add_page at_end"></div>
 							</div>
 						</div>
 					</div>
@@ -60,6 +126,21 @@
 			</div>
 		</div>
 		{{pass}}
+	</div>
+	<div class="new_page_dialog">
+		<form action="default/call/run/create_page">
+			<fieldset>
+				<legend>Add New Page</legend>
+				<label for="new_page_title">Page title:</label>
+				<input type="text" name="title" />
+				<input type="hidden" name="page_num" />
+				<input type="hidden" name="section" />
+				<br />
+				<br />
+				<button type="submit">Add Page</button>
+				<button>Cancel</button>
+			</fieldset>
+		</form>
 	</div>
 	</body>
 </html>
