@@ -18,15 +18,6 @@
 		margin: 0;
 		padding: 0; }
 
-	ul#drops {
-		border:dashed black;
-		position:absolute;
-		margin: 0;
-		padding: 10px;
-		left:300px;
-		width:200px;
-	}
-
 	ul.child {
 		position:relative;
 		margin: 0;
@@ -60,115 +51,19 @@
 </script>
 <script type="text/javascript">
 $(document).ready(function(){
-/*
-	$( "ul.droptrue" ).sortable({
-		connectWith: "ul"
-	});
-
-	$( "ul.dropfalse" ).sortable({
-		connectWith: "ul",
-		dropOnEmpty: false
-	});
-
-	$( "#parent, #child" ).disableSelection();
-
-	$( ".section").on("click", function(event){
-		$(event.target).toggle("slide");
-		$(event.target).children().toggle("blind");
-	})
-*/
-	//~ $( ".section").find('ul').hide();
-	//~ $( ".section").on("click", function(event){
-		//~ //$( ".section").find('ul').hide();
-		//~ var replica = $(event.target).clone();
-		//~ replica.insertAfter($(event.target));
-		//~ replica.css('left', '440px');
-		//~ $(event.target).parent('li').children('ul').toggle("blind");
-	//~ });
-
-	//~ var childview = $('#parentview').clone();
-	//~ childview.attr('id','childview');
-	//~ //childview.css('left',$('#parentview').css('width'));
-	//~ childview.css('left','50%');
-	//~ $('body').append(childview);
-	//~ $('#parentview #root').css('left',$('#parentview').css('width'));
-
-
-	//~ $( ".section").find('ul').hide();
-
-	//~ var viewing = false;
-	//~ $( "#childview .section").on('click', function(event){
-		//~ viewing = $(event.target).parent('li').attr('id');
-		//~ $('#parentview #' + viewing).children('ul').toggle();
-		//~ $('#childview #' + viewing).children('ul').toggle();
-		//~ $('#childview #root').css('left', Number($('#childview #root').css('left').replace('px',''))-Number($('#childview').css('width').replace('px',''))+'px' );
-		//~ $('#parentview #root').css('left', Number($('#parentview #root').css('left').replace('px',''))-Number($('#parentview').css('width').replace('px',''))+'px' );
-	//~ });
-
-	//~ $( "#parentview .section").on('click', function(event){
-		//~ if ($(event.target).parent('li').attr('id') == viewing) {
-			//~ $('#parentview #' + viewing).children('ul').toggle();
-			//~ $('#childview #' + viewing).children('ul').toggle();
-			//~ $('#childview #root').css('left', Number($('#childview #root').css('left').replace('px',''))+Number($('#childview').css('width').replace('px',''))+'px' );
-			//~ $('#parentview #root').css('left', Number($('#parentview #root').css('left').replace('px',''))+Number($('#parentview').css('width').replace('px',''))+'px' );
-		//~ }
-	//~ });
-
-	$( "ul" ).sortable({
-		connectWith: "ul",
-		scroll: false,
-		helper: 'clone',
-		appendTo: 'body',
-		placeholder: 'ui-state-highlight'
-	});
-
-	$( "ul#root" ).sortable({
-		beforeStop: function(event, ui){
-			$(ui.helper).children('img').on('click', function(event){
-				var viewing = $(event.target).parent('li');
-				if(viewing.hasClass('parent')){
-					viewing.removeClass('parent');
-					viewing.children('ul').hide();
-					viewing.parent('ul').parent('li').show();
-					viewing.siblings().show();
-				} else {
-					viewing.addClass('parent');
-					viewing.siblings().hide();
-					viewing.children('ul').show();
-				}
-			});
-		}
-	});
-
-	$("#drops").bind('sortreceive', function(e, ui){
-			$(ui.item).children('img').off('click');
-	});
-	$("#drops").bind('sortremove', function(e, ui){
-		$(ui.item).children('img').on('click', function(event){
-			var viewing = $(event.target).parent('li');
-			if(viewing.hasClass('parent')){
-				viewing.removeClass('parent');
-				viewing.children('ul').hide();
-				viewing.parent('ul').parent('li').show();
-				viewing.siblings().show();
-			} else {
-				viewing.addClass('parent');
-				viewing.siblings().hide();
-				viewing.children('ul').show();
-			}
-		})
-	});
 
 	$(".section").find('ul').hide();
 	$('ul.child').css('margin-left', '90px');
 	$(".section").children('img').on('click', function(event){
 		var viewing = $(event.target).parent('li');
 		if(viewing.hasClass('parent')){
+			$(viewing.parents('li.parent')[0]).css('margin-top', '');
 			viewing.removeClass('parent');
 			viewing.children('ul').hide();
 			viewing.parent('ul').parent('li').show();
 			viewing.siblings().show();
 		} else {
+			$(viewing.parents('li.parent')[0]).css('margin-top', '-150px');
 			viewing.addClass('parent');
 			viewing.siblings().hide();
 			viewing.children('ul').show();
@@ -241,8 +136,6 @@ $(document).ready(function(){
 			</li>
 		</ul>
 	</div>
-	<ul id='drops' >
-	</ul>
 
 </body>
 
