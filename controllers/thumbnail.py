@@ -24,8 +24,6 @@ def png(page_id):
 	for box in db(db.container_box.page_id==page_id).select() :
 		draw.rectangle((int(scale*box.position_x),int(scale*box.position_y),int(scale*(box.position_x + box.width)-1),int(scale*(box.position_y + box.height)-1)), outline=(0,0,0))
 
-	#~ draw.rectangle((0,0,im.size[0]-1,im.size[1]-1), outline=(0,0,0))
-
 	im.save(thmbnail)
 
 	redirect(URL(pagepath, file))
