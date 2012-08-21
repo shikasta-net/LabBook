@@ -1,0 +1,99 @@
+{{for id in colours.keys():}}
+#{{=id}} {
+	color: rgb{{=colours[id]}};
+}
+	
+#{{=id}} .ssec_info div.expand {
+	background-color: rgb{{=colours[id]}};
+}
+{{pass}}
+
+body {
+	font-family: 'Droid Sans', sans-serif;
+	font-weight: 400;
+}
+
+header {
+	display: block;
+	height: 7em;
+	padding-left: 1em;
+}
+
+.sec {
+	height: 15em;
+	margin-bottom: 2em;
+}
+
+.sec_info {
+	float: left;
+	width: 15em;
+	height: 100%;
+	padding-left: 2em;
+	border-right-style: solid;
+	border-right-width: 0.5em;
+	margin-bottom: 1em;
+}
+
+.sec_info div.title {
+	font-size: x-large;
+	font-weight: 700;
+	margin-bottom: 1em;
+}
+
+.ssec {
+	float: left;	
+	padding-left: 2em;
+	width: 15em;
+	height: 100%;
+}
+
+.ssec_info {
+	border-bottom-style: solid;
+	border-bottom-width: 0.25em;
+	margin-bottom: 1em;
+}
+
+
+.ssec_info div.expand {
+		font-size: xx-large;
+		float: right;
+		font-weight: 700;
+		color: white;
+		padding-left: 0.1em;
+		padding-right: 0.1em;
+	}
+
+.ssec_info div.details {
+		font-size: small;
+		margin-bottom: 1em;
+	}
+
+.ssec_info div.title {
+	font-size: medium;
+	font-weight: 700;
+}
+
+.page {
+	border: 1px solid lightgray;
+	width: 12em;
+	line-height: 9em;
+	text-align: center;
+	color: black;
+	float:left;
+	margin-left: 2em;
+}
+
+.page:first-child {
+	margin-left: 0;
+}
+
+.pages_scrollhide {
+	overflow: hidden;
+       	height: 15em;
+}
+
+.pages_scroller {
+	overflow-x: auto;
+	height: 16em;
+       	padding-bottom: 1em;
+}

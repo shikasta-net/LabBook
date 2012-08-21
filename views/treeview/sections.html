@@ -1,0 +1,98 @@
+<head>
+<style>
+
+	#treeview {
+		position:absolute;
+		top: 0px;
+		left: 0px;
+		height:100%;
+		width:240px;
+		overflow-y: scroll;}
+
+	.parent {
+		margin-left:-90px;
+	}
+
+	ul#root {
+		position:relative;
+		margin: 0;
+		padding: 0; }
+
+	ul.child {
+		position:relative;
+		margin: 0;
+		padding: 0;
+		margin-top: 11px;
+		margin-left: 220px; }
+
+	li {
+		list-style-type: none;
+		text-align:center;
+		vertical-align:center;
+		margin: 0;
+		padding: 0;
+		width:210px;
+		height:150px; }
+
+	li img{
+		width:90%;
+		height:90%; }
+
+</style>
+{{response.files.append("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")}}
+{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js")}}
+{{response.files.append("http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css")}}
+{{include 'web2py_ajax.html'}}
+<script type="text/javascript">
+	var serviceURL = "{{=URL('call/run')}}";
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$(".section").find('ul').hide();
+	$('ul.child').css('margin-left', '90px');
+	$(".section").children('img').on('click', function(event){
+		var viewing = $(event.target).parent('li');
+		if(viewing.hasClass('parent')){
+			$(viewing.parents('li.parent')[0]).css('margin-top', '');
+			viewing.removeClass('parent');
+			viewing.children('ul').hide();
+			viewing.parent('ul').parent('li').show();
+			viewing.siblings().show();
+		} else {
+			$(viewing.parents('li.parent')[0]).css('margin-top', '-150px');
+			viewing.addClass('parent');
+			viewing.siblings().hide();
+			viewing.children('ul').show();
+		}
+	});
+});
+</script>
+{{def getChildren(sec):}}
+	{{for entry in sec : }}
+		{{if entry['contains'] != None:}}
+			<li id='s'+str(entry['id']) class="section"><img src={{=entry['thumbnail']}}>
+				<ul id='sc'+str(entry['id']) class="child">
+					{{getChildren(entry['contains'])}}
+				</ul>
+			</li>
+		{{else:}}
+			<li id='p'+str(entry['id']) class="page"><img src={{=entry['thumbnail']}}>
+		{{pass}}
+	{{pass}}
+{{return}}
+
+</head>
+<body>
+	<div id="treeview">
+		<ul id="root" class="parent">
+			{{getChildren(layout)}}
+		</ul>
+	</div>
+
+	<div id="pageview">
+
+	</div>
+
+</body>
+

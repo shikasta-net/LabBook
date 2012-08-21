@@ -1,7 +1,7 @@
 var crossBoxCounter = 0;
 
 function crossBox(css) {
-    
+
     crossBoxCounter++;
     this.crossBoxID = crossBoxCounter;
     this.crossDiv = $('<div class="crossbox" id="crossbox' + crossBoxCounter + '"></div>');
@@ -14,7 +14,7 @@ function crossBox(css) {
         this.crossDiv.css(css);
     }
     this.elementOver = false;
-    this.crossDiv.on('dragleave', null, {crossBox: this}, 
+    this.crossDiv.on('dragleave', null, {crossBox: this},
         function(event) {
             thisCrossBox = event.data.crossBox;
             event = event.originalEvent;
@@ -22,22 +22,24 @@ function crossBox(css) {
                 if(!($(event.relatedTarget).hasClass('line'))) {
                     thisCrossBox.hide()
                     thisCrossBox.elementOver = false;
-                }                                            
-            } 
+                }
+            }
         });
-                                                    
-    this.crossDiv.on('drop', function(event) { 
-            this.hide();
+
+    this.crossDiv.on('drop', function(event) {
+				event.stopPropagation();
+				event.preventDefault();
+            thisCrossBox.hide(); //use thisCrossBox. instead of this.
             content.handleDrop(event);
             this.elementOver = false;
     });
-    
+
     this.crossDiv.on('dragover', function (event) {
         event.stopPropagation();
         event.preventDefault();
         event.originalEvent.dataTransfer.dropEffect = 'copy';
     });
-    
+
     this.resizeAndPosition = function(newElementID) {
 
         var crossElement = $('#'+newElementID);
@@ -54,31 +56,31 @@ function crossBox(css) {
 
         this.line1.css({
             'transform': 'rotate('+angle+'deg)',
-            '-moz-transform': 'rotate('+angle+'deg)', 
+            '-moz-transform': 'rotate('+angle+'deg)',
             '-webkit-transform': 'rotate('+angle+'deg)'})
             .width(hypotenuse);
-        
+
         this.line2.css({
-            'transform': 'rotate(-'+angle+'deg)', 
-            '-moz-transform': 'rotate(-'+angle+'deg)', 
-            '-webkit-transform': 'rotate(-'+angle+'deg)', 
+            'transform': 'rotate(-'+angle+'deg)',
+            '-moz-transform': 'rotate(-'+angle+'deg)',
+            '-webkit-transform': 'rotate(-'+angle+'deg)',
             'top': h+borderHeightAdjust})
             .width(hypotenuse);
 
         elementOffset = crossElement.offset();
-        
+
         this.crossDiv.css({
             'top': crossElement.css('top'),
             'left': crossElement.css('left')
         });
     }
-    
+
     this.show = function() {
         this.crossDiv.fadeIn(100);
     }
-    
+
     this.hide = function() {
         this.crossDiv.fadeOut(100);
     }
-    
+
 }

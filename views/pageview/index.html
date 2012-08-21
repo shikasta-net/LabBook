@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+		<link href='{{=URL("css.css")}}' rel='stylesheet' type='text/css'>
+	</head>
+	<body>
+                <header>
+                	<h1>LabBook - Alastair Mailer</h1>
+		</header>
+		{{for section in labbook['sections']:}}
+		<div class="sec" style="width: {{=15 + 2 + 0.5 + len(section['subsections'])*(15 + 2)}}em">
+			<div class="sec_info">
+				<div class="title">{{=section['title']}}</div>
+				<div class="details">{{=len(section['subsections'])}} subsection(s)</div>
+			</div>
+			{{for subsection in section['subsections']:}}
+			<div class="ssec" id="{{=subsection['id']}}">
+				<div class="ssec_info">
+					<div class="expand">+</div>
+					<div class="title">{{=subsection['title']}}</div>
+					<div class="details">{{=len(subsection['pages'])}} page(s)</div>
+				</div>
+				<div class="pages_scrollhide">
+					<div class="pages_scroller">
+						<div style="width: {{=1+14*len(subsection['pages'])}}em;">
+							{{for i, page in enumerate(subsection['pages']):}}
+							<div class="page">Page {{=i+1}}</div>
+							{{pass}}
+						</div>
+					</div>
+				</div>
+			</div>
+			{{pass}}
+		</div>
+		{{pass}}
+	</body>
+</html>

@@ -1,5 +1,9 @@
 db = DAL('sqlite://storage.sqlite')
+from gluon.custom_import import track_changes; track_changes(True)
 from gluon.tools import *
+from gluon import current
+current.db = db
+
 service = Service()
 crud = Crud(db)
 
@@ -16,7 +20,7 @@ db.define_table('page',
 				Field('number', 'integer', requires=IS_NOT_EMPTY()),
 				Field('created_on', 'datetime', default=request.now),
 				Field('modified_on', 'datetime', default=request.now),
-				Field('section', db.section, requires=IS_IN_DB(db, 'section.id', 'section.title')))
+				Field('section', db.section, requires=IS_NULL_OR(IS_IN_DB(db, 'section.id', 'section.title'))))
 
 db.define_table('content',
 				Field('file_type', 'string'),
