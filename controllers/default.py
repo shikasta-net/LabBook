@@ -8,9 +8,9 @@ def index():
 def page():
 
 	if get_preference('useLocalMathJax') :
-		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')
+		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
 	else :
-		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js'
+		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 	this_page = db.page(request.args(0)) or redirect(URL('index'))
 	db.container_box.page_id.default = this_page.id
 	boxes = db(db.container_box.page_id==this_page.id).select()
