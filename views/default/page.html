@@ -150,11 +150,11 @@
 			{{=DIV(_id="side_bar_l", _class="side_bar")}}
 			<div id="content_area" class="content_area">
 				{{for tbox in boxes:}}
-				{{if contents[tbox.id] is not "" :}}
-				{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
-				{{else:}}
-				{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
-				{{pass}}
+					{{if contents[tbox.id] :}}
+						{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+					{{else:}}
+						{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
+					{{pass}}
 				{{pass}}
 			</div>
 		</div>
