@@ -241,6 +241,7 @@ function saveEditor() {
 	boxContent.find('script').removeAttr('id');
 	bb.append(boxContent.html());
 	var blob = bb.getBlob('text/html');
-	content.handleSaveContent(pageID, edCurrentTarget.attr("id").replace('c',''), blob, { name:'textbox'+edCurrentTarget.attr("id").replace('c','')+'.html', type:'text/html', size: blob.size });
+	blob.name = 'textbox'+edCurrentTarget.attr("id").replace('c','')+'.html';
+	content.handleSaveContent(pageID, edCurrentTarget.attr("id").replace('c',''), blob);
 	//~ textEd.setProgressState(0);
 }
