@@ -4,33 +4,34 @@ content.dropCrossBox = new crossBox();
 
 content.serviceURL = '/LabBook/content/call/run';
 
-content.handleDragEnter = function(event) {
+content.handleDragEnter = function(event, page_id) {
 	event.stopPropagation();
 	event.preventDefault();
-	content.dropCrossBox.elementOver = $(this);
-	content.dropCrossBox.resizeAndPosition(this.id);
+	content.dropCrossBox.elementOver = event.target;
+	content.dropCrossBox.pageOver = page_id;
+	content.dropCrossBox.resizeAndPosition(event.target.id);
 	content.dropCrossBox.show()
 }
 
 content.handleDrop = function(event) {
-	console.log('boom');
-	event.originalEvent.stopPropagation();
-	event.originalEvent.preventDefault();
+	event.stopPropagation();
+	event.preventDefault();
+	var page_id = content.dropCrossBox.pageOver;
 	var box_id = content.dropCrossBox.elementOver.id.substr(1);
 	var contentFile = event.dataTransfer.files[0];
-	content.handleSaveContent(pageID ,box_id, contentFile, contentFile);
+	content.handleSaveContent(page_id, box_id, contentFile);
 	$(content.dropCrossBox.crossDiv).removeClass('empty');
 	$(content.dropCrossBox.elementOver).off('dblclick.empty');
 }
 
-content.handleSaveContent = function(page_id, box_id, file_content, metadata) {
+content.handleSaveContent = function(page_id, box_id, file_content) {
 	var fd = new FormData();
 	fd.append("page_id", page_id);
 	fd.append("box_id", box_id);
 	fd.append("contentFile", file_content);
-	fd.append("contentFileName", metadata.name);
-	fd.append("contentFileType", metadata.type);
-	fd.append("contentFileSize", metadata.size);
+	fd.append("contentFileName", file_content.name);
+	fd.append("contentFileType", file_content.type);
+	fd.append("contentFileSize", file_content.size);
 	$.ajax({
 		url: content.serviceURL + "/upload_content",
 		data: fd,
