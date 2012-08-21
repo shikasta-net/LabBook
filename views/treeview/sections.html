@@ -6,10 +6,16 @@
 		top: 0px;
 		left: 0px;
 		height:100%;
-		width:240px;
+		width:230px;
 		overflow-y: scroll;}
 
-	.parent {
+	#pageview {
+		position:absolute;
+		left: 240px;
+		height: 70%;
+		width:70%}
+
+	ul.parent, li.parent {
 		margin-left:-90px;
 	}
 
@@ -71,28 +77,29 @@ $(document).ready(function(){
 {{def getChildren(sec):}}
 	{{for entry in sec : }}
 		{{if entry['contains'] != None:}}
-			<li id='s'+str(entry['id']) class="section"><img src={{=entry['thumbnail']}}>
-				<ul id='sc'+str(entry['id']) class="child">
+			<li id={{='s'+str(entry['id'])}} class="section"><img src={{=entry['thumbnail']}}>
+				<ul id={{='sc'+str(entry['id'])}} class="child">
 					{{getChildren(entry['contains'])}}
 				</ul>
 			</li>
 		{{else:}}
-			<li id='p'+str(entry['id']) class="page"><img src={{=entry['thumbnail']}}>
+			<li id={{='p'+str(entry['id'])}} class="page"><a href="{{=URL(c='default',f='page',args=[str(entry['id'])])}}" target="pageview"><img class="page" id={{=str(entry['id'])}} src={{=entry['thumbnail']}}></a>
 		{{pass}}
 	{{pass}}
 {{return}}
 
 </head>
 <body>
+
 	<div id="treeview">
 		<ul id="root" class="parent">
 			{{getChildren(layout)}}
 		</ul>
 	</div>
 
-	<div id="pageview">
+	<iframe id="pageview" name="pageview">
 
-	</div>
+	</iframe>
 
 </body>
 
