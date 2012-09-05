@@ -1,0 +1,190 @@
+body.page {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+div.page {
+    position: relative;
+    width: 70em;
+    height: 50em;
+}
+
+#textEditorContainer {
+    position: fixed;
+    top: 0px;
+    height: 12em;
+    width: 20em;
+    z-index: 20;
+}
+
+div.content_area {
+    position: relative;
+    margin: 3em;
+    width: 64em;
+    height: 44em;
+    z-index: 0;
+}
+
+div.title_bar{
+    position: absolute;
+    margin-top: 1em;
+    height: 2em;
+    margin-left: 3em;
+    width: 64em;
+    text-align: center;
+    z-index:1;
+}
+span.title_bar{
+    font-family: Times, serif;
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+#option_bar{
+    position : absolute;
+//    float : right;
+	top : 0px;
+//    left : 30px;
+    right: -25px;
+    width : 20px;
+    z-index : 10;
+}
+div.side_bar{
+    position:absolute;
+    margin-top:3em;
+    height: 44em;
+    width: 3em;
+    z-index:1;
+}
+
+.side_button{
+    width:inherit;
+    padding:0;
+    height: 18px;
+}
+button.selected {
+    background: orange;
+}
+
+div.line {
+    -webkit-transform-origin: 0 50%;
+    -moz-transform-origin: 0 50%;
+    transform-origin: 0 50%;
+    height: 1px;
+    background: gray;
+    position: absolute;
+}
+#line1 {
+    transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    display: inherit;
+}
+#line2 {
+    transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    display: inherit;
+}
+
+.crossbox {
+    display: none;
+    background: #fff;
+    border: 3px solid gray;
+    opacity: 0.4;
+    z-index:10;
+    position: absolute;
+}
+
+.eqn {
+    color: gray;
+}
+
+.inline {
+	border-bottom: solid;
+	color: inherit;
+}
+
+.display {
+	border-bottom: double;
+	color: inherit;
+}
+
+.inline:before {
+//	content: "$\0020";
+	color: inherit;
+}
+
+.inline:after {
+//	content: "\0020$";
+	color: inherit;
+}
+
+.display:before {
+//	content: "$$\0020";
+	color: inherit;
+}
+
+.display:after {
+//	content: "\0020$$";
+	color: inherit;
+}
+
+div.empty {
+    border: 3px dashed gray;
+    z-index:2;
+}
+div.cbox {
+    opacity: 1;
+    position: absolute;
+    z-index:1;
+    border: 1px dotted lightgray;
+    background-color: lightgray;
+
+}
+
+div.cbox .ui-selected {
+    background-color: red;
+}
+
+
+div.imgbox {
+}
+div.clipbox {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+}
+div.textbox {
+    width: 100%;
+    height: 100%;
+}
+div.textbox p {
+    margin: 0;
+    padding: 0;
+}
+
+.ui-state-disabled {
+    opacity: inherit;
+
+}
+
+@media screen{
+    div.page {
+        margin: 5px;
+        border: 1px solid darkgray;
+        background: #F5F5F5;
+        box-shadow: 3px 3px 3px #888888;
+    }
+    div.content_area {
+        border: 1px dotted lightgray;
+    }
+    div.cbox {
+        background: #FAFAFA;
+    }
+}
+
+@media print{
+}

@@ -16,10 +16,10 @@ content.handleDrop = function(event) {
 	console.log('boom');
 	event.originalEvent.stopPropagation();
 	event.originalEvent.preventDefault();
-	var box_id = content.dropCrossBox.elementOver.id.substr(1);
+	var box_id = content.dropCrossBox.elementOver.id;
 	var contentFile = event.dataTransfer.files[0];
 	content.handleSaveContent(box_id, contentFile, contentFile);
-	$(content.dropCrossBox.crossDiv).removeClass('empty');
+	$(content.dropCrossBox.elementOver).removeClass('empty');
 	$(content.dropCrossBox.elementOver).off('dblclick.empty');
 }
 
@@ -32,23 +32,23 @@ content.handleSaveContent = function(page_id, box_id, content, metadata) {
 	fd.append("contentFileType", metadata.type);
 	fd.append("contentFileSize", metadata.size);
 	$.ajax({
-		url: content.serviceURL + "/upload_content",
+		url: this.serviceURL + "/upload",
 		data: fd,
 		cache: false,
 		contentType: false,
 		processData: false,
 		type: 'POST',
-		dataType: "json",
 		success: function(data){
-			//console.log("Content upload : ");
-			//console.log(data);
-			/*
-			if (data.error == undefined) {
-				$('#c'+data['box_id']).html(data['content']); //This turns out to replace too much and kills the resize divs
-			} else {
-				alert("There was an error uploading content.");
-			}
-			*/
+		    var dom_box = $('#' + data);
+            $.ajax({
+                url: "/LabBook/render/box_content/" + data,
+                data: { box_id: data },
+                type: 'GET',
+                success: function(data) {
+                    dom_box.html(data);
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, dom_box.children(".textbox").get(0)]);
+                }
+            });
 		}
 	});
 
