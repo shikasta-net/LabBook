@@ -17,7 +17,7 @@ def page():
 	db.container_box.page_id.default = this_page.id
 	boxes = db(db.container_box.page_id==this_page.id).select()
 	contents = {}
-	server=xmlrpclib.ServerProxy('http://127.0.0.1:8001/LabBook/content/call/xmlrpc')
+	server=xmlrpclib.ServerProxy(URL(scheme='http', c='content', f='call/xmlrpc'))
 	for box in boxes :
 		contents[box.id] = XML(server.get_content_xml(box.id))
 	return dict(page=this_page, boxes=boxes, contents=contents, mathjax_URL=mathjax_URL)

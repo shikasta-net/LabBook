@@ -7,10 +7,10 @@
 		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" />
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>
 		<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
-		
+
 		<!-- Load MathJax -->
 		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
-		
+
 		<!-- Load text editor (dojo) -->
 		<!-- <script type="text/javascript" src="{{=URL('static/js/tiny_mce','tiny_mce.js')}}"></script> -->
 		<!-- <script type="text/javascript" src="{{=URL('static/js','tinyMCEtools.js')}}"></script> -->
@@ -19,7 +19,7 @@
 			/* bring in the claro theme */
 			@import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
 		</style>
-		
+
 		<!-- Load our scripts! -->
 		<script type="text/javascript">
 			var pageID = "{{=page.id}}";
@@ -38,8 +38,8 @@
 
 			function handleUpdateTitle(value, settings) {
 				jQuery.post('{{=URL("call/run/update_title")}}',
-						{ page_id:{{=page.id}}, title_content:value }, 
-						function(data){	value = data.title_content; console.log("title update : "); console.log(data); }, 
+						{ page_id:{{=page.id}}, title_content:value },
+						function(data){	value = data.title_content; console.log("title update : "); console.log(data); },
 						"json");
 				return(value);
 			}
@@ -110,8 +110,9 @@
 				});
 
 				$(".cbox").each(function(index) {
-					$(this).on('dragenter', content.handleDragEnter);
-					$(this).on('drop', content.handleDrop);
+						// WARNING - in future, when we have multiple pages on screen, setting this static here will no longer work.
+						$(this).on('dragenter', function(event) { content.handleDragEnter(event, {{=page.id}}); });
+						//$(this).on('drop', function(event) { content.handleDrop(event); });
 					containers.defineContainerMobile($(this));
 					containers.enableOptionBar($(this));
 				});
@@ -134,11 +135,11 @@
 			{{=DIV(_id="side_bar_l", _class="side_bar")}}
 			<div id="content_area" class="content_area">
 				{{for tbox in boxes:}}
-				{{if contents[tbox.id] is not "" :}}
-				{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
-				{{else:}}
-				{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
-				{{pass}}
+					{{if contents[tbox.id] :}}
+						{{=DIV(contents[tbox.id], _id="c%(id)s"%dict(id=tbox.id), _class="cbox")}}
+					{{else:}}
+						{{=DIV('', _id="c%(id)s"%dict(id=tbox.id), _class="cbox empty")}}
+					{{pass}}
 				{{pass}}
 			</div>
 		</div>
