@@ -32,12 +32,6 @@ def box_content():
     extra_box_info[box.id] = box_content_info(box)
     return dict(box=box, extra_box_info=extra_box_info)
         
-#Function to return the value of the given preference correctly formatted
-def get_preference(pref):
-	row = db(db.preferences.preference == pref).select().first()
-
-	return {'boolean': {'True': True, 'False': False}[row.value] }[row.type]
-
 def dynamic_css():
 	response.headers['Content-Type']='text/css'
 	page_id = request.vars['page']
@@ -52,16 +46,3 @@ def doc_ready():
 	page = db(db.pages.id == page_id).select().first()
 	return dict(page=page)
 	
-def get_content_reldir(page_id, box_id):
-	return os.path.join("static/content", str(page_id), str(box_id))
-
-def get_content_dir(page_id, box_id):
-	return os.path.join(request.folder, get_content_reldir(page_id, box_id))
-
-def get_file_contents(page_id, box_id, content_id):
-	content_dir = os.path.join(os.getcwd(), get_content_dir(page_id, box_id))
-	f = open(os.path.join(content_dir, content_id), 'r')
-	return XML(f.read())
-
-def get_file_url(page_id, box_id, content_id):
-	return URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, content_id))
