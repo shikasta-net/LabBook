@@ -1,0 +1,43 @@
+<html>
+<head>
+	<!-- Load static page css -->
+	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
+	<!-- Load dynamic box css -->
+	<link rel="stylesheet" type="text/css" href="{{=URL('render', 'dynamic_css.css?page='+str(page.id))}}" />
+    <style>
+    body { font-size: 12.75pt; }
+    </style>
+		<!-- Load MathJax -->
+		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
+		<script type="text/javascript">
+		printPage = function() {
+    		//jsPrintSetup.clearSilentPrint()
+            jsPrintSetup.setOption('printSilent', 0);
+            jsPrintSetup.setOption('marginTop', 0);
+            jsPrintSetup.setOption('marginLeft', 0);
+            jsPrintSetup.setOption('marginBottom', 0);
+            jsPrintSetup.setOption('marginRight', 0);
+            jsPrintSetup.setOption('headerStrCenter', '');
+            jsPrintSetup.setOption('headerStrLeft', '');
+            jsPrintSetup.setOption('headerStrRight', '');
+            jsPrintSetup.setOption('footerStrCenter', '');
+            jsPrintSetup.setOption('footerStrLeft', '');
+            jsPrintSetup.setOption('footerStrRight', '');
+            jsPrintSetup.setOption('shrinkToFit', 0);
+            jsPrintSetup.setOption('printBGColors', 1);
+            jsPrintSetup.setPaperSizeData(9);
+            jsPrintSetup.saveOptions('kSaveAll');
+            jsPrintSetup.print();
+		}
+        </script>
+</head>
+<body>
+	<div id="content_area" class="content_area">
+		{{for box in boxes_on_pages:}}
+			<div class="cbox" id="box{{=box['id']}}" type="{{=box['content_type']}}">
+				{{ include 'render/box_content.html' }}
+			</div>
+		{{pass}}
+	</div>
+</body>
+</html>

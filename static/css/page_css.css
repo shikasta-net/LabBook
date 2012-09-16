@@ -187,4 +187,16 @@ div.textbox p {
 }
 
 @media print{
+	@page { size: A4 landscape; }
+	.title_bar, .side_bar, .ui-resizable-handle, button#mknewbox { visibility: hidden; }
+	* { border: 0; }
+	div.page {
+	   margin: 0;
+	   border: 0;
+	   height: 44em;
+	   width: 64em;
+	}
+	#content_area {
+	   margin: 0;
+	}
 }

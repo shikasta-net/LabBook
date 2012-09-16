@@ -1,0 +1,9 @@
+{{ for box in boxes_on_pages: }}
+#box{{=box.id}} { 
+	top:  {{=box.position_y}}em;
+	left: {{=box.position_x}}em; 
+	height: {{=box.height}}em; 
+	width: {{=box.width}}em; 
+}
+
+{{pass}}
