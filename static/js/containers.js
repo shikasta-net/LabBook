@@ -13,18 +13,18 @@ containers.handleResizeContainer = function(event, ui) {
 containers.handleCreateContainer = function(new_cont) {
 	var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
 	jQuery.post(containers.serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/pxPerem, y:dims['y']/pxPerem, w:dims['w']/pxPerem, h:dims['h']/pxPerem }, function(data){
-		$("#content_area").append( "<div class='cbox empty' id='c"+data.new_id+"'></div>" );
-		$("div#c" + data.new_id).css({
+		$("#content_area").append( "<div class='cbox empty' id='box"+data.new_id+"'></div>" );
+		$("div#box" + data.new_id).css({
 			'top':dims['y']+'px',
 			'left':dims['x']+'px',
 			'width':dims['w']+'px',
 			'height':dims['h']+'px'
 		});
-		$("div#c" + data.new_id).on('dragenter', content.handleDragEnter);
-		$("div#c" + data.new_id).on('drop', content.handleDrop);
-		containers.defineContainerMobile($("div#c" + data.new_id));
-		containers.defineIsBlank($("div#c" + data.new_id));
-		containers.enableOptionBar($("div#c" + data.new_id));
+		$("div#box" + data.new_id).on('dragenter', content.handleDragEnter);
+		$("div#box" + data.new_id).on('drop', content.handleDrop);
+		containers.defineContainerMobile($("div#box" + data.new_id));
+		containers.defineIsBlank($("div#box" + data.new_id));
+		containers.enableOptionBar($("div#box" + data.new_id));
 		console.log("create container : ");console.log(data);
 	}, "json");
 }
@@ -53,14 +53,14 @@ containers.setContainersMobile = function(target) {
 
 
 containers.enableOptionBar = function(target) {
-	target.bind('click', function(event) {
-		event.stopImmediatePropagation();
+	target.on('click', function(event) {
+		event.stopPropagation();
 		optionBarShow($(this));
 	});
 }
 
 containers.dissableOptionBar = function(target) {
-	target.unbind('click');
+	target.off('click');
 }
 
 
@@ -124,8 +124,30 @@ containers.toggleMoveResize = function(toggleElement) {
 }
 
 containers.deleteBox =  function(target) {
-	jQuery.post(containers.serviceURL+'/del_box', { box_id:target.attr("id").replace('c','') }, function(data){ console.log("remove container : ");console.log(data); }, "json");
+	jQuery.post(containers.serviceURL+'/del_box', { box_id:target.attr("id") }, function(data){ console.log("remove container : ");console.log(data); }, "json");
 	target.detach();
 	containers.setContainersMobile();
 	$(".selected").removeClass("selected");
+}
+
+containers.clearContent = function (target) {
+    $.ajax({
+        url: '/LabBook/content/call/run/delete',
+        data: { box_id: activeContainer.attr("id") },
+        type: 'GET',
+        error: function(data) { console.log('Error on AJAX delete content request'); },
+        success: function(data) {
+            if (activeContainer.children(".clipbox").length != 0) {
+                childBox = activeContainer.children(".clipbox").first();
+                $.ajax({
+                    url: '/LabBook/content/call/run/delete',
+                    data: { box_id: activeContainer.attr("id") },
+                    type: 'GET',
+                    error: function(data) { console.log('Error on AJAX delete content request'); }            
+                });
+            }
+        }
+    });
+    activeContainer.children("*").not('ui-resizable-handle').detach()
+    activeContainer.attr("type", "");
 }

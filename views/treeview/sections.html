@@ -83,7 +83,7 @@ $(document).ready(function(){
 				</ul>
 			</li>
 		{{else:}}
-			<li id={{='p'+str(entry['id'])}} class="page"><a href="{{=URL(c='default',f='page',args=[str(entry['id'])])}}" target="pageview"><img class="page" id={{=str(entry['id'])}} src={{=entry['thumbnail']}}></a>
+			<li id={{='p'+str(entry['id'])}} class="page"><a href="{{=URL(c='render',f='page',args=[str(entry['id'])])}}" target="pageview"><img class="page" id={{=str(entry['id'])}} src={{=entry['thumbnail']}}></a>
 		{{pass}}
 	{{pass}}
 {{return}}

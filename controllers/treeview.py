@@ -32,7 +32,7 @@ def sectionContent(sec):
 
 	contents = []
 
-	for item in db(db.page.section == sec).select():
+	for item in db(db.pages.section == sec).select():
 		entry = dict()
 		entry['id'] = item.id
 		entry['title'] = item.title
@@ -41,7 +41,7 @@ def sectionContent(sec):
 		entry['thumbnail'] = thumbnail.pngPath(item.id)
 		contents.append(entry)
 
-	for item in db(db.section.parent == sec).select() :
+	for item in db(db.sections.parent == sec).select() :
 		entry = dict()
 		entry['id'] = item.id
 		entry['title'] = item.title

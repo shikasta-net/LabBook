@@ -37,7 +37,7 @@ function initialiseEditor() {
 				setupDefaultShortcuts: function(){}
 			}, "textEditor");
 
-			textEd.addStyleSheet("../../css/page_layout.css");
+			textEd.addStyleSheet("/LabBook/static/css/page_css.css");
 
 			textEd.connect(textEd, "onKeyPress", function(e){
 				// If we're currently editing an equation...
@@ -169,8 +169,10 @@ function initialiseEditor() {
 // Content box to editor conversion
 // Copies content box, rips out any display mathjax (leaving script elements behind), converts script elements to spans.
 function loadBoxToEditor(target) {
-
-	var tbox_contents = target.children(".textbox").clone();
+    if (target.children('.textbox').length != 1) {
+        throw "loadBoxToEditor called on container which doesn't have only one textbox";
+    }
+	var tbox_contents = $(target.children('.textbox')[0]).clone();
 	tbox_contents.find('.MathJax_Display').remove();
 	tbox_contents.find('.MathJax').remove();
 	tbox_contents.find('script').replaceWith(function() {
@@ -195,7 +197,7 @@ function loadBoxToEditor(target) {
 // Reverse loadBoxToEditor: replace spans with scripts (decoding html entities) and re-typeset.
 function loadEditorToBox(target) {
 
-	editorContents = $('<div />').html($(textEd.get("value")).clone());
+	editorContents = $('<div />').html(textEd.get("value"));
 	editorContents.find('span.eqn').replaceWith(function() {
 		var display = $(this).hasClass('display') ? 'display' : 'inline';
 		var newScript = $('<script type="math/tex; mode=' + display + '"></script>');
@@ -203,12 +205,14 @@ function loadEditorToBox(target) {
 		newScript.text($(this).text());
 		return newScript;
 	});
-	target.children(".textbox").html(editorContents.html());
+	$(target).children('.textbox.').html(editorContents.html());
 	MathJax.Hub.Queue(["Typeset", MathJax.Hub, target.children(".textbox").get(0)]);
 }
 
 function showEditor(target) {
 	edCurrentTarget = target;
+	edCurrentTarget.append('<div style="background-color: black; color: white; font-family: sans-serif; width: 6em; height: 1em;" id="preview">Preview</div>');
+	$('#preview').position({ my: 'bottom right', at: 'bottom right', of: edCurrentTarget });
 	textEd.set("value","<p></p>");
 	$('#textEditorContainer').slideDown('1000');
 	//~ textEd.setProgressState(1);
@@ -231,6 +235,7 @@ function showEditor(target) {
 function hideEditor() {
 	edCurrentTarget = false;
 	$('#textEditorContainer').slideUp('1000');
+	$('#preview').detach();
 }
 
 function saveEditor() {
@@ -240,25 +245,34 @@ function saveEditor() {
 	}
 	loadEditorToBox(edCurrentTarget);
 	//~ textEd.setProgressState(1);
-	if (window.BlobBuilder) {
-		var bb = new BlobBuilder();
-	} else if (window.MozBlobBuilder) {
-		var bb = new MozBlobBuilder();
-	} else if (window.MSBlobBuilder) {
-		var bb = new MSBlobBuilder();
-	} else if (window.WebKitBlobBuilder) {
-		var bb = new WebKitBlobBuilder();
-	} else {
-		throw "No BlobBuilder implementation";
-	}
 	// Saving - like boxToEditor, but keep script tags (remove ids so they are auto-generated each time page is loaded)
 	var boxContent = $(edCurrentTarget).children(".textbox").clone();
 	boxContent.find('.MathJax_Display').remove();
 	boxContent.find('.MathJax').remove();
 	boxContent.find('script').removeAttr('id');
-	bb.append(boxContent.html());
-	var blob = bb.getBlob('text/html');
-	blob.name = 'textbox'+edCurrentTarget.attr("id").replace('c','')+'.html';
-	content.handleSaveContent(pageID, edCurrentTarget.attr("id").replace('c',''), blob);
+	
+	if (window.Blob) {
+	   	var blob = new Blob([boxContent.html()], {type: 'text/html'});
+	} else if (window.BlobBuilder) {
+		var bb = new BlobBuilder();
+	    bb.append(boxContent.html());
+	    var blob = bb.getBlob('text/html');
+	} else if (window.MozBlobBuilder) {
+		var bb = new MozBlobBuilder();
+		bb.append(boxContent.html());
+	    var blob = bb.getBlob('text/html');
+	} else if (window.MSBlobBuilder) {
+		var bb = new MSBlobBuilder();
+		bb.append(boxContent.html());
+	    var blob = bb.getBlob('text/html');
+	} else if (window.WebKitBlobBuilder) {
+		var bb = new WebKitBlobBuilder();
+		bb.append(boxContent.html());
+	    var blob = bb.getBlob('text/html');
+	} else {
+		throw "No Blob or BlobBuilder implementation";
+	}
+	metadata = {name: 'text_' + edCurrentTarget.attr('id') + '.html', type: blob.type, size: blob.size}
+	content.handleSaveContent(pageID, edCurrentTarget.attr("id"), blob, metadata);
 	//~ textEd.setProgressState(0);
 }
