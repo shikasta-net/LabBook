@@ -1,7 +1,7 @@
 MathJax.Hub.Config({ elements: ["content_area"] });
 
 function handleUpdateTitle(value, settings) {
-	jQuery.post('{{=URL("call/run/update_title")}}',
+	jQuery.post('{{=URL("default","call/run/update_title")}}',
 		{ page_id:{{=page.id}}, title_content:value },
 		function(data){	value = data.title_content; console.log("title update : "); console.log(data); },
 		"json");
@@ -29,7 +29,7 @@ $(document).ready(function(){
 		tooltip : "DoubleClick to edit...",
 		event : "dblclick"
 	});
-	
+
 	$("button#mknewbox").click(function(){
 		if (!$(this).hasClass("selected")) {
 			$(".selected").removeClass("selected");
