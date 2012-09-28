@@ -7,10 +7,62 @@ import os, shutil
 service = Service()
 crud = Crud(db)
 
+db.define_table('object_tree',
+				Field('next_object', 'reference object_tree', requires=IS_NULL_OR(IS_IN_DB(db, 'object_tree.id', 'object_tree.id')), ondelete='NO ACTION'),
+				Field('parent_object', 'reference object_tree', requires=IS_NULL_OR(IS_IN_DB(db, 'object_tree.id', 'object_tree.id')), ondelete='NO ACTION'),
+				Field('page_id', 'reference pages', requires=IS_NULL_OR(IS_IN_DB(db, 'pages.id', 'pages.id'))),
+				Field('created_on', 'datetime', default=request.now),
+				Field('modified_on', 'datetime', update=request.now))
+
+def get_branch(parent=None):
+	objects_in_branch = db(db.object_tree.parent_object == parent).select()
+	ordered_objects = [None] # None is to terminate while when reaching end of section
+	for object in objects_in_branch:
+		temp_list = [object]
+		if object.next_object is not None :
+			while temp_list[-1].next_object.ALL not in ordered_objects:
+				 temp_list.append(temp_list[-1].next_object.ALL)
+		ordered_objects = temp_list + ordered_objects
+	del ordered_objects[-1]
+	return reversed(ordered_objects)
+
+
+def insert_section(parent=None) :
+	db.object_tree.insert(parent_object=parent)
+
+def move_section(section_object_id, after) :
+	section = db(db.object_tree.id == section_object_id).select().first()
+	db(db.object_tree.next_object == section_object_id).update(next_object=section.next_object)
+
+	new_prev_object = db(db.object_tree.id == after).select().first()
+	section.update_record(next_object=new_prev_object.next_object.id)
+	new_prev_object.update_record(next_object=section_object_id)
+
+def move_page_to_section(page_id, section_id, after) :
+	page_leaf = db(db.object_tree.page_id == page_id).select().first()
+	db(db.object_tree.next_object == page_leaf.id).update(next_object=page_leaf.next_object)
+
+	new_prev_object = db(db.object_tree.id == after).select().first()
+	db(db.object_tree.page_id == page_id).update(parent_object=section_id, next_object=new_prev_object.next_object.id)
+	new_prev_object.update_record(next_object=page_id)
+
+
+def delete_section(section_id):
+	children = db(db.object_tree.parent_object == section_id).select()
+	for child in children :
+		if child.page_id is None :
+			delete_section(child.id)
+		else :
+			delete_page(child.page_id)
+	db(db.object_tree.next_object == section_id).update(next_object=db(db.object_tree.id == section_id).next_object)
+	db(db.object_tree.id == section_id).delete()
+
+
+
 db.define_table('pages',
 				Field('title', 'string'),
 				Field('created_on', 'datetime', default=request.now),
-				Field('modified_on', 'datetime', default=request.now))
+				Field('modified_on', 'datetime', update=request.now))
 
 # Raise exception on malformed page_id - can possibly be included with other page operations?
 def check_page_id(page_id):
@@ -21,8 +73,10 @@ def check_page_id(page_id):
 
 # Add a new entry to the box table
 def insert_new_page(section):
-	new_id = db.pages.insert(title='')
-	return new_id
+	new_page_id = db.pages.insert(title='')
+	new_leaf_id = db.object_tree.insert(page_id=new_id, parent_object=section)
+	db((db.object_tree.parent_object == section) & (db.object_tree.next_object == None)).update(next_object=new_leaf_id)
+	return new_page_id
 
 # Return the page row object
 def get_page(page_id):
@@ -37,11 +91,11 @@ def get_page_title(page_id):
 
 # Generic method to update aspects of a page
 def update_page(page_id, **field_dict):
-	field_dict['modified_on'] = request.now
 	db(db.pages.id==page_id).update(**field_dict)
 
 def delete_page(page_id) :
 	#~ page = db(db.pages.id == page_id).select().first()
+	#TODO: delete page propegates surrounding tree structure
 	db(db.pages.id == page_id).delete()
 
 
@@ -57,7 +111,7 @@ db.define_table('boxes',
 				Field('content_type', 'string', default=''),
 				Field('content_id', 'string', default=''),
 				Field('created_on', 'datetime', default=request.now),
-				Field('modified_on', 'datetime', default=request.now))
+				Field('modified_on', 'datetime', update=request.now))
 
 # HTML id is 'box' + db id number - ignore the 'box' bit
 def html_id_to_db_id(html_id):
@@ -79,7 +133,6 @@ def get_boxes_on_page(page_id):
 
 # Update a specific box entry
 def update_box(box_db_id, **field_dict):
-	field_dict['modified_on'] = request.now
 	db(db.boxes.id == box_db_id).update(**field_dict)
 
 # Add a new entry to the box table

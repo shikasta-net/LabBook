@@ -33,6 +33,14 @@ def index():
 #	thumbs = None
 #	return dict(thumbs=thumbs)
 
+def test():
+	ordered_objects = get_branch(None)
+	for object in ordered_objects :
+		if object.page_id is None :
+			print str(object.id)+ " section"
+		else :
+			print str(object.id)+ " " +str(object.page_id)+ " " +get_page(object.page_id).title
+
 
 def call():
 	session.forget()
