@@ -24,14 +24,14 @@ content.handleDrop = function(event) {
 	$(content.dropCrossBox.elementOver).off('dblclick.empty');
 }
 
-content.handleSaveContent = function(page_id, box_id, file_content) {
+content.handleSaveContent = function(page_id, box_id, file_content, metadata) {
 	var fd = new FormData();
 	fd.append("page_id", page_id);
 	fd.append("box_id", box_id);
 	fd.append("contentFile", file_content);
-	fd.append("contentFileName", file_content.name);
-	fd.append("contentFileType", file_content.type);
-	fd.append("contentFileSize", file_content.size);
+	fd.append("contentFileName", metadata.name);
+	fd.append("contentFileType", metadata.type);
+	fd.append("contentFileSize", metadata.size);
 	$.ajax({
 		url: this.serviceURL + "/upload",
 		data: fd,
