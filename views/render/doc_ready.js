@@ -8,11 +8,8 @@ function handleUpdateTitle(value, settings) {
 	return(value);
 }
 
-var pxPerem = false;
-
 $(document).ready(function(){
     optionBar = initialiseOptionBar($('body'));
-    pxPerem = $("div.page").width()/70.0;
 
 	var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""};
 
