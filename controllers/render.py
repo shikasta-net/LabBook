@@ -16,12 +16,14 @@ def page():
 		
 	return dict(page=page, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
 
+from xml.dom import minidom
 def box_content_info(box):
     extra_info = {}
     if box.content_type == 'box':
         extra_info = {'child_box': box.content_id}
     elif box.content_type == 'text/html':
-        extra_info = {'file_contents': get_file_contents(box.page_id, box.id, box.content_id)}
+        file_content = get_file_contents(box.page_id, box.id, box.content_id)
+        extra_info = {'file_contents': file_content}
     elif box.content_type in ['image/jpeg', 'image/svg+xml']:
         extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
     return extra_info
@@ -65,3 +67,42 @@ def get_file_contents(page_id, box_id, content_id):
 
 def get_file_url(page_id, box_id, content_id):
 	return URL('static', '%s/%s/%s/%s' % ('content', page_id, box_id, content_id))
+
+from subprocess import Popen
+from gluon.contenttype import contenttype
+@service.run
+def print_pdf():
+    # Read the MathJax specific CSS
+    mj_css = request.post_vars['mj_css']
+    # Read the MathJax specific HTML
+    maths = request.post_vars['maths[]']
+
+    # Write MathJax CSS file
+    f_css = open('temp.css', 'w')
+    f_css.write(mj_css)
+    f_css.close()
+
+    # Write JavaScript processing file
+    f = open('temp.js', 'w')
+    f.write('var maths = [];\n\n')
+    for m in maths:
+        f.write('maths.push(\'' + m + '\');\n\n');
+    f.write('var scripts = $(\'script[type^="math/tex"]\');\n')
+    f.write('scripts.each(function(index) {\n')
+    f.write('   $(maths[index]).insertBefore($(this));\n')
+    f.write('});')
+    f.close()
+
+    # Run PrinceXML
+    #bin/prince http://127.0.0.1:8000/LabBook/print/page?p=1 test.pdf --script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js --script=/Users/agm/web2py/temp.js -v --style=/Users/agm/web2py/temp.css --media=print
+    prince_path = os.path.join(request.folder, 'prince/bin/prince')
+    p = Popen([prince_path, URL('print', 'page?p=1', host=True), '-o temp_new.pdf', '--script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js', '--script=/Users/agm/web2py/temp.js', '-v', '--style=/Users/agm/web2py/temp.css', '--media=print'])
+    print "BOOM!"
+    p.communicate()
+    return response.json(dict(printurl=URL('render', 'printjob')))
+
+def printjob():
+    f = open('temp_new.pdf')
+    response.headers['Content-Type'] = contenttype('.pdf')
+    response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
+    return response.stream(f, chunk_size=64*1024)

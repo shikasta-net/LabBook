@@ -7,9 +7,10 @@
     <style>
     body { font-size: 12.75pt; }
     </style>
-		<!-- Load MathJax -->
-		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
-		<script type="text/javascript">
+   		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="/LabBook/static/js/MathJax/unpacked/MathJax.js"></script>
+		<!--<script type="text/javascript" src="/LabBook/static/js/MathJax/unpacked/jax/input/TeX/jax.js"></script>-->
+		<!--<script type="text/javascript">
 		printPage = function() {
     		//jsPrintSetup.clearSilentPrint()
             jsPrintSetup.setOption('printSilent', 0);
@@ -29,7 +30,13 @@
             jsPrintSetup.saveOptions('kSaveAll');
             jsPrintSetup.print();
 		}
-        </script>
+        </script>-->
+        <script>
+            $(document).ready(function () {
+                
+
+            });
+            </script>
 </head>
 <body>
 	<div id="content_area" class="content_area">

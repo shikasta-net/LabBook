@@ -1,5 +1,6 @@
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
@@ -11,6 +12,15 @@
 		<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 
 		<!-- Load MathJax -->
+		<!--<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+              jax: ["input/TeX","input/MathML","output/NativeMML"],
+              extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"],
+              TeX: {
+                extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+              }
+            });
+        </script>-->
 		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
 
 		<!-- Load text editor (dojo) -->
@@ -33,6 +43,25 @@
 
         <!-- DOCUMENT READY -->
         <script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
+        <script>
+            print_page = function() {
+                maths = $('script[type^="math/tex"]');
+                maths_arr = [];
+                for (i=0; i< maths.length; i++) {
+                    var temp = $('<div></div>').append($(maths[i]).prev().clone());
+                    maths_arr.push(temp.html());
+                }
+                var styles = $('style')
+                var mj_css = styles[styles.length - 1].textContent;
+                // svg_defs = $('<div></div>').append($('#MathJax_SVG_Hidden').next('svg')).html();
+                $.post('{{=URL('render', 'print_pdf')}}', {maths: maths_arr, mj_css: mj_css}, function (data) {
+                    console.log(data);
+                    console.log(data['printurl']);
+                    var printjob_url = data['printurl'];
+                    $.get(printjob_url)
+                }, 'json');
+            };
+        </script>
 </head>
 <body>
 <div id="page{{=page.id}}" class="page">

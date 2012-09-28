@@ -11,7 +11,7 @@ def page():
 		extra_box_info[box.id] = box_content_info(box)
 
 	if get_preference('useLocalMathJax') :
-		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_SVG'
+		mathjax_URL = URL('static/js', 'MathJax/unpacked/MathJax.js')+'?config=TeX-AMS-MML_SVG'
 	else :
 		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG'
 		
