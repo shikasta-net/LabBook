@@ -1,9 +1,11 @@
-{{ for box in boxes_on_pages: }}
-#box{{=box.id}} { 
+{{for page in boxes_on_pages.values(): }}
+{{for box in page:}}
+#box{{=box.id}} {
 	top:  {{=box.position_y}}%;
-	left: {{=box.position_x}}%; 
-	height: {{=box.height}}%; 
-	width: {{=box.width}}%; 
+	left: {{=box.position_x}}%;
+	height: {{=box.height}}%;
+	width: {{=box.width}}%;
 }
 
+{{pass}}
 {{pass}}

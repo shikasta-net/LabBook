@@ -1,30 +1,37 @@
 MathJax.Hub.Config({ elements: ["content_area"] });
 
-function handleUpdateTitle(value, settings) {
-	jQuery.post('{{=URL("default","call/run/update_title")}}',
-		{ page_id:{{=page.id}}, title_content:value },
-		function(data){	value = data.title_content; console.log("title update : "); console.log(data); },
-		"json");
-	return(value);
+//~ function handleUpdateTitle(value, settings) {
+	//~ console.log(settings.submitdata);
+	//~ jQuery.post('{{=URL("default","call/run/update_title")}}',
+		//~ { page_id:settings.submitdata['page_id'], title_content:value },
+		//~ function(data){	value = data.title_content; console.log("title update : "); console.log(data); },
+		//~ "json");
+	//~ return(value);
+//~ }
+
+function pageID(target) {
+	return target.parents("div.page").attr('id').replace('page','');
 }
 
 $(document).ready(function(){
     optionBar = initialiseOptionBar($('body'));
 
-	var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""};
-
-	$("#main_page").disableTextSelect();
+	var new_cont = { 'pid': "", x1: "", y1: "", x2: "", y2: ""};
 
 	$(".empty").each(function(index) { containers.defineIsBlank($(this)); });
 
+	$("body").disableTextSelect();
+
 	//Double click to edit Press enter to save changes. Press Esc to cancel them.
-	$("#title_bar").bind('focusin', function() {
-		$("#main_page").enableTextSelect()
+	$(".title_bar").bind('focusin', function() {
+		$("body").enableTextSelect()
 	}).bind('focusout', function() {
-		$("#main_page").disableTextSelect()
-	}).editable(handleUpdateTitle, {
+		$("body").disableTextSelect()
+	}).editable('{{=URL("default","call/run/update_title")}}', {
 		tooltip : "DoubleClick to edit...",
-		event : "dblclick"
+		event : "dblclick",
+		name : 'title_content',
+		id : 'page_id'
 	});
 
 	$("button#mknewbox").click(function(){
@@ -38,31 +45,33 @@ $(document).ready(function(){
 		}
 	});
 
-	$("#content_area").click( function(event){
+	$(".content_area").click( function(event){
 		optionBarHide();
 		saveEditor();
 		hideEditor();
 	}).mousedown(function(e){
 		if ($("button#mknewbox").hasClass("selected")) {
-			new_cont['x1'] = (e.pageX - $("div.content_area").offset().left);
-			new_cont['y1'] = (e.pageY - $("div.content_area").offset().top);
-			if (!(new_cont['x1'] > 0 && new_cont['y1'] > 0 && new_cont['x1'] < $("div.content_area").width() && new_cont['y1'] < $("div.content_area").height()))  {
+			new_cont['x1'] = (e.pageX - $(e.target).offset().left);
+			new_cont['y1'] = (e.pageY - $(e.target).offset().top);
+			if (!(new_cont['x1'] > 0 && new_cont['y1'] > 0 && new_cont['x1'] < $(e.target).width() && new_cont['y1'] < $(e.target).height()))  {
 				new_cont['x1'] = -1;
 				new_cont['y1'] = -1;
 			}
 		}
 	}).mouseup(function(e){
 		if ($("button#mknewbox").hasClass("selected")) {
-			new_cont['x2'] = (e.pageX - $("div.content_area").offset().left);
-			new_cont['y2'] = (e.pageY - $("div.content_area").offset().top);
-			if (!(new_cont['x2'] > 0 && new_cont['y2'] > 0 && new_cont['x2'] < $("div.content_area").width() && new_cont['y2'] < $("div.content_area").height())) {
+			new_cont['x2'] = (e.pageX - $(e.target).offset().left);
+			new_cont['y2'] = (e.pageY - $(e.target).offset().top);
+			if (!(new_cont['x2'] > 0 && new_cont['y2'] > 0 && new_cont['x2'] < $(e.target).width() && new_cont['y2'] < $(e.target).height())) {
 				new_cont['x2'] = -1;
 				new_cont['y2'] = -1;
 			}
 			if (new_cont['x1'] > 0 && new_cont['x2'] > 0 && new_cont['y1'] > 0 && new_cont['y2'] > 0) {
-				containers.handleCreateContainer(new_cont);
+				new_cont['pid'] = pageID($(e.target));
+				containers.handleCreateContainer($(e.target), new_cont);
 				$(".selected").removeClass("selected");
 				containers.setContainersMobile();
+				new_cont['pid'] = "";
 				new_cont['x1'] = -1;
 				new_cont['y1'] = -1;
 				new_cont['x2'] = -1;
@@ -73,7 +82,7 @@ $(document).ready(function(){
 
 	$(".cbox").each(function(index) {
 			// WARNING - in future, when we have multiple pages on screen, setting this static here will no longer work.
-			$(this).on('dragenter', function(event) { content.handleDragEnter(event, {{=page.id}}); });
+			$(this).on('dragenter', function(event) { content.handleDragEnter(event, pageID($(this))); });
 			//$(this).on('drop', function(event) { content.handleDrop(event); });
 		containers.defineContainerMobile($(this));
 		containers.enableOptionBar($(this));

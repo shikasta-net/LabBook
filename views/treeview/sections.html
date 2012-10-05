@@ -74,16 +74,18 @@ $(document).ready(function(){
 	});
 });
 </script>
-{{def getChildren(sec):}}
-	{{for entry in sec : }}
-		{{if entry['contains'] != None:}}
-			<li id={{='s'+str(entry['id'])}} class="section"><img src={{=entry['thumbnail']}}>
-				<ul id={{='sc'+str(entry['id'])}} class="child">
-					{{getChildren(entry['contains'])}}
+{{def getChildren(section):}}
+	{{for entry in section : }}
+		{{children = entry[1]}}
+		{{item = entry[0]}}
+		{{if children is None:}}
+			<li id={{='p'+str(item['id'])}} class="page"><iframe></iframe> <!--<a href="{{=URL(c='render',f='page',args=[str(item.page_id)])}}" target="pageview">Page {{='p'+str(item.id)}}</a> <img class="page" id={/{=str(entry['id'])}} src={/{=entry['thumbnail']}}> -->
+		{{else:}}
+			<li id={{='s'+str(item.id)}} class="section"> Section {{='s'+str(item.id)}} <!--<img src={/{=entry['thumbnail']}}>-->
+				<ul id={{='sc'+str(item.id)}} class="child">
+					{{getChildren(children)}}
 				</ul>
 			</li>
-		{{else:}}
-			<li id={{='p'+str(entry['id'])}} class="page"><a href="{{=URL(c='render',f='page',args=[str(entry['id'])])}}" target="pageview"><img class="page" id={{=str(entry['id'])}} src={{=entry['thumbnail']}}></a>
 		{{pass}}
 	{{pass}}
 {{return}}

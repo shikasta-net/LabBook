@@ -3,49 +3,55 @@
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
-	<link rel="stylesheet" type="text/css" href="{{=URL('render', 'dynamic_css.css?page='+str(page.id))}}" />
+	<style type="text/css">
+		{{ include 'render/dynamic_css.css' }}
+	</style>
 	<!-- Load jQuery and jQuery-ui -->
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
-		<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
+	<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 
-		<!-- Load MathJax -->
-		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
+	<!-- Load MathJax -->
+	<script type="text/javascript" src="{{=mathjax_URL}}"></script>
 
-		<!-- Load text editor (dojo) -->
-		<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
-		<style type="text/css">
-			/* bring in the claro theme */
-			@import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
-		</style>
+	<!-- Load text editor (dojo) -->
+	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="async: true, parseOnLoad: true"></script>
+	<style type="text/css">
+		/* bring in the claro theme */
+		@import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
+	</style>
 
-		<!-- Load our scripts! -->
-		<script type="text/javascript">
-			var pageID = "{{=page.id}}";
-		</script>
-		<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
-		<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
-		<script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
-		<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
-		<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
-		<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
+	<!-- Load our scripts! ->
+	<script type="text/javascript">
+	var pageID = "{/{=page.id}}";
+	</script>-->
+	<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 
-        <!-- DOCUMENT READY -->
-        <script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
+	<!-- DOCUMENT READY -->
+	<!--    <script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page='+','.join(page_order))}}"></script>-->
+	<script type="text/javascript">
+		{{ include 'render/doc_ready.js' }}
+	</script>
 </head>
 <body>
-<div id="page{{=page.id}}" class="page">
-	{{=DIV(SPAN(page.title, _id="title_bar", _class="title_bar"), _class="title_bar")}}
-	{{=DIV(_id="side_bar_l", _class="side_bar")}}
-	<div id="content_area" class="content_area">
-		{{for box in boxes_on_pages:}}
+{{for page_id in page_order:}}
+<div id="page{{=page_id}}" class="page">
+	{{=DIV(SPAN(pages[page_id].title, _id="title"+page_id, _class="title_bar"), _class="title_bar")}}
+	<div id="content_area{{=page_id}}" class="content_area">
+		{{for box in boxes_on_pages[page_id]:}}
 			<div class="cbox" id="box{{=box['id']}}" type="{{=box['content_type']}}">
 				{{ include 'render/box_content.html' }}
 			</div>
 		{{pass}}
 	</div>
 </div>
+{{pass}}
 <button type="button" id="mknewbox">Create box</button>
 </body>
 </html>

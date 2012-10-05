@@ -1,20 +1,26 @@
 import os
 
 def page():
-	page_id = request.args[0]
-	check_page_id(page_id)
-	page = get_page(page_id)
-	boxes_on_pages = page.boxes.select()
+
+	page_order = request.vars['pages'].split(',')
+	pages = {}
+	boxes_on_pages	= {}
 	extra_box_info = {}
-	for box in boxes_on_pages:
-		extra_box_info[box.id] = box_content_info(box)
+
+	for page_id in page_order :
+		check_page_id(page_id)
+		pages[page_id] = get_page(page_id)
+		boxes_on_pages[page_id] = pages[page_id].boxes.select()
+		extra_box_info[page_id] = {}
+		for box in boxes_on_pages[page_id]:
+			extra_box_info[page_id][box.id] = box_content_info(box)
 
 	if get_preference('useLocalMathJax') :
 		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
 	else :
 		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
-	return dict(page=page, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
+	return dict(page_order=page_order, pages=pages, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
 
 def box_content_info(box):
     extra_info = {}
@@ -32,17 +38,21 @@ def box_content():
     extra_box_info[box.id] = box_content_info(box)
     return dict(box=box, extra_box_info=extra_box_info)
 
-def dynamic_css():
-	response.headers['Content-Type']='text/css'
-	page_id = request.vars['page']
-	check_page_id(page_id)
-	page = get_page(page_id)
-	boxes_on_pages = page.boxes.select()
-	return dict(boxes_on_pages=boxes_on_pages)
+#~ def dynamic_css():
+	#~ boxes_on_pages	= {}
+	#~ response.headers['Content-Type']='text/css'
+	#~ for page_id in request.vars['pages'].split(',') :
+		#~ check_page_id(page_id)
+		#~ page = get_page(page_id)
+		#~ boxes_on_pages[page_id] = page.boxes.select()
 
-def doc_ready():
-	response.headers['Content-Type']='text/javascript'
-	page_id = request.vars['page']
-	page = get_page(page_id)
-	return dict(page=page)
+	#~ return dict(boxes_on_pages=boxes_on_pages)
+
+#~ def doc_ready():
+	#~ response.headers['Content-Type']='text/javascript'
+	#~ pages = {}
+	#~ for page_id in request.vars['pages'].split(',') :
+		#~ pages = get_page(page_id)
+
+	#~ return dict(pages=pages)
 

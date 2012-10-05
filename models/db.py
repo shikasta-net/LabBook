@@ -33,7 +33,7 @@ def get_branch(parent=None):
 				 temp_list.append(temp_list[-1].next_object.ALL)
 		ordered_objects = temp_list + ordered_objects
 	del ordered_objects[-1]
-	return reversed(ordered_objects)
+	return ordered_objects[::-1]
 
 
 def insert_section(parent=None) :
@@ -78,7 +78,7 @@ def check_page_id(page_id):
 	try:
 		assert db(db.pages.id == page_id).count() != 0
 	except Exception, e:
-		raise HTTP(400, 'Malformed page ID: %s' % e)
+		raise HTTP(400, 'Malformed page ID: %s' % page_id)
 
 # Add a new entry to the box table
 def insert_new_page(section):

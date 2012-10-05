@@ -1,6 +1,14 @@
 
 import thumbnail
 
+def section():
+
+	return dict(layout=sectionContent(None))
+
+
+
+
+
 def sections():
 	#returns ordered by section then number, fortuantely NONE counts at the top of the list.
 	#TODO: mix the lists into a single correctly ordered list of rows to make rendering possible
@@ -32,26 +40,43 @@ def sectionContent(sec):
 
 	contents = []
 
-	for item in db(db.pages.section == sec).select():
-		entry = dict()
-		entry['id'] = item.id
-		entry['title'] = item.title
-		entry['number'] = item.number
-		entry['contains'] = None
-		entry['thumbnail'] = thumbnail.pngPath(item.id)
-		contents.append(entry)
+	leaves = get_branch(sec)
 
-	for item in db(db.sections.parent == sec).select() :
-		entry = dict()
-		entry['id'] = item.id
-		entry['title'] = item.title
-		entry['number'] = item.number
-		entry['contains'] = sectionContent(item.id)
-		if entry['contains'] :
-			frontpage = thumbnail.pngPath(entry['contains'][0]['id'])
+	for leaf in leaves :
+		if leaf.page_id is None :
+			entry = leaf, sectionContent(leaf.id)
 		else :
-			frontpage = URL('static/images','sec'+str(entry['number'])+'.svg')
-		entry['thumbnail'] = frontpage
+			entry = leaf, None
+
 		contents.append(entry)
 
-	return sorted(contents, key=lambda pg: pg['number'])
+	return contents
+
+
+
+
+	#~ contents = []
+
+	#~ for item in db(db.pages.section == sec).select():
+		#~ entry = dict()
+		#~ entry['id'] = item.id
+		#~ entry['title'] = item.title
+		#~ entry['number'] = item.number
+		#~ entry['contains'] = None
+		#~ entry['thumbnail'] = thumbnail.pngPath(item.id)
+		#~ contents.append(entry)
+
+	#~ for item in db(db.sections.parent == sec).select() :
+		#~ entry = dict()
+		#~ entry['id'] = item.id
+		#~ entry['title'] = item.title
+		#~ entry['number'] = item.number
+		#~ entry['contains'] = sectionContent(item.id)
+		#~ if entry['contains'] :
+			#~ frontpage = thumbnail.pngPath(entry['contains'][0]['id'])
+		#~ else :
+			#~ frontpage = URL('static/images','sec'+str(entry['number'])+'.svg')
+		#~ entry['thumbnail'] = frontpage
+		#~ contents.append(entry)
+
+	#~ return sorted(contents, key=lambda pg: pg['number'])

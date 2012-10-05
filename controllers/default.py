@@ -144,6 +144,7 @@ def page_delete(page_id):
 # Function to update the page title
 @service.run
 def update_title(page_id, title_content):
+	page_id = page_id.replace('title','')
 	check_page_id(page_id)
 	update_page(page_id, title=title_content)
 	#~ try :
@@ -156,4 +157,4 @@ def update_title(page_id, title_content):
 		#~ rcode = 200
 	#~ finally :
 		#~ title_content = db(db.pages.id==page_id).select().first().title
-	return response.json(dict(return_code=200, title_content=get_page_title(page_id)))
+	return get_page_title(page_id)
