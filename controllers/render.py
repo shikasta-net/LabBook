@@ -18,22 +18,22 @@ def page():
 
 from xml.dom import minidom
 def box_content_info(box):
-    extra_info = {}
-    if box.content_type == 'box':
-        extra_info = {'child_box': box.content_id}
-    elif box.content_type == 'text/html':
-        file_content = get_file_contents(box.page_id, box.id, box.content_id)
-        extra_info = {'file_contents': file_content}
-    elif box.content_type in ['image/jpeg', 'image/svg+xml']:
-        extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
-    return extra_info
+	extra_info = {}
+	if box.content_type == 'box':
+		extra_info = {'child_box': box.content_id}
+	elif box.content_type == 'text/html':
+		file_content = get_file_contents(box.page_id, box.id, box.content_id)
+		extra_info = {'file_contents': file_content}
+	elif box.content_type in ['image/jpeg', 'image/svg+xml']:
+		extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
+	return extra_info
 
 def box_content():
-    box = db(db.boxes.id == html_id_to_db_id(request.args[0])).select().first()
-    extra_box_info = {}
-    extra_box_info[box.id] = box_content_info(box)
-    return dict(box=box, extra_box_info=extra_box_info)
-        
+	box = db(db.boxes.id == html_id_to_db_id(request.args[0])).select().first()
+	extra_box_info = {}
+	extra_box_info[box.id] = box_content_info(box)
+	return dict(box=box, extra_box_info=extra_box_info)
+		
 #Function to return the value of the given preference correctly formatted
 def get_preference(pref):
 	row = db(db.preferences.preference == pref).select().first()
@@ -70,39 +70,67 @@ def get_file_url(page_id, box_id, content_id):
 
 from subprocess import Popen
 from gluon.contenttype import contenttype
-@service.run
+import uuid
+@request.restful()
 def print_pdf():
-    # Read the MathJax specific CSS
-    mj_css = request.post_vars['mj_css']
-    # Read the MathJax specific HTML
-    maths = request.post_vars['maths[]']
 
-    # Write MathJax CSS file
-    f_css = open('temp.css', 'w')
-    f_css.write(mj_css)
-    f_css.close()
-
-    # Write JavaScript processing file
-    f = open('temp.js', 'w')
-    f.write('var maths = [];\n\n')
-    for m in maths:
-        f.write('maths.push(\'' + m + '\');\n\n');
-    f.write('var scripts = $(\'script[type^="math/tex"]\');\n')
-    f.write('scripts.each(function(index) {\n')
-    f.write('   $(maths[index]).insertBefore($(this));\n')
-    f.write('});')
-    f.close()
-
-    # Run PrinceXML
-    #bin/prince http://127.0.0.1:8000/LabBook/print/page?p=1 test.pdf --script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js --script=/Users/agm/web2py/temp.js -v --style=/Users/agm/web2py/temp.css --media=print
-    prince_path = os.path.join(request.folder, 'prince/bin/prince')
-    p = Popen([prince_path, URL('print', 'page?p=1', host=True), '-o temp_new.pdf', '--script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js', '--script=/Users/agm/web2py/temp.js', '-v', '--style=/Users/agm/web2py/temp.css', '--media=print'])
-    print "BOOM!"
-    p.communicate()
-    return response.json(dict(printurl=URL('render', 'printjob')))
+	def GET(printid):
+		f = open(os.path.join(request.folder, 'printjobs', printid, 'download.pdf'))
+		response.headers['Content-Type'] = contenttype('.pdf')
+		response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
+		return response.stream(f, chunk_size=64*1024)
+		
+	def POST(**kwargs):
+		try:
+			# Read the current path
+			current_path = kwargs['current_path']
+			# Read the MathJax specific CSS
+			mj_css = kwargs['mj_css']
+			# Read the MathJax specific HTML
+			maths = kwargs['maths[]']
+		except:
+			raise HTTP(400, 'Invalid arguments')
+		
+		# Make the printjob directory
+		printid = str(uuid.uuid4())
+		printjobdir = os.path.join(request.folder, 'printjobs', printid)
+		os.mkdir(printjobdir)
+		
+		# Write MathJax CSS file
+		css_path = os.path.join(printjobdir, 'temp.css')
+		f_css = open(css_path, 'w')
+		f_css.write(mj_css)
+		f_css.close()
+	
+		# Write JavaScript processing file
+		script_path = os.path.join(printjobdir, 'temp.js')
+		f = open(script_path, 'w')
+		f.write('var maths = [];\n\n')
+		for m in maths:
+			f.write('maths.push(\'' + m + '\');\n\n');
+		f.write('var scripts = $(\'script[type^="math/tex"]\');\n')
+		f.write('scripts.each(function(index) {\n')
+		f.write('   $(maths[index]).insertBefore($(this));\n')
+		f.write('});')
+		f.close()
+	
+		# Run PrinceXML
+		prince_path = os.path.join(request.folder, 'prince/bin/prince')
+		prince_args = [prince_path]
+		prince_args.append(current_path) # function output to print from
+		prince_args.append('-o %s' % os.path.join(printjobdir, 'download.pdf')) # output filename
+		prince_args.append('--script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js') # import jquery
+		prince_args.append('--script=%s' % script_path) # Script to insert math elements
+		prince_args.append('--style=%s' % css_path) # CSS to style math elements
+		prince_args.append('--media=print') # Ensure we're using the print stylesheet
+		p = Popen(prince_args)
+		p.communicate()
+		return response.json(dict(printid=printid))
+		
+	return locals()
 
 def printjob():
-    f = open('temp_new.pdf')
-    response.headers['Content-Type'] = contenttype('.pdf')
-    response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
-    return response.stream(f, chunk_size=64*1024)
+	f = open('temp_new.pdf')
+	response.headers['Content-Type'] = contenttype('.pdf')
+	response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
+	return response.stream(f, chunk_size=64*1024)
