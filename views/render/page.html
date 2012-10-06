@@ -1,6 +1,6 @@
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
@@ -14,13 +14,13 @@
 		<!-- Load MathJax -->
 		<!--<script type="text/x-mathjax-config">
 		  MathJax.Hub.Config({
-              jax: ["input/TeX","input/MathML","output/NativeMML"],
-              extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"],
-              TeX: {
-                extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
-              }
-            });
-        </script>-->
+			  jax: ["input/TeX","input/MathML","output/NativeMML"],
+			  extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"],
+			  TeX: {
+				extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+			  }
+			});
+		</script>-->
 		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
 
 		<!-- Load text editor (dojo) -->
@@ -40,35 +40,11 @@
 		<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 		<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
 		<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'printing.js')}}"></script>
+		
+		<!-- DOCUMENT READY -->
+		<script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
 
-        <!-- DOCUMENT READY -->
-        <script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
-        <script>
-            print_page = function() {
-            	var current_path = window.location.toString();
-                maths = $('script[type^="math/tex"]');
-                maths_arr = [];
-                for (i=0; i< maths.length; i++) {
-                    var temp = $('<div></div>').append($(maths[i]).prev().clone());
-                    maths_arr.push(temp.html());
-                }
-                var styles = $('style')
-                var mj_css = styles[styles.length - 1].textContent;
-                var data = {};
-                data.maths = maths_arr;
-                data.mj_css = mj_css;
-                data.current_path = current_path;
-                $.post('{{=URL('render', 'print_pdf')}}', data, function (data) {
-                    console.log(data);
-                    console.log(data['printid']);
-                    var printjob_id = data['printid'];
-                    if ($('#print_spooler').length == 0) {
-                    	$(document.body).append('<iframe style="display: none" id="print_spooler"></iframe>');
-                    }
-                    $('#print_spooler').attr('src', '{{=URL('render', 'print_pdf')}}/' + printjob_id);
-                }, 'json');
-            };
-        </script>
 </head>
 <body>
 <div id="page{{=page.id}}" class="page">
@@ -83,5 +59,6 @@
 	</div>
 </div>
 <button type="button" id="mknewbox">Create box</button>
+<button type="button" id="printpage">Print page</button>
 </body>
 </html>

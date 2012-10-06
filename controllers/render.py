@@ -74,11 +74,14 @@ import uuid
 @request.restful()
 def print_pdf():
 
-	def GET(printid):
-		f = open(os.path.join(request.folder, 'printjobs', printid, 'download.pdf'))
-		response.headers['Content-Type'] = contenttype('.pdf')
-		response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
-		return response.stream(f, chunk_size=64*1024)
+	def GET(printid, fetch=None):
+		status = get_printjob_status(printid)
+		if status == 201 and fetch:
+			f = open(os.path.join(request.folder, 'printjobs', printid, 'download.pdf'))
+			response.headers['Content-Type'] = contenttype('.pdf')
+			response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
+			return response.stream(f, chunk_size=64*1024)
+		else: raise HTTP(status)
 		
 	def POST(**kwargs):
 		try:
@@ -123,14 +126,8 @@ def print_pdf():
 		prince_args.append('--script=%s' % script_path) # Script to insert math elements
 		prince_args.append('--style=%s' % css_path) # CSS to style math elements
 		prince_args.append('--media=print') # Ensure we're using the print stylesheet
-		p = Popen(prince_args)
-		p.communicate()
+		add_printjob_task(prince_args, printid)
 		return response.json(dict(printid=printid))
 		
 	return locals()
-
-def printjob():
-	f = open('temp_new.pdf')
-	response.headers['Content-Type'] = contenttype('.pdf')
-	response.headers['Content-disposition'] = 'attachment; filename=download.pdf'
-	return response.stream(f, chunk_size=64*1024)
+	

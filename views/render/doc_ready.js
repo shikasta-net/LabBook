@@ -11,6 +11,8 @@ function handleUpdateTitle(value, settings) {
 var pxPerem = false;
 
 $(document).ready(function(){
+	$('button#printpage').click(function() { printing.print_page(); });
+
     optionBar = initialiseOptionBar($('body'));
     pxPerem = $("div.page").width()/70.0;
 
