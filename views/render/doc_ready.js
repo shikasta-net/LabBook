@@ -9,6 +9,8 @@ function handleUpdateTitle(value, settings) {
 }
 
 $(document).ready(function(){
+	$('button#printpage').click(function() { printing.print_page(); });
+
     optionBar = initialiseOptionBar($('body'));
 
 	var new_cont = { 'pid': {{=page.id}}, x1: "", y1: "", x2: "", y2: ""};

@@ -1,5 +1,6 @@
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
@@ -11,6 +12,15 @@
 		<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
 
 		<!-- Load MathJax -->
+		<!--<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			  jax: ["input/TeX","input/MathML","output/NativeMML"],
+			  extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"],
+			  TeX: {
+				extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+			  }
+			});
+		</script>-->
 		<script type="text/javascript" src="{{=mathjax_URL}}"></script>
 
 		<!-- Load text editor (dojo) -->
@@ -30,9 +40,11 @@
 		<script type="text/javascript" src="{{=URL('static/js', 'containers.js')}}"></script>
 		<script type="text/javascript" src="{{=URL('static/js', 'content.js')}}"></script>
 		<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
+		<script type="text/javascript" src="{{=URL('static/js', 'printing.js')}}"></script>
+		
+		<!-- DOCUMENT READY -->
+		<script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
 
-        <!-- DOCUMENT READY -->
-        <script type="text/javascript" src="{{=URL('render', 'doc_ready.js?page=' + str(page.id))}}"></script>
 </head>
 <body>
 <div id="page{{=page.id}}" class="page">
@@ -47,5 +59,6 @@
 	</div>
 </div>
 <button type="button" id="mknewbox">Create box</button>
+<button type="button" id="printpage">Print page</button>
 </body>
 </html>
