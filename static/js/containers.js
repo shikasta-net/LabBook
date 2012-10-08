@@ -15,10 +15,10 @@ containers.handleResizeContainer = function(event, ui) {
 }
 
 containers.handleCreateContainer = function(new_cont) {
-	var dims = { x: Math.min(new_cont['x1'],new_cont['x2']), y: Math.min(new_cont['y1'],new_cont['y2']), w: Math.abs(new_cont['x2']-new_cont['x1']), h: Math.abs(new_cont['y2']-new_cont['y1']) };
     var page_width = $('#content_area').width();
     var page_height = $('#content_area').height();
-	jQuery.post(containers.serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x']/page_width, y:dims['y']/page_height, w:dims['w']/page_width, h:dims['h']/page_height }, function(data){
+	var dims = { x: Math.min(new_cont['x1'],new_cont['x2'])/page_width*100, y: Math.min(new_cont['y1'],new_cont['y2'])/page_height*100, w: Math.abs(new_cont['x2']-new_cont['x1'])/page_width*100, h: Math.abs(new_cont['y2']-new_cont['y1'])/page_height*100 };
+	jQuery.post(containers.serviceURL+'/new_box', { page_id:new_cont['pid'], x:dims['x'], y:dims['y'], w:dims['w'], h:dims['h'] }, function(data){
 		$("#content_area").append( "<div class='cbox empty' id='box"+data.new_id+"'></div>" );
 		$("div#box" + data.new_id).css({
 			'top':dims['y']+'%',
