@@ -9,7 +9,11 @@ content.handleDragEnter = function(event, page_id) {
 	event.preventDefault();
 	content.dropCrossBox.elementOver = event.target;
 	content.dropCrossBox.pageOver = page_id;
-	content.dropCrossBox.resizeAndPosition(event.target.id);
+	var cbox_over = event.target;
+	if (!$(cbox_over).hasClass('cbox')) {
+		cbox_over = $(cbox_over).parents('.cbox')[0];
+	}
+	content.dropCrossBox.resizeAndPosition(cbox_over.id);
 	content.dropCrossBox.show()
 }
 
