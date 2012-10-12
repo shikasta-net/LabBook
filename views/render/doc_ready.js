@@ -13,20 +13,23 @@ function pageID(target) {
 	return target.parents("div.page").attr('id').replace('page','');
 }
 
-$(document).ready(function(){
-    optionBar = initialiseOptionBar($('body'));
+
+function initialise_pages() {
+	$('button#printpage').click(function() { printing.print_page(); });
+
+	optionBar = initialiseOptionBar($('body'));
 
 	var new_cont = { 'pid': "", x1: "", y1: "", x2: "", y2: ""};
 
 	$(".empty").each(function(index) { containers.defineIsBlank($(this)); });
 
-	$("body").disableTextSelect();
+	$(".pages").disableTextSelect();
 
 	//Double click to edit Press enter to save changes. Press Esc to cancel them.
 	$(".title_bar").bind('focusin', function() {
-		$("body").enableTextSelect()
+		$(".page").enableTextSelect()
 	}).bind('focusout', function() {
-		$("body").disableTextSelect()
+		$(".page").disableTextSelect()
 	}).editable('{{=URL("default","call/run/update_title")}}', {
 		tooltip : "DoubleClick to edit...",
 		event : "dblclick",
@@ -95,4 +98,4 @@ $(document).ready(function(){
 	//newly created divs have cross box underneither somhow???
 	$('#content_area').append(content.dropCrossBox.crossDiv);
 	initialiseEditor();
-});
+}

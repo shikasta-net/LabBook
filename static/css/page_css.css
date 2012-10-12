@@ -1,3 +1,6 @@
+body {
+    font-size: 12pt;
+}
 body.page {
     margin: 0;
     padding: 0;
@@ -186,5 +189,21 @@ div.textbox p {
     }
 }
 
-@media print{
+@media print {
+	@page { 
+	   size: A4 landscape;
+	   margin: 0;
+	}
+	.title_bar, .side_bar, .ui-resizable-handle, button#mknewbox { visibility: hidden; }
+	* { border: 0; }
+	div.page {
+	   margin: 0;
+	   height: 210mm;
+	   width: 297mm;
+	}
+	#content_area {
+	   margin: 10mm;
+	   width: 277mm;
+       height: 190mm;
+	}
 }

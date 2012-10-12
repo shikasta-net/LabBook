@@ -1,9 +1,10 @@
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
-	<style type="text/css">
+	<style id='current_pages_css' type="text/css">
 		{{ include 'render/dynamic_css.css' }}
 	</style>
 	<!-- Load jQuery and jQuery-ui -->
@@ -22,10 +23,7 @@
 		@import "http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css";
 	</style>
 
-	<!-- Load our scripts! ->
-	<script type="text/javascript">
-	var pageID = "{/{=page.id}}";
-	</script>-->
+	<!-- Load our scripts! -->
 	<script type="text/javascript" src="{{=URL('static/js','protect_text.js')}}"></script>
 	<script type="text/javascript" src="{{=URL('static/js','texteditor.js')}}"></script>
 	<script type="text/javascript" src="{{=URL('static/js', 'crossbox.js')}}"></script>
@@ -34,14 +32,16 @@
 	<script type="text/javascript" src="{{=URL('static/js', 'option_bar.js')}}"></script>
 
 	<!-- DOCUMENT READY -->
-	<!--    <script type="text/javascript" src="{/{=URL('render', 'doc_ready.js?page='+','.join(page_order))}}"></script>-->
 	<script type="text/javascript">
 		{{ include 'render/doc_ready.js' }}
+		$(document).ready(function(){
+			initialise_pages();
+		});
 	</script>
 </head>
 <body>
 {{for page_id in page_order:}}
-<div id="page{{=page_id}}" class="page">
+<div class="page" id="page{{=page_id}}">
 	{{=DIV(SPAN(pages[page_id].title, _id="title"+page_id, _class="title_bar"), _class="title_bar")}}
 	<div id="content_area{{=page_id}}" class="content_area">
 		{{for box in boxes_on_pages[page_id]:}}
@@ -53,5 +53,6 @@
 </div>
 {{pass}}
 <button type="button" id="mknewbox">Create box</button>
+<button type="button" id="printpage">Print page</button>
 </body>
 </html>

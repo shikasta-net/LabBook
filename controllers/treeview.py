@@ -3,7 +3,17 @@ import thumbnail
 
 def section():
 
-	return dict(layout=sectionContent(None))
+	parent = request.vars['parent']
+	if not parent :
+		parent = 'root'
+
+	if get_preference('useLocalMathJax') :
+		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
+	else :
+		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+
+
+	return dict(parent=parent, mathjax_URL=mathjax_URL)
 
 
 
