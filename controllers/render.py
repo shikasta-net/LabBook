@@ -2,18 +2,47 @@ import os
 
 def page():
 
-	page_order = request.vars['pages'].split(',')
+	page_order = []
 	pages = {}
 	boxes_on_pages	= {}
 	extra_box_info = {}
 
-	for page_id in page_order :
-		check_page_id(page_id)
-		pages[page_id] = get_page(page_id)
-		boxes_on_pages[page_id] = pages[page_id].boxes.select()
-		extra_box_info[page_id] = {}
-		for box in boxes_on_pages[page_id]:
-			extra_box_info[page_id][box.id] = box_content_info(box)
+	if request.vars['pages'] :
+
+		page_order = request.vars['pages'].split(',')
+
+		for page_id in page_order :
+			check_page_id(page_id)
+			pages[page_id] = get_page(page_id)
+			boxes_on_pages[page_id] = pages[page_id].boxes.select()
+			extra_box_info[page_id] = {}
+			for box in boxes_on_pages[page_id]:
+				extra_box_info[page_id][box.id] = box_content_info(box)
+
+	elif request.vars['section'] :
+
+		section = request.vars['section']
+		if section == 'root' :
+			section = None
+
+		section_contents = get_branch(section)
+
+		for object in section_contents :
+			page_id = object.page_id
+			if not page_id :
+				page_id = get_branch(object.id)[0].page_id
+			page_id = str(page_id)
+
+			check_page_id(page_id)
+			page_order.append(page_id)
+			pages[page_id] = get_page(page_id)
+			boxes_on_pages[page_id] = pages[page_id].boxes.select()
+			extra_box_info[page_id] = {}
+			for box in boxes_on_pages[page_id]:
+				extra_box_info[page_id][box.id] = box_content_info(box)
+
+	else :
+		raise HTTP(400, 'Malformed page(s) request')
 
 	if get_preference('useLocalMathJax') :
 		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
