@@ -10,14 +10,16 @@ MathJax.Hub.Config({ elements: ["content_area"] });
 //~ }
 
 function pageID(target) {
-	return target.parents("div.page").attr('id').replace('page','');
+	return target.parents("div.page").attr('id').match(/page(None|\d+)\.(\d+)/i)[2];
 }
 
 
 function initialise_pages() {
 	$('button#printpage').click(function() { printing.print_page(); });
 
-	optionBar = initialiseOptionBar($('body'));
+	if(!$('#option_bar')) {
+		optionBar = initialiseOptionBar($('body'));
+	}
 
 	var new_cont = { 'pid': "", x1: "", y1: "", x2: "", y2: ""};
 
@@ -97,5 +99,8 @@ function initialise_pages() {
 
 	//newly created divs have cross box underneither somhow???
 	$('#content_area').append(content.dropCrossBox.crossDiv);
-	initialiseEditor();
+
+	if(!$('#textEditor')) {
+		initialiseEditor();
+	}
 }

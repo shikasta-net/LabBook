@@ -4,14 +4,16 @@ def page():
 
 	page_order = []
 	pages = {}
+	sections = {}
 	boxes_on_pages	= {}
 	extra_box_info = {}
 
 	if request.vars['pages'] :
 
 		page_order = request.vars['pages'].split(',')
+		page_order = zip(request.vars['pages'].split(','), [None]*len(page_order))
 
-		for page_id in page_order :
+		for page_id, parent_id in page_order :
 			check_page_id(page_id)
 			pages[page_id] = get_page(page_id)
 			boxes_on_pages[page_id] = pages[page_id].boxes.select()
@@ -28,16 +30,27 @@ def page():
 		section_contents = get_branch(section)
 
 		for object in section_contents :
-			page_id = object.page_id
-			if not page_id :
-				page_id = get_branch(object.id)[0].page_id
-			page_id = str(page_id)
 
-			check_page_id(page_id)
-			page_order.append(page_id)
-			pages[page_id] = get_page(page_id)
-			boxes_on_pages[page_id] = pages[page_id].boxes.select()
-			extra_box_info[page_id] = {}
+			if object.page_id :
+				page_id = str(object.page_id)
+				if object.parent_object :
+					parent_id = str(object.parent_object.id)
+				else :
+					parent_id = None
+				check_page_id(page_id)
+				pages[page_id] = get_page(page_id)
+				boxes_on_pages[page_id] = pages[page_id].boxes.select()
+				extra_box_info[page_id] = {}
+			else :
+				page_id = str(get_branch(object.id)[0].page_id)
+				parent_id = str(object.id)
+				check_page_id(page_id)
+				sections[page_id] = get_page(page_id)
+				boxes_on_pages[page_id] = sections[page_id].boxes.select()
+				extra_box_info[page_id] = {}
+
+			page_order.append((page_id,parent_id))
+
 			for box in boxes_on_pages[page_id]:
 				extra_box_info[page_id][box.id] = box_content_info(box)
 
@@ -49,7 +62,8 @@ def page():
 	else :
 		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
-	return dict(page_order=page_order, pages=pages, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
+
+	return dict(page_order=page_order, sections=sections, pages=pages, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
 
 from xml.dom import minidom
 def box_content_info(box):

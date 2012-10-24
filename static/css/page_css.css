@@ -41,7 +41,7 @@ div.title_bar{
 span.title_bar{
     font-family: Times, serif;
     font-weight: bold;
-    font-size: 14pt;
+    font-size: 1.2em;
 }
 
 #option_bar{
@@ -190,7 +190,7 @@ div.textbox p {
 }
 
 @media print {
-	@page { 
+	@page {
 	   size: A4 landscape;
 	   margin: 0;
 	}

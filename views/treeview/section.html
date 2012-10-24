@@ -42,28 +42,12 @@
 		width: 150px;
 		height: 90%;
 	}
-	#oldpageview {
-		position: absolute;
-		margin:0;
-		border:0;
-		padding:0;
-		top: 50px;
-		right: 0px;
-		height:250px;
-		width:350px;
-	}
 	div#pages {
 		position: absolute;
 		left: 200px;
 		width:80%;
 		height:90%;
-	}
-	#pageview {
-		margin:0;
-		border:0;
-		padding:0;
-		width:100%;
-		height:100%;
+		font-size: 12px;
 	}
 
 </style>
@@ -71,15 +55,30 @@
 	var serviceURL = "{{=URL('call/run')}}";
 </script>
 <script type="text/javascript">
+var parent = '{{=parent}}'
+
+function getPages(sec) {
+	$.get("{{=URL(c='render',f='page',vars=dict(section=''))}}"+sec, function(data){
+		$('head').remove('#current_pages_css');
+		$('#pages').empty();
+		$('head').append($(data).filter('#current_pages_css'));
+		$('#pages').append($(data).filter('.page'));
+		initialise_pages();
+
+		$(".section").on('click', function(e) {
+			getPages($(e.target).attr('id').match(/page(None|\d+)\.(\d+)/i)[1]);
+		});
+		$("#back_button").off('click').on('click', function(e) {
+			getPages(parent);
+		});
+	});
+};
+
 $(document).ready(function(){
 
-//~ $("#pageview").attr("src","{{=URL(c='render',f='page',vars=dict(section='root'))}}");
-$.get("{{=URL(c='render',f='page',vars=dict(section=parent))}}", function(data){
-	$('head').append($(data).filter('#current_pages_css'));
-	$('#pages').append($(data).filter('.page'));
-	initialise_pages();
-});
+getPages('{{=parent}}')
 
+//~ $("#pageview").attr("src","{/{=URL(c='render',f='page',vars=dict(section='root'))}}");
 
 });
 </script>
@@ -88,10 +87,9 @@ $.get("{{=URL(c='render',f='page',vars=dict(section=parent))}}", function(data){
 <body>
 
 	<div id="sidepane">
-		<!-- <iframe id="oldpageview" name="previouspage"></iframe> -->
+		<button id='back_button'>Go back</button>
 	</div>
 	<div id="pages">
-		<!-- <iframe id="pageview" name="currentpages"></iframe> -->
 	</div>
 
 </body>
