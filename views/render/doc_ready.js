@@ -10,7 +10,7 @@ MathJax.Hub.Config({ elements: ["content_area"] });
 //~ }
 
 function pageID(target) {
-	return target.parents("div.page").attr('id').match(/page(None|\d+)\.(\d+)/i)[2];
+	return target.parents("div.page").attr('id').match(/page(None|\d+)_(\d+)/i)[2];
 }
 
 

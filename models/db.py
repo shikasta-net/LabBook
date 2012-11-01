@@ -23,6 +23,9 @@ db.define_table('object_tree',
 				Field('created_on', 'datetime', default=request.now),
 				Field('modified_on', 'datetime', update=request.now))
 
+def get_parent(current):
+	return db(db.object_tree.id == current).select().first().parent_object
+
 def get_branch(parent=None):
 	objects_in_branch = db(db.object_tree.parent_object == parent).select()
 	ordered_objects = [None] # None is to terminate while when reaching end of section

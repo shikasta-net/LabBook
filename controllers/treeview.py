@@ -13,7 +13,7 @@ def section():
 		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
 
-	return dict(parent=parent, mathjax_URL=mathjax_URL)
+	return dict(layout=[dict(id='root', page_id='', parent_id='', title='Contents', contains=treeLayout(None))], parent=parent, mathjax_URL=mathjax_URL)
 
 
 
@@ -46,6 +46,36 @@ def sections():
 	return dict(layout=sectionContent(None))
 
 
+def treeLayout(branch):
+
+	contents = []
+
+	leaves = get_branch(branch)
+
+	for leaf in leaves :
+		node = dict()
+		node['id'] = leaf.id
+		if leaf.page_id :
+			node['page_id'] = leaf.page_id
+			if leaf.parent_object :
+				node['parent_id'] = leaf.parent_object.id
+			else :
+				node['parent_id'] = None
+			node['title'] = get_page(leaf.page_id).title
+			node['contains'] = None
+		else :
+			children = treeLayout(leaf.id)
+			node['page_id'] = children[0]['page_id']
+			node['parent_id'] = leaf.id
+			node['title'] = children[0]['title']
+			node['contains'] = children
+
+		contents.append(node)
+
+	return contents
+
+
+
 def sectionContent(sec):
 
 	contents = []
@@ -53,10 +83,11 @@ def sectionContent(sec):
 	leaves = get_branch(sec)
 
 	for leaf in leaves :
-		if leaf.page_id is None :
-			entry = leaf, sectionContent(leaf.id)
+		if leaf.page_id :
+			entry = get_page(leaf.page_id), None
 		else :
-			entry = leaf, None
+			children = sectionContent(leaf.id)
+			entry = get_page(children[0][0].id), children
 
 		contents.append(entry)
 

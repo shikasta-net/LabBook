@@ -11,6 +11,7 @@
 	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
 	<script type="text/javascript" src="{{=URL('static/js','jquery.jeditable.js')}}"></script>
+	<script type="text/javascript" src="{{=URL('static/js','jquery.scrollTo-1.4.3.1-min.js')}}"></script>
 
 	<!-- Load MathJax -->
 	<script type="text/javascript" src="{{=mathjax_URL}}"></script>
@@ -35,10 +36,64 @@
 		{{ include 'render/doc_ready.js' }}
 	</script>
 
+
+<style>
+
+	#treeview {
+		position:relative;
+		font-size: 10pt;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+		height: 50%;
+		overflow-x: hide;
+		overflow-y: scroll;
+	}
+
+	li.branch {
+	}
+
+	li.branch span:hover {
+		text-decoration: underline;
+	}
+
+	li.node {
+	}
+
+	li.node span:hover {
+		text-decoration: underline;
+	}
+
+	ul {
+		list-style-type: none;
+	}
+
+
+	ul.child {
+		position:relative;
+		margin: 0;
+		padding: 0;
+		margin-top: 11px;
+		margin-left: 5px;
+	}
+
+	li {
+		margin: 0;
+		padding: 0;
+		width:100%;
+	}
+
+	li.parent {
+		margin-top: -11px;
+		margin-left: -5px;
+	}
+
+</style>
+
 <style>
 
 	div#sidepane {
-		position: absolute;
+		position: fixed;
 		width: 150px;
 		height: 90%;
 	}
@@ -54,11 +109,13 @@
 <script type="text/javascript">
 	var serviceURL = "{{=URL('call/run')}}";
 </script>
+
 <script type="text/javascript">
-var parent = '{{=parent}}'
+var current_section = '{{=parent}}'
 
 function getPages(sec) {
-	$.get("{{=URL(c='render',f='page',vars=dict(section=''))}}"+sec, function(data){
+	$.get("{{=URL(c='render',f='page')}}?section="+sec, function(data){
+		current_section = sec
 		$('head').remove('#current_pages_css');
 		$('#pages').empty();
 		$('head').append($(data).filter('#current_pages_css'));
@@ -66,28 +123,113 @@ function getPages(sec) {
 		initialise_pages();
 
 		$(".section").on('click', function(e) {
-			getPages($(e.target).attr('id').match(/page(None|\d+)\.(\d+)/i)[1]);
+			getPages($(e.target).attr('id').match(/page(None|\d+)_(\d+)/i)[1]);
 		});
 		$("#back_button").off('click').on('click', function(e) {
-			getPages(parent);
+			$.get("{{=URL(c='navigate',f='parent')}}?section="+current_section, function(data){
+				console.log(data['parent']);
+				getPages(data['parent']);
+			}, "json");
 		});
 	});
 };
 
+</script>
+
+<script type="text/javascript">
 $(document).ready(function(){
 
-getPages('{{=parent}}')
+	function loadBranch(target){
+		//~ getPages(target.children('ul').attr('id').match(/s(\d+)/i)[1]);
+		target.addClass('parent');
+		target.parent('ul').siblings('span').hide();
+		target.parent('ul').siblings('.load').hide();
+		target.siblings().hide();
+		target.children('ul').show();
 
-//~ $("#pageview").attr("src","{/{=URL(c='render',f='page',vars=dict(section='root'))}}");
+	};
+	function exitBranch(target){
+		//~ getPages(target.parent('ul').attr('id').match(/(s(\d+)|root)/i)[1]);
+		target.removeClass('parent');
+		target.children('ul').hide();
+		target.parent('ul').siblings('span').show();
+		target.parent('ul').siblings('.load').show();
+		target.siblings().show();
+	};
+
+	getPages('{{=parent}}')
+
+	$(".branch").find('ul').hide();
+	$("#rootS").show();
+	$("#rootS").parent('li').removeClass('branch');
+	$("#rootS").children('li').addClass('viewing');
+
+	$(".branch").on('click', function(event){
+		event.stopImmediatePropagation()
+		var viewing = $(event.target).parent('li');
+		if(viewing.hasClass('parent')){
+			exitBranch(viewing);
+		} else {
+			loadBranch(viewing);
+		}
+	});
+	$("li").children('a.load').on('click', function(event){
+		event.stopImmediatePropagation();
+		event.preventDefault();
+		$('li.node').removeClass('viewing');
+		var viewing = $(event.target).parent('li');
+		viewing.children('ul').children('li').addClass('viewing');
+		var id = viewing.children('ul').attr('id').match(/(\d+|root)S/i)[1]
+		getPages(id);
+		if (id != 'root') {
+			loadBranch(viewing);
+		}
+	});
+
+	$("li.node").on('click', function(event){
+		event.stopImmediatePropagation();
+		event.preventDefault();
+		var viewing = $(event.target).parent('li');
+		var targetID = viewing.attr('id').match(/(\d+)P(None|\d+)_(\d+)/i)
+		var target = $('#page'+targetID[2]+'_'+targetID[3]);
+		if (viewing.hasClass('viewing')) {
+			$.scrollTo(target, {duration:700, easing:'easeOutExpo', offset: {top:-15}});
+		};
+	});
 
 });
 </script>
+
+{{def getChildren(branch):}}
+	{{for node in branch : }}
+		{{if node['id'] == 'root' :}}
+			{{elementID = str(node['id'])+'S'}}
+		{{elif not node['contains']:}}
+			{{elementID = str(node['id'])+'P'+str(node['parent_id'])+'_'+str(node['page_id'])}}
+		{{else:}}
+			{{elementID = str(node['id'])+'S'+str(node['parent_id'])+'_'+str(node['page_id'])}}
+		{{pass}}
+
+		{{if not node['contains']:}}
+			<li id={{=elementID}} class='node'><span>{{=node['title']}}</span></li>
+		{{else:}}
+			<li class="branch"><span>{{=node['title']}}</span> <a class='load' href="#">Go Here</a>
+				<ul id={{=elementID}} class="child">
+					{{getChildren(node['contains'])}}
+				</ul>
+			</li>
+		{{pass}}
+	{{pass}}
+{{return}}
 
 </head>
 <body>
 
 	<div id="sidepane">
 		<button id='back_button'>Go back</button>
+		<ul id="treeview">
+			{{getChildren(layout)}}
+		</ul>
 	</div>
 	<div id="pages">
 	</div>

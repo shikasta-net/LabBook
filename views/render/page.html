@@ -42,10 +42,10 @@
 <body>
 {{for page_id, parent_id in page_order:}}
 	{{if page_id in pages:}}
-		<div class="page" id="page{{=parent_id}}.{{=page_id}}">
+		<div class="page" id="page{{=parent_id}}_{{=page_id}}">
 			{{=DIV(SPAN(pages[page_id].title, _id="title"+page_id, _class="title_bar"), _class="title_bar")}}
 	{{else:}}
-		<div class="page section" id="page{{=parent_id}}.{{=page_id}}">
+		<div class="page section" id="page{{=parent_id}}_{{=page_id}}">
 			{{=DIV(SPAN(sections[page_id].title, _id="title"+page_id, _class="title_bar"), _class="title_bar")}}
 	{{pass}}
 	<div id="content_area{{=page_id}}" class="content_area">

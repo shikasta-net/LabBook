@@ -24,7 +24,7 @@ def page():
 	elif request.vars['section'] :
 
 		section = request.vars['section']
-		if section == 'root' :
+		if section == 'root' or section == 'null':
 			section = None
 
 		section_contents = get_branch(section)
