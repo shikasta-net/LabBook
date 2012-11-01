@@ -86,9 +86,11 @@ def check_page_id(page_id):
 # Add a new entry to the box table
 def insert_new_page(section):
 	new_page_id = db.pages.insert(title='')
-	new_leaf_id = db.object_tree.insert(page_id=new_id, parent_object=section)
-	db((db.object_tree.parent_object == section) & (db.object_tree.next_object == None)).update(next_object=new_leaf_id)
-	return new_page_id
+	new_leaf_id = db.object_tree.insert(page_id=new_page_id, parent_object=section)
+	db((db.object_tree.parent_object == section) \
+		& (db.object_tree.next_object == None)
+		& (db.object_tree.id != new_page_id)).update(next_object=new_leaf_id)
+	return (new_page_id, new_leaf_id)
 
 # Return the page row object
 def get_page(page_id):

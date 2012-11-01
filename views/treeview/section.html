@@ -41,6 +41,8 @@
 
 	#treeview {
 		position:relative;
+		margin: 0;
+		padding: 0;
 		font-size: 10pt;
 		top: 0px;
 		left: 0px;
@@ -50,14 +52,8 @@
 		overflow-y: scroll;
 	}
 
-	li.branch {
-	}
-
 	li.branch span:hover {
 		text-decoration: underline;
-	}
-
-	li.node {
 	}
 
 	li.node span:hover {
@@ -88,13 +84,21 @@
 		margin-left: -5px;
 	}
 
+	li.add_page {
+		color: blue;
+	}
+
+	li.add_page span:hover {
+		text-decoration: underline;
+	}
+
 </style>
 
 <style>
 
 	div#sidepane {
 		position: fixed;
-		width: 150px;
+		width: 160px;
 		height: 90%;
 	}
 	div#pages {
@@ -143,7 +147,7 @@ $(document).ready(function(){
 		//~ getPages(target.children('ul').attr('id').match(/s(\d+)/i)[1]);
 		target.addClass('parent');
 		target.parent('ul').siblings('span').hide();
-		target.parent('ul').siblings('.load').hide();
+		target.parent('ul').siblings('.load_branch').hide();
 		target.siblings().hide();
 		target.children('ul').show();
 
@@ -153,7 +157,7 @@ $(document).ready(function(){
 		target.removeClass('parent');
 		target.children('ul').hide();
 		target.parent('ul').siblings('span').show();
-		target.parent('ul').siblings('.load').show();
+		target.parent('ul').siblings('.load_branch').show();
 		target.siblings().show();
 	};
 
@@ -163,6 +167,7 @@ $(document).ready(function(){
 	$("#rootS").show();
 	$("#rootS").parent('li').removeClass('branch');
 	$("#rootS").children('li').addClass('viewing');
+	$.scrollTo(0);
 
 	$(".branch").on('click', function(event){
 		event.stopImmediatePropagation()
@@ -173,28 +178,50 @@ $(document).ready(function(){
 			loadBranch(viewing);
 		}
 	});
-	$("li").children('a.load').on('click', function(event){
+	$('a.load_branch').on('click', function(event){
 		event.stopImmediatePropagation();
 		event.preventDefault();
 		$('li.node').removeClass('viewing');
 		var viewing = $(event.target).parent('li');
-		viewing.children('ul').children('li').addClass('viewing');
+		viewing.children('ul').children('li.node,li.branch').addClass('viewing');
 		var id = viewing.children('ul').attr('id').match(/(\d+|root)S/i)[1]
 		getPages(id);
 		if (id != 'root') {
 			loadBranch(viewing);
 		}
+		$.scrollTo(0);
 	});
 
 	$("li.node").on('click', function(event){
 		event.stopImmediatePropagation();
 		event.preventDefault();
 		var viewing = $(event.target).parent('li');
-		var targetID = viewing.attr('id').match(/(\d+)P(None|\d+)_(\d+)/i)
+		var targetID = viewing.attr('id').match(/(\d+)P(None|\d+)_(\d+)/i);
 		var target = $('#page'+targetID[2]+'_'+targetID[3]);
 		if (viewing.hasClass('viewing')) {
 			$.scrollTo(target, {duration:700, easing:'easeOutExpo', offset: {top:-15}});
 		};
+	});
+
+	$("li.add_page span").on('click', function(event){
+		event.stopImmediatePropagation();
+		var list_entry = $(event.target).parent('li').parent('ul');
+		var sectionID = list_entry.attr('id').match(/(root|\d+)S/i)[1];
+		$.post("{{=URL(c='default',f='create_page')}}?parent="+sectionID, function(data){
+			var page_id = data['page_id'];
+			var node_id = data['page_id'];
+
+			$.get("{{=URL(c='render',f='page')}}?pages="+page_id, function(data){
+				$('head').append($(data).filter('#current_pages_css'));
+				$('#pages').append($(data).filter('.page'));
+				initialise_pages();
+
+				$("<li id="+node_id+"P"+sectionID+"_"+page_id+" class='node'><span>*</span></li>").insertBefore(list_entry.children('li.add_page'));
+				$.scrollTo($('#page'+sectionID+"_"+page_id), {duration:700, easing:'easeOutExpo', offset: {top:-15}});
+
+			});
+
+		}, 'json');
 	});
 
 });
@@ -210,12 +237,20 @@ $(document).ready(function(){
 			{{elementID = str(node['id'])+'S'+str(node['parent_id'])+'_'+str(node['page_id'])}}
 		{{pass}}
 
-		{{if not node['contains']:}}
-			<li id={{=elementID}} class='node'><span>{{=node['title']}}</span></li>
+		{{if node['title'] == '' :}}
+			{{title = '*'}}
 		{{else:}}
-			<li class="branch"><span>{{=node['title']}}</span> <a class='load' href="#">Go Here</a>
+			{{title = node['title']}}
+		{{pass}}
+
+
+		{{if not node['contains']:}}
+			<li id={{=elementID}} class='node'><span>{{=title}}</span></li>
+		{{else:}}
+			<li class="branch"><span>{{=title}}</span> <a class='load_branch' href="#">Go Here</a>
 				<ul id={{=elementID}} class="child">
 					{{getChildren(node['contains'])}}
+					<li class="add_page"><span>Add Page</span></li>
 				</ul>
 			</li>
 		{{pass}}
@@ -226,7 +261,8 @@ $(document).ready(function(){
 <body>
 
 	<div id="sidepane">
-		<button id='back_button'>Go back</button>
+		<button type="button" id='back_button'>Go back</button>
+		<button type="button" id="mknewbox">Create box</button>
 		<ul id="treeview">
 			{{getChildren(layout)}}
 		</ul>

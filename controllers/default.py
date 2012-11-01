@@ -111,17 +111,22 @@ def move_to_section(child_section_id, parent_section_id, page_number):
 
 #Page can be created as part of a section, or not
 @service.run
-def create_page(section=None):
-	try :
-		new_page = insert_new_page(section)
-	except Exception, e :
-		print 'oops: %s' % e
-		response.headers['Status'] = '400'
-		rcode = 400
-	else :
-		rcode = 200
-	finally :
-		return response.json(dict(return_code=rcode, page_id=new_page))
+def create_page():
+
+	parent = request.vars['parent']
+	if parent == 'root' :
+		parent = None
+
+	(new_page_id, object_id) = insert_new_page(parent)
+	#~ try :
+	#~ except Exception, e :
+		#~ print 'oops: %s' % e
+		#~ response.headers['Status'] = '400'
+		#~ rcode = 400
+	#~ else :
+		#~ rcode = 200
+	#~ finally :
+	return response.json(dict(page_id=new_page_id, node_id=object_id))
 
 
 @service.run
