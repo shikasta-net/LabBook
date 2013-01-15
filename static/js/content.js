@@ -23,7 +23,7 @@ content.handleDrop = function(event) {
 	var page_id = content.dropCrossBox.pageOver;
 	var box_id = content.dropCrossBox.elementOver.id;
 	var contentFile = event.dataTransfer.files[0];
-	var metadata = {name: contentFile.name, type: contentFile.type, size: contentFile.size}'
+	var metadata = {name: contentFile.name, type: contentFile.type, size: contentFile.size};
 	content.handleSaveContent(page_id, box_id, contentFile, metadata);
 	$(content.dropCrossBox.elementOver).removeClass('empty');
 	$(content.dropCrossBox.elementOver).off('dblclick.empty');
