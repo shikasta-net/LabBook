@@ -8,7 +8,7 @@
 	</div>
 {{elif box['content_type'] == 'text/html':}}
 	<div class="textbox">{{=extra_box_info[box['id']]['file_contents']}}</div>
-{{elif box['content_type'] in ['image/jpeg', 'image/svg+xml']:}}
+{{elif box['content_type'] in ['image/png', 'image/jpeg', 'image/svg+xml']:}}
 	<img src="{{=extra_box_info[box['id']]['file_url']}}" style="width: 100%; height: 100%" />
 {{else:}}<!-- Content type not supported: {{=box['content_type']}} -->{{pass}}
 {{return}}
