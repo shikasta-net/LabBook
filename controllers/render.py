@@ -33,10 +33,6 @@ def box_content():
     extra_box_info = {}
     extra_box_info[box.id] = box_content_info(box)
     return dict(box=box, extra_box_info=extra_box_info)
-	box = db(db.boxes.id == html_id_to_db_id(request.args[0])).select().first()
-	extra_box_info = {}
-	extra_box_info[box.id] = box_content_info(box)
-	return dict(box=box, extra_box_info=extra_box_info)
 		
 #Function to return the value of the given preference correctly formatted
 def get_preference(pref):
