@@ -2,8 +2,45 @@ from gluon.shell import exec_environment
 import xmlrpclib
 
 def index():
-	pages = db().select(db.page.id, db.page.title, db.page.modified_on, orderby=db.page.modified_on)
-	return dict(pages=pages)
+    statusList = []
+    useLocalMathJax1 = db(db.preferences.preference == 'useLocalMathJax').select().first()
+    if useLocalMathJax1 == None:
+        errorMsg = LI('Setting "Use local MathJax1?" not set.')
+        errorActions = UL(FORM('Set now:', SELECT(OPTION('', _selected='1'), 'True', 'False', _name='value'), INPUT(_value='boolean', _type='hidden', _name='type'), SPAN('', _id='target', _class='status'), _onchange=XML("ajax('%s', ['value', 'type'], 'target');" % URL('preferences/useLocalMathJax'))))
+        errorMsg.append(errorActions)
+        statusList.append(errorMsg)
+
+    if len(statusList) == 0:
+        statusList.append(LI('No installation errors detected!'))
+        
+	return dict(statusList=statusList)
+
+@request.restful()
+def preferences():
+    response.view = 'generic.json'
+    def GET(preferenceName):
+        record = db(db.preferences.preference == preferenceName).select().first()
+        return dict(preference=record)
+    def POST(preferenceName, **values):
+        update = db(db.preferences.preference == preferenceName).validate_and_update(**values)
+        if update.updated == 0:
+            full_record = dict([('preference', preferenceName)] + values.items())
+            update = db.preferences.validate_and_insert(**full_record)
+            if update.errors:
+                return SPAN("Error: %s" % update.errors.join(', '), _class="error")
+            else:
+                return SPAN("OK - Created preference", _class="ok")
+        elif update.errors:
+            return SPAN("Error: %s" % update.errors.join(', '), _class="error")
+        else:
+            return SPAN("OK - Updated preference", _class="ok")
+    return locals()
+
+@request.restful()
+def test():
+    def GET():
+        return 'Hello World'
+    return locals()
 
 def page():
 

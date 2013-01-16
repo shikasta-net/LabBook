@@ -1,26 +1,70 @@
-{{extend 'layout.html'}}
-
-<script type="text/javascript">
-var serviceURL = "{{=URL('call/run')}}";
-</script>
-{{=A(H1('Available sections'), _href=URL('sections'))}}
-{{=H1('Available pages')}}
-<ul>{{for page in pages:}}
-     {{if page.title != '':}}
-       {{ttl=str(page.id) + " " + page.title}}
-     {{else:}}
-       {{ttl=page.id}}
-     {{pass}}
-     {{=LI(A(ttl, _href=URL('page', args=page.id)))}}
-{{pass}}</ul>
-
-<div>
-<button type="button" onclick="jQuery.post(serviceURL + '/create_page', function(data){ console.log('create page :');console.log(data); }, 'json')">Add page</button>
-<br />
-<button type="button" onclick="jQuery.post(serviceURL + '/delete_page', { page_id:$('select#delpg').val() }, function(data){ console.log('delete page :');console.log(data); }, 'json')">Delete page</button><select id='delpg'>
-	{{for page in pages:}}
-		<option value='{{=page.id}}'>{{=page.id}}</option>
-	{{pass}}
-</select>
-</div>
+<html>
+<head>
+<link href='http://fonts.googleapis.com/css?family=Arvo:400,400italic,700|Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+<style>
+body {
+	font-family: Open Sans;
+	margin-left: 20%;
+	margin-top: 10%;
+	font-weight: 300;
+}
+h1 {
+	font-family: Arvo;
+	font-weight: 700;
+	font-size: 64pt;
+}
+h2 {
+	font-family: Open Sans;
+	font-weight: 700;
+	font-size: 16pt;
+}
+select {
+	font-family: Open Sans;
+	font-weight: 300;
+	margin-left: 1em;
+	font-size: 10pt;
+}
+span.ok {
+	color: green;
+	margin-left: 1em;
+}
+span.ok:before {
+	content:  "\2713  ";
+}
+span.error {
+	color: red;
+	margin-left: 1em;
+}
+span.error:before {
+	content: "\2717  ";
+}
+</style>
+<script type="text/javascript"><!--
+    // These variables are used by the web2py_ajax_init
+        // function in web2py.js (which is loaded below).
+    var w2p_ajax_confirm_message =
+        "{{=T('Are you sure you want to delete this object?')}}";
+    var w2p_ajax_date_format = "{{=T('%Y-%m-%d')}}";
+    var w2p_ajax_datetime_format = "{{=T('%Y-%m-%d %H:%M:%S')}}";
+//--></script>
+<script src="{{=URL('static', 'js/jQuery.js')}}"
+		type="text/javascript"></script>
+<script src="{{=URL('static','js/web2py.js')}}"
+        type="text/javascript"></script>
+</head>
+<body>
+<h1>LabBook</h1>
+<h2>Welcome</h2>
+<p>Welcome to the LabBook! This software was written by Kym Eden-Jones and Alastair Mailer.</p>
+<h2>LabBook Status</h2>
+{{=UL(statusList)}}
+<h2>LabBook Useful Links</h2>
+<ul>
+	<li><a href="{{=URL(c='appadmin')}}">LabBook appadmin page</a></li>
+	<li>Access PageLayout view - TODO</li>
+	<li>Access SectionLayout view - TODO</li>
+	<li><a href="{{=URL('render', 'page/1')}}">Render test page</a></li>
+</ul>
+</body>
+</html>
 
