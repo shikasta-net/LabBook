@@ -1,13 +1,14 @@
-{{def render_content(box=box):}}
+{{def render_content(box, box_info):}}
 {{if box['content_type'] == '':}}
 	<!-- This box is empty -->
 {{elif box['content_type'] == 'box':}}
-	{{childbox = extra_box_info[box['id']]['child_box']}}
-	<div class="clipbox" id="box{{box['id']}}">
-		{{ render_content(childbox) }}
+	{{childbox = box_info['child_box']}}
+	{{childbox_info = box_info['child_box_info']}}
+	<div class="clipbox">
+		{{ render_content(childbox, childbox_info) }}
 	</div>
 {{elif box['content_type'] == 'text/html':}}
-	<div class="textbox">{{=extra_box_info[box['id']]['file_contents']}}</div>
+	<div class="textbox">{{=box_info['file_contents']}}</div>
 {{elif box['content_type'] in ['image/png', 'image/jpeg', 'image/svg+xml']:}}
 	<img src="{{=extra_box_info[box['id']]['file_url']}}" style="width: 100%; height: 100%" />
 {{else:}}<!-- Content type not supported: {{=box['content_type']}} -->{{pass}}

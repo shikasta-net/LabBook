@@ -3,14 +3,14 @@ var containers = containers||{};
 containers.serviceURL = '/LabBook/containers/call/run';
 
 containers.handleMoveContainer = function (event, ui) {
-    var page_width = $('#content_area').width();
-    var page_height = $('#content_area').height();
+    var page_width = $(ui.helper).parent().width();
+    var page_height = $(ui.helper).parent().height();
 	jQuery.post(containers.serviceURL + '/move_box', { id:$(ui.helper).attr("id"), x:$(ui.position).attr("left")*100/page_width, y:$(ui.position).attr("top")*100/page_height }, function(data){ console.log("move container : ");console.log(data); }, "json");
 }
 
 containers.handleResizeContainer = function(event, ui) {
-    var page_width = $('#content_area').width();
-    var page_height = $('#content_area').height();
+    var page_width = $(ui.helper).parent().width();
+    var page_height = $(ui.helper).parent().height();
 	jQuery.post(containers.serviceURL + '/resize_box', { id:$(ui.helper).attr("id"), w:$(ui.size).attr("width")*100/page_width, h:$(ui.size).attr("height")*100/page_height }, function(data){ console.log("resize container : ");console.log(data); }, "json");
 }
 

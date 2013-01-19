@@ -6,21 +6,26 @@ def page():
 	page = get_page(page_id)
 	boxes_on_pages = page.boxes.select()
 	extra_box_info = {}
+	child_boxes = []
 	for box in boxes_on_pages:
 		extra_box_info[box.id] = box_content_info(box)
+		if box.content_type == 'box':
+			child_boxes.append(box.content_id)
 
 	if get_preference('useLocalMathJax') :
 		mathjax_URL = URL('static/js', 'MathJax/MathJax.js')+'?config=TeX-AMS-MML_HTMLorMML'
 	else :
 		mathjax_URL = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
-	return dict(page=page, boxes_on_pages=boxes_on_pages, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
+	return dict(page=page, boxes_on_pages=boxes_on_pages, child_boxes=child_boxes, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
 
 from xml.dom import minidom
 def box_content_info(box):
 	extra_info = {}
 	if box.content_type == 'box':
-		extra_info = {'child_box': box.content_id}
+		childbox = db.boxes[box.content_id]
+		childbox_info = box_content_info(childbox)
+		extra_info = {'child_box': childbox, 'child_box_info': childbox_info}
 	elif box.content_type == 'text/html':
 		file_content = get_file_contents(box.page_id, box.id, box.content_id)
 		extra_info = {'file_contents': file_content}
