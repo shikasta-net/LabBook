@@ -24,7 +24,7 @@ def box_content_info(box):
 	elif box.content_type == 'text/html':
 		file_content = get_file_contents(box.page_id, box.id, box.content_id)
 		extra_info = {'file_contents': file_content}
-	elif box.content_type in ['image/jpeg', 'image/svg+xml']:
+	elif box.content_type in ['image/jpeg', 'image/svg+xml', 'application/pdf']:
 		extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
 	return extra_info
 
