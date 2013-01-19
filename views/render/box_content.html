@@ -10,7 +10,9 @@
 {{elif box['content_type'] == 'text/html':}}
 	<div class="textbox">{{=box_info['file_contents']}}</div>
 {{elif box['content_type'] in ['image/png', 'image/jpeg', 'image/svg+xml']:}}
+	<div class="imgbox" id="box{{=box['id']}}">
 	<img src="{{=extra_box_info[box['id']]['file_url']}}" style="width: 100%; height: 100%" />
+	</div>
 {{else:}}<!-- Content type not supported: {{=box['content_type']}} -->{{pass}}
 {{return}}
-{{render_content(box)}}
+{{render_content(box, box_info)}}

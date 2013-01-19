@@ -35,9 +35,7 @@ def box_content_info(box):
 
 def box_content():
     box = get_box(html_id_to_db_id(request.args[0]))
-    extra_box_info = {}
-    extra_box_info[box.id] = box_content_info(box)
-    return dict(box=box, extra_box_info=extra_box_info)
+    return dict(box=box, box_info=box_content_info(box))
 		
 #Function to return the value of the given preference correctly formatted
 def get_preference(pref):
@@ -58,7 +56,7 @@ def doc_ready():
 	return dict(page=page)
 
 def get_content_dir(page_id, box_id):
-	return os.path.join(request.folder, get_content_reldir(page_id, box_id))
+	return os.path.join(request.folder, get_content_reldir(box_id))
 
 def get_file_contents(page_id, box_id, content_id):
 	content_dir = os.path.join(os.getcwd(), get_content_dir(page_id, box_id))
