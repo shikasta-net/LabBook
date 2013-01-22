@@ -22,6 +22,7 @@ def page():
 from xml.dom import minidom
 def box_content_info(box):
 	extra_info = {}
+	extra_info['file_path'] = get_content_dir(box.page_id, box.id)
 	if box.content_type == 'box':
 		childbox = db.boxes[box.content_id]
 		childbox_info = box_content_info(childbox)
