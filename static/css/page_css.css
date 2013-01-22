@@ -151,9 +151,10 @@ div.cbox .ui-selected {
     background-color: red;
 }
 
-
 div.imgbox {
+	position: relative;
 }
+
 div.clipbox {
     width: 100%;
     height: 100%;
