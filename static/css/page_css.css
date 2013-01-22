@@ -170,6 +170,24 @@ div.textbox p {
     padding: 0;
 }
 
+div.content_not_supported {
+	font-family: sans-serif;
+	color: lightGrey;
+	height: 4em;
+	top: 50%;
+	margin-top: -2em;
+	position: relative;
+	text-align: center;
+}
+
+div.content_not_supported span.filename {
+	font-size: 14pt;
+}
+
+div.content_not_supported span.mime_type {
+	font-size: 10pt;
+}
+
 .ui-state-disabled {
     opacity: inherit;
 

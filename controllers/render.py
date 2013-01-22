@@ -22,6 +22,7 @@ def page():
 from xml.dom import minidom
 def box_content_info(box):
 	extra_info = {}
+	extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
 	if box.content_type == 'box':
 		childbox = db.boxes[box.content_id]
 		childbox_info = box_content_info(childbox)
@@ -29,8 +30,6 @@ def box_content_info(box):
 	elif box.content_type == 'text/html':
 		file_content = get_file_contents(box.page_id, box.id, box.content_id)
 		extra_info = {'file_contents': file_content}
-	elif box.content_type in ['image/png', 'image/jpeg', 'image/svg+xml']:
-		extra_info = {'file_url': get_file_url(box.page_id, box.id, box.content_id)}
 	return extra_info
 
 def box_content():
