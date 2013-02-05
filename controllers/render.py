@@ -11,7 +11,10 @@ def page():
 	if request.vars['pages'] :
 
 		page_order = request.vars['pages'].split(',')
-		page_order = zip(request.vars['pages'].split(','), [None]*len(page_order))
+		section_order = []
+		for page_id in page_order :
+			section_order.append(get_section(page_id))
+		page_order = zip(request.vars['pages'].split(','), section_order)
 
 		for page_id, parent_id in page_order :
 			check_page_id(page_id)

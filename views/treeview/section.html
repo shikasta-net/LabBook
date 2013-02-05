@@ -52,14 +52,6 @@
 		overflow-y: scroll;
 	}
 
-	li.branch span:hover {
-		text-decoration: underline;
-	}
-
-	li.node span:hover {
-		text-decoration: underline;
-	}
-
 	ul {
 		list-style-type: none;
 	}
@@ -71,7 +63,10 @@
 		padding: 0;
 		margin-top: 11px;
 		margin-left: 5px;
+
 	}
+
+	.selected { background: #FECA40; }
 
 	li {
 		margin: 0;
@@ -83,6 +78,11 @@
 		margin-top: -11px;
 		margin-left: -5px;
 	}
+	li#rootS {
+		margin-top: 0px;
+		margin-left: 0px;
+	}
+
 
 	li.add_page {
 		color: blue;
@@ -129,12 +129,6 @@ function getPages(sec) {
 		$(".section").on('click', function(e) {
 			getPages($(e.target).attr('id').match(/page(None|\d+)_(\d+)/i)[1]);
 		});
-		$("#back_button").off('click').on('click', function(e) {
-			$.get("{{=URL(c='navigate',f='parent')}}?section="+current_section, function(data){
-				console.log(data['parent']);
-				getPages(data['parent']);
-			}, "json");
-		});
 	});
 };
 
@@ -143,70 +137,98 @@ function getPages(sec) {
 <script type="text/javascript">
 $(document).ready(function(){
 
-	function loadBranch(target){
+	var current_selected_id = null;
+	var current_viewing_id = null;
+
+	function makeSelectable(target){
+		target.addClass('selectable');
+		target.on('click', function(){
+			$(".selected").removeClass("selected");
+			target.addClass("selected");
+			current_selected_id = target.attr('id');
+		});
+	}
+
+	function unmakeSelectable(target){
+		target.removeClass('selected');
+		current_selected_id = null;
+		target.off('click');
+		target.removeClass('selectable');
+	}
+
+
+	function enterBranch(target){
 		//~ getPages(target.children('ul').attr('id').match(/s(\d+)/i)[1]);
+		current_viewing_id = target.attr('id');
+		target.removeClass('viewing');
+		target.siblings('li').removeClass('viewing');
 		target.addClass('parent');
 		target.parent('ul').siblings('span').hide();
-		target.parent('ul').siblings('.load_branch').hide();
-		target.siblings().hide();
+		target.siblings('li').hide();
 		target.children('ul').show();
-
+		target.children('ul').children('li').addClass('viewing');
 	};
 	function exitBranch(target){
 		//~ getPages(target.parent('ul').attr('id').match(/(s(\d+)|root)/i)[1]);
+		current_viewing_id = target.parent('ul').parent('li.parent').attr('id');
+		target.children('ul').children('li').removeClass('viewing');
 		target.removeClass('parent');
 		target.children('ul').hide();
 		target.parent('ul').siblings('span').show();
-		target.parent('ul').siblings('.load_branch').show();
-		target.siblings().show();
+		target.siblings('li').show();
+		target.siblings('li').addClass('viewing');
+		target.addClass('viewing');
 	};
 
 	getPages('{{=parent}}')
 
 	$(".branch").find('ul').hide();
-	$("#rootS").show();
-	$("#rootS").parent('li').removeClass('branch');
-	$("#rootS").children('li').addClass('viewing');
+	$("#rootS").removeClass('branch');
+	enterBranch($("#rootS"));
+	$(".viewing").each(function(){
+		makeSelectable($(this))
+	});
 	$.scrollTo(0);
 
-	$(".branch").on('click', function(event){
-		event.stopImmediatePropagation()
-		var viewing = $(event.target).parent('li');
-		if(viewing.hasClass('parent')){
+
+
+	$('#load_branch').on('click', function(event){
+		event.stopImmediatePropagation();
+		if (current_selected_id != null) {
+			var viewing = $(document.getElementById(current_selected_id));
+			if(viewing.hasClass('branch')) {
+				$(".viewing").each(function(){
+					unmakeSelectable($(this));
+				});
+				enterBranch(viewing);
+				$(".viewing").each(function(){
+					makeSelectable($(this));
+				});
+			} else {
+				console.log('no handler yet for '+current_selected_id);
+			}
+		}
+	});
+
+	$('#back_branch').on('click', function(event){
+		event.stopImmediatePropagation();
+		if (current_viewing_id != 'rootS') {
+			var viewing = $(document.getElementById(current_viewing_id));
+			$(".viewing").each(function(){
+				unmakeSelectable($(this));
+			});
 			exitBranch(viewing);
-		} else {
-			loadBranch(viewing);
+			$(".viewing").each(function(){
+				makeSelectable($(this));
+			});
 		}
 	});
-	$('a.load_branch').on('click', function(event){
-		event.stopImmediatePropagation();
-		event.preventDefault();
-		$('li.node').removeClass('viewing');
-		var viewing = $(event.target).parent('li');
-		viewing.children('ul').children('li.node,li.branch').addClass('viewing');
-		var id = viewing.children('ul').attr('id').match(/(\d+|root)S/i)[1]
-		getPages(id);
-		if (id != 'root') {
-			loadBranch(viewing);
-		}
-		$.scrollTo(0);
-	});
 
-	$("li.node").on('click', function(event){
+	$("#add_page").on('click', function(event){
 		event.stopImmediatePropagation();
-		event.preventDefault();
-		var viewing = $(event.target).parent('li');
-		var targetID = viewing.attr('id').match(/(\d+)P(None|\d+)_(\d+)/i);
-		var target = $('#page'+targetID[2]+'_'+targetID[3]);
-		if (viewing.hasClass('viewing')) {
-			$.scrollTo(target, {duration:700, easing:'easeOutExpo', offset: {top:-15}});
-		};
-	});
+		var list_entry = $(document.getElementById(current_viewing_id));
+		var sectionID = current_viewing_id.match(/(root|\d+)S/i)[1];
 
-	$("li.add_page span").on('click', function(event){
-		event.stopImmediatePropagation();
-		var list_entry = $(event.target).parent('li').parent('ul');
-		var sectionID = list_entry.attr('id').match(/(root|\d+)S/i)[1];
 		$.post("{{=URL(c='default',f='create_page')}}?parent="+sectionID, function(data){
 			var page_id = data['page_id'];
 			var node_id = data['page_id'];
@@ -216,7 +238,11 @@ $(document).ready(function(){
 				$('#pages').append($(data).filter('.page'));
 				initialise_pages();
 
-				$("<li id="+node_id+"P"+sectionID+"_"+page_id+" class='node'><span>*</span></li>").insertBefore(list_entry.children('li.add_page'));
+				if (sectionID == 'root') {
+					sectionID	= 'None';
+				}
+
+				list_entry.children('ul').append("<li id="+node_id+"P"+sectionID+"_"+page_id+" class='node viewing selectable'><span>*</span></li>");
 				$.scrollTo($('#page'+sectionID+"_"+page_id), {duration:700, easing:'easeOutExpo', offset: {top:-15}});
 
 			});
@@ -224,6 +250,39 @@ $(document).ready(function(){
 		}, 'json');
 	});
 
+	$("#load_view").on('click', function(event){
+		event.stopImmediatePropagation();
+		event.preventDefault();
+		var id = current_viewing_id.match(/(\d+|root)S/i)[1]
+		getPages(id);
+		$.scrollTo(0);
+	});
+
+	//~ $("#load_view").on('click', function(event){
+		//~ event.stopImmediatePropagation();
+		//~ event.preventDefault();
+		//~ //var viewing = $(document.getElementById(current_viewing_id));
+		//~ var targetID = current_viewing_id.match(/(\d+)P(None|\d+)_(\d+)/i);
+		//~ var target = $('#page'+targetID[2]+'_'+targetID[3]);
+		//~ if (viewing.hasClass('viewing')) {
+			//~ $.scrollTo(target, {duration:700, easing:'easeOutExpo', offset: {top:-15}});
+		//~ };
+	//~ });
+
+/*
+
+
+
+
+		$("#back_button").off('click').on('click', function(e) {
+			$.get("{{=URL(c='navigate',f='parent')}}?section="+current_section, function(data){
+				console.log(data['parent']);
+				getPages(data['parent']);
+			}, "json");
+		});
+*/
+
+					//~ <li class="add_page"><span>Add Page</span></li>
 });
 </script>
 
@@ -247,10 +306,9 @@ $(document).ready(function(){
 		{{if not node['contains']:}}
 			<li id={{=elementID}} class='node'><span>{{=title}}</span></li>
 		{{else:}}
-			<li class="branch"><span>{{=title}}</span> <a class='load_branch' href="#">Go Here</a>
-				<ul id={{=elementID}} class="child">
+			<li id={{=elementID}} class="branch"><span>{{=title}}</span>
+				<ul class="child">
 					{{getChildren(node['contains'])}}
-					<li class="add_page"><span>Add Page</span></li>
 				</ul>
 			</li>
 		{{pass}}
@@ -261,11 +319,17 @@ $(document).ready(function(){
 <body>
 
 	<div id="sidepane">
-		<button type="button" id='back_button'>Go back</button>
-		<button type="button" id="mknewbox">Create box</button>
+		<center>
+		<button type="button" id="back_branch"><=</button> <button type="button" id="add_page">+</button> <button type="button" id="load_branch">=></button>
+		<button type="button" id="load_view">Load view</button>
+		</center>
 		<ul id="treeview">
 			{{getChildren(layout)}}
 		</ul>
+		<div>
+			Create box + layout menu
+			<button type="button" id="mknewbox">Create box</button>
+		</div>
 	</div>
 	<div id="pages">
 	</div>

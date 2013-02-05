@@ -38,6 +38,8 @@ def get_branch(parent=None):
 	del ordered_objects[-1]
 	return ordered_objects[::-1]
 
+def get_section(page_id) :
+	return db(db.object_tree.page_id == page_id).select().first().parent_object
 
 def insert_section(parent=None) :
 	db.object_tree.insert(parent_object=parent)
