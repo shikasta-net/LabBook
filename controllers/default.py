@@ -111,26 +111,22 @@ def move_to_section(child_section_id, parent_section_id, page_number):
 
 #Page can be created as part of a section, or not
 @service.run
-def create_page():
+def page_create():
 
 	parent = request.vars['parent']
 	if parent == 'root' :
 		parent = None
 
 	(new_page_id, object_id) = insert_new_page(parent)
-	#~ try :
-	#~ except Exception, e :
-		#~ print 'oops: %s' % e
-		#~ response.headers['Status'] = '400'
-		#~ rcode = 400
-	#~ else :
-		#~ rcode = 200
-	#~ finally :
+
 	return response.json(dict(page_id=new_page_id, node_id=object_id))
 
 
 @service.run
-def page_delete(page_id):
+def page_delete():
+
+	page_id = request.vars['page']
+
 	check_page_id(page_id)
 	for box in get_boxes_on_page(page_id) :
 		db_id = box.id
@@ -143,7 +139,8 @@ def page_delete(page_id):
 
 	delete_page(page_id)
 
-	return response.json(dict(return_code=200))
+	return True
+
 
 
 # Function to update the page title

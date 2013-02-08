@@ -229,7 +229,7 @@ $(document).ready(function(){
 		var list_entry = $(document.getElementById(current_viewing_id));
 		var sectionID = current_viewing_id.match(/(root|\d+)S/i)[1];
 
-		$.post("{{=URL(c='default',f='create_page')}}?parent="+sectionID, function(data){
+		$.post("{{=URL(c='default',f='page_create')}}?parent="+sectionID, function(data){
 			var page_id = data['page_id'];
 			var node_id = data['page_id'];
 
@@ -242,7 +242,8 @@ $(document).ready(function(){
 					sectionID	= 'None';
 				}
 
-				list_entry.children('ul').append("<li id="+node_id+"P"+sectionID+"_"+page_id+" class='node viewing selectable'><span>*</span></li>");
+				list_entry.children('ul').append("<li id="+node_id+"P"+sectionID+"_"+page_id+" class='node viewing'><span>*</span></li>");
+				makeSelectable($(document.getElementById(node_id+"P"+sectionID+"_"+page_id)));
 				$.scrollTo($('#page'+sectionID+"_"+page_id), {duration:700, easing:'easeOutExpo', offset: {top:-15}});
 
 			});
@@ -250,10 +251,35 @@ $(document).ready(function(){
 		}, 'json');
 	});
 
+	$("#delete_page").on('click', function(event){
+		event.stopImmediatePropagation();
+		var type = current_selected_id.match(/\d+(P|S)(None|\d+)_(\d+)/i)[1];
+		var section_id = current_selected_id.match(/\d+(P|S)(None|\d+)_(\d+)/i)[2];
+		var page_id = current_selected_id.match(/\d+(P|S)(None|\d+)_(\d+)/i)[3];
+
+		if (type == 'P') {
+			console.log('deleting page');
+			console.log(section_id);
+			console.log(page_id);
+			$.post("{{=URL(c='default',f='page_delete')}}?page="+page_id, function(data){
+				console.log(data);
+				if (data == 'True') {
+					console.log('success');
+					$(document.getElementById(current_selected_id)).remove();
+					$(document.getElementById('page'+section_id+'_'+page_id)).remove();
+				}
+			});
+		} else if (type == 'S') {
+			console.log('not deleting section');
+			console.log(section_id);
+			console.log(page_id);
+		};
+	});
+
 	$("#load_view").on('click', function(event){
 		event.stopImmediatePropagation();
 		event.preventDefault();
-		var id = current_viewing_id.match(/(\d+|root)S/i)[1]
+		var id = current_viewing_id.match(/(root|\d+)S/i)[1]
 		getPages(id);
 		$.scrollTo(0);
 	});
@@ -320,7 +346,7 @@ $(document).ready(function(){
 
 	<div id="sidepane">
 		<center>
-		<button type="button" id="back_branch"><=</button> <button type="button" id="add_page">+</button> <button type="button" id="load_branch">=></button>
+		<button type="button" id="back_branch"><=</button> <button type="button" id="add_page">+</button> <button type="button" id="delete_page">-</button> <button type="button" id="load_branch">=></button>
 		<button type="button" id="load_view">Load view</button>
 		</center>
 		<ul id="treeview">

@@ -92,6 +92,7 @@ def insert_new_page(section):
 	db((db.object_tree.parent_object == section) \
 		& (db.object_tree.next_object == None)
 		& (db.object_tree.id != new_page_id)).update(next_object=new_leaf_id)
+	db(db.object_tree.id == new_leaf_id).update(next_object = None); #Why is this the only way to get the last entry to have next_object = None on creation?????????? setting to None either directly or via a variable during insert does not work. Setting field default=None is wrong; it means there is no default. HOW!!!!!?
 	return (new_page_id, new_leaf_id)
 
 # Return the page row object
@@ -109,9 +110,15 @@ def get_page_title(page_id):
 def update_page(page_id, **field_dict):
 	db(db.pages.id==page_id).update(**field_dict)
 
+
+#fix all of this next page propegation
 def delete_page(page_id) :
 	#~ page = db(db.pages.id == page_id).select().first()
 	#TODO: delete page propegates surrounding tree structure
+	the_page_object = db(db.object_tree.page_id == page_id).select().first()
+	db(db.object_tree.next_object == the_page_object.id).update(next_object = the_page_object.next_object);
+
+	db(db.object_tree.page_id == page_id).delete()
 	db(db.pages.id == page_id).delete()
 
 
