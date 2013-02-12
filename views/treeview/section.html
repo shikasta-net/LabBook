@@ -146,6 +146,10 @@ $(document).ready(function(){
 			$(".selected").removeClass("selected");
 			target.addClass("selected");
 			current_selected_id = target.attr('id');
+			if(current_viewing_id.match(/(\d+|root)S/i)[1] == current_section) {
+				var targetID = current_selected_id.match(/(\d+)(P|S)(None|\d+)_(\d+)/i);
+				$.scrollTo($('#page'+targetID[3]+'_'+targetID[4]), {duration:700, easing:'easeOutExpo', offset: {top:-15}});
+			}
 		});
 	}
 
@@ -179,6 +183,12 @@ $(document).ready(function(){
 		target.siblings('li').addClass('viewing');
 		target.addClass('viewing');
 	};
+	function loadBranch(target){
+		var id = target.attr('id').match(/(root|\d+)S/i)[1]
+		getPages(id);
+		$.scrollTo(0);
+	};
+
 
 	getPages('{{=parent}}')
 
@@ -192,7 +202,7 @@ $(document).ready(function(){
 
 
 
-	$('#load_branch').on('click', function(event){
+	$('#enter_branch').on('click', function(event){
 		event.stopImmediatePropagation();
 		if (current_selected_id != null) {
 			var viewing = $(document.getElementById(current_selected_id));
@@ -223,6 +233,12 @@ $(document).ready(function(){
 			});
 		}
 	});
+
+	$("#load_view").on('click', function(event){
+		event.stopImmediatePropagation();
+		loadBranch( $(document.getElementById(current_viewing_id)) );
+	});
+
 
 	$("#add_page").on('click', function(event){
 		event.stopImmediatePropagation();
@@ -276,39 +292,38 @@ $(document).ready(function(){
 		};
 	});
 
-	$("#load_view").on('click', function(event){
-		event.stopImmediatePropagation();
-		event.preventDefault();
-		var id = current_viewing_id.match(/(root|\d+)S/i)[1]
-		getPages(id);
-		$.scrollTo(0);
-	});
-
-	//~ $("#load_view").on('click', function(event){
-		//~ event.stopImmediatePropagation();
-		//~ event.preventDefault();
-		//~ //var viewing = $(document.getElementById(current_viewing_id));
-		//~ var targetID = current_viewing_id.match(/(\d+)P(None|\d+)_(\d+)/i);
-		//~ var target = $('#page'+targetID[2]+'_'+targetID[3]);
-		//~ if (viewing.hasClass('viewing')) {
-			//~ $.scrollTo(target, {duration:700, easing:'easeOutExpo', offset: {top:-15}});
-		//~ };
-	//~ });
 
 /*
-
-
-
-
-		$("#back_button").off('click').on('click', function(e) {
-			$.get("{{=URL(c='navigate',f='parent')}}?section="+current_section, function(data){
-				console.log(data['parent']);
-				getPages(data['parent']);
-			}, "json");
-		});
+	$("li.branch").on('dblclick', function(event){
+		event.stopImmediatePropagation();
+		event.preventDefault();
+		if (current_selected_id != null) {
+			var viewing = $(document.getElementById(current_selected_id));
+			if(viewing.hasClass('branch')) {
+				$(".viewing").each(function(){
+					unmakeSelectable($(this));
+				});
+				enterBranch(viewing);
+				$(".viewing").each(function(){
+					makeSelectable($(this));
+				});
+				loadBranch( $(document.getElementById(current_viewing_id)) );
+			} else {
+				console.log('no handler yet for '+current_selected_id);
+			}
+		}
+		if (window.getSelection) {
+			if (window.getSelection().empty) {  // Chrome
+				window.getSelection().empty();
+			} else if (window.getSelection().removeAllRanges) {  // Firefox
+				window.getSelection().removeAllRanges();
+			}
+		} else if (document.selection) {  // IE?
+			document.selection.empty();
+		}
+	});
 */
 
-					//~ <li class="add_page"><span>Add Page</span></li>
 });
 </script>
 
@@ -346,7 +361,7 @@ $(document).ready(function(){
 
 	<div id="sidepane">
 		<center>
-		<button type="button" id="back_branch"><=</button> <button type="button" id="add_page">+</button> <button type="button" id="delete_page">-</button> <button type="button" id="load_branch">=></button>
+		<button type="button" id="back_branch"><=</button> <button type="button" id="add_page">+</button> <button type="button" id="delete_page">-</button> <button type="button" id="enter_branch">=></button>
 		<button type="button" id="load_view">Load view</button>
 		</center>
 		<ul id="treeview">
