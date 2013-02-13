@@ -34,10 +34,10 @@ def page():
 
 		for object in section_contents :
 
-			if object.page_id :
-				page_id = str(object.page_id)
-				if object.parent_object :
-					parent_id = str(object.parent_object.id)
+			if object['page_id'] :
+				page_id = str(object['page_id'])
+				if object['parent_object'] :
+					parent_id = str(object['parent_object'])
 				else :
 					parent_id = None
 				check_page_id(page_id)
@@ -45,8 +45,8 @@ def page():
 				boxes_on_pages[page_id] = pages[page_id].boxes.select()
 				extra_box_info[page_id] = {}
 			else :
-				page_id = str(get_branch(object.id)[0].page_id)
-				parent_id = str(object.id)
+				page_id = str(get_branch(object['id'])[0]['page_id'])
+				parent_id = str(object['id'])
 				check_page_id(page_id)
 				sections[page_id] = get_page(page_id)
 				boxes_on_pages[page_id] = sections[page_id].boxes.select()

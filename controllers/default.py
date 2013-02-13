@@ -55,59 +55,46 @@ def delete_section(section_id):
 # This back shifts all page numbers of the elements of the original section to fill the gap left by the removed element
 # and also down shifts all the page numbers in the target section to accomodate the move.
 @service.run
-def move_to_section(page_id, section_id, page_number):
-	try :
-		this_page = db(db.pages.id==page_id).select().first()
+def move_to_section():
 
-		for p in db((db.pages.section==this_page.section) & (db.pages.number>this_page.number)).select() :
-			p.update_record(number=(p.number-1), modified_on=request.now)
-		for s in db((db.section.parent==this_page.section) & (db.section.number>this_page.number)).select() :
-			s.update_record(number=(s.number-1), modified_on=request.now)
+	page_id = request.vars['page']
+	after_page = request.vars['after']
+	section_id = request.vars['section']
+	if 'None' in section_id or 'root' in section_id  :
+		section_id = None
 
-		for p in db((db.pages.section==section_id) & (db.pages.number>=page_number)).select() :
-			p.update_record(number=(p.number+1), modified_on=request.now)
-		for s in db((db.section.parent==section_id) & (db.section.number>=page_number)).select() :
-			s.update_record(number=(s.number+1), modified_on=request.now)
+	move_page_to_section(page_id, after_page, section_id)
 
-		this_page.update_record(section=section_id, number=page_number, modified_on=request.now)
+	return True
 
-	except Exception, e :
-		print 'oops: %s' % e
-		response.headers['Status'] = '400'
-		rcode = 400
-	else :
-		rcode = 200
-	finally :
-		return response.json(dict(return_code=rcode))
+#~ @service.run
+#~ def move_to_section(child_section_id, parent_section_id, page_number):
+	#~ try :
+		#~ if child_section_id == parent_section_id :
+			#~ raise Exception('Cyclically deffined sectioning attempted.')
+		#~ else :
+			#~ this_section = db(db.section.id==child_section_id).select().first()
 
-@service.run
-def move_to_section(child_section_id, parent_section_id, page_number):
-	try :
-		if child_section_id == parent_section_id :
-			raise Exception('Cyclically deffined sectioning attempted.')
-		else :
-			this_section = db(db.section.id==child_section_id).select().first()
+			#~ for p in db((db.pages.section==this_section.parent) & (db.pages.number>this_section.number)).select() :
+				#~ p.update_record(number=(p.number-1), modified_on=request.now)
+			#~ for s in db((db.section.parent==this_section.parent) & (db.section.number>this_section.number)).select() :
+				#~ s.update_record(number=(s.number-1), modified_on=request.now)
 
-			for p in db((db.pages.section==this_section.parent) & (db.pages.number>this_section.number)).select() :
-				p.update_record(number=(p.number-1), modified_on=request.now)
-			for s in db((db.section.parent==this_section.parent) & (db.section.number>this_section.number)).select() :
-				s.update_record(number=(s.number-1), modified_on=request.now)
+			#~ for p in db((db.pages.section==section_id) & (db.pages.number>=page_number)).select() :
+				#~ p.update_record(number=(p.number+1), modified_on=request.now)
+			#~ for s in db((db.section.parent==section_id) & (db.section.number>=page_number)).select() :
+				#~ s.update_record(number=(s.number+1), modified_on=request.now)
 
-			for p in db((db.pages.section==section_id) & (db.pages.number>=page_number)).select() :
-				p.update_record(number=(p.number+1), modified_on=request.now)
-			for s in db((db.section.parent==section_id) & (db.section.number>=page_number)).select() :
-				s.update_record(number=(s.number+1), modified_on=request.now)
+			#~ this_section.update_record(parent=parent_section_id, number=page_number, modified_on=request.now)
 
-			this_section.update_record(parent=parent_section_id, number=page_number, modified_on=request.now)
-
-	except Exception, e :
-		print 'oops: %s' % e
-		response.headers['Status'] = '400'
-		rcode = 400
-	else :
-		rcode = 200
-	finally :
-		return response.json(dict(return_code=rcode))
+	#~ except Exception, e :
+		#~ print 'oops: %s' % e
+		#~ response.headers['Status'] = '400'
+		#~ rcode = 400
+	#~ else :
+		#~ rcode = 200
+	#~ finally :
+		#~ return response.json(dict(return_code=rcode))
 
 #Page can be created as part of a section, or not
 @service.run

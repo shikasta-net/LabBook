@@ -3,6 +3,7 @@ from gluon.custom_import import track_changes; track_changes(True)
 from gluon.tools import *
 from gluon import current
 import os, shutil
+from operator import itemgetter
 current.db = db
 
 service = Service()
@@ -27,16 +28,28 @@ def get_parent(current):
 	return db(db.object_tree.id == current).select().first().parent_object
 
 def get_branch(parent=None):
-	objects_in_branch = db(db.object_tree.parent_object == parent).select()
-	ordered_objects = [None] # None is to terminate while when reaching end of section
-	for object in objects_in_branch:
-		temp_list = [object]
-		if object.next_object is not None :
-			while temp_list[-1].next_object.ALL not in ordered_objects:
-				 temp_list.append(temp_list[-1].next_object.ALL)
-		ordered_objects = temp_list + ordered_objects
-	del ordered_objects[-1]
+	objects_in_branch = db(db.object_tree.parent_object == parent).select().as_list()
+
+	#~ print [l.id for l in sorted(objects_in_branch, key = lambda x,y: x.id == y.next_object)]
+
+	ordered_objects = [] # None is to terminate while when reaching end of section
+	while objects_in_branch :
+		temp_list = [objects_in_branch.pop()]
+		while temp_list[-1]['next_object'] :
+			obj_index = None
+			for (index, o) in enumerate(objects_in_branch) :
+				if o['id'] == temp_list[-1]['next_object'] :
+					obj_index = index
+					break
+
+			if obj_index is not None :
+				temp_list.append(objects_in_branch.pop(obj_index))
+			else :
+				break
+
+		ordered_objects.extend(reversed(temp_list))
 	return ordered_objects[::-1]
+
 
 def get_section(page_id) :
 	return db(db.object_tree.page_id == page_id).select().first().parent_object
@@ -52,13 +65,17 @@ def move_section(section_object_id, after) :
 	section.update_record(next_object=new_prev_object.next_object.id)
 	new_prev_object.update_record(next_object=section_object_id)
 
-def move_page_to_section(page_id, section_id, after) :
+def move_page_to_section(page_id, after, section_id) :
 	page_leaf = db(db.object_tree.page_id == page_id).select().first()
 	db(db.object_tree.next_object == page_leaf.id).update(next_object=page_leaf.next_object)
 
-	new_prev_object = db(db.object_tree.id == after).select().first()
-	db(db.object_tree.page_id == page_id).update(parent_object=section_id, next_object=new_prev_object.next_object.id)
-	new_prev_object.update_record(next_object=page_id)
+	if after is 'none' :
+		page_leaf.update_record(parent_object=section_id, next_object=get_branch(parent=section_id)[0].id)
+	else :
+		new_prev_object = db(db.object_tree.page_id == after).select().first()
+		page_leaf.update_record(parent_object=section_id, next_object=new_prev_object.next_object)
+		new_prev_object.update_record(next_object=page_leaf)
+
 
 
 def delete_section(section_id):

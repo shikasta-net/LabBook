@@ -53,24 +53,34 @@ def treeLayout(branch):
 	leaves = get_branch(branch)
 
 	for leaf in leaves :
-		node = dict()
-		node['id'] = leaf.id
-		if leaf.page_id :
-			node['page_id'] = leaf.page_id
-			if leaf.parent_object :
-				node['parent_id'] = leaf.parent_object.id
-			else :
-				node['parent_id'] = None
-			node['title'] = get_page(leaf.page_id).title
-			node['contains'] = None
+		if leaf['page_id'] :
+			leaf['title'] = get_page(leaf['page_id']).title
+			leaf['contains'] = None
 		else :
-			children = treeLayout(leaf.id)
-			node['page_id'] = children[0]['page_id']
-			node['parent_id'] = leaf.id
-			node['title'] = children[0]['title']
-			node['contains'] = children
+			children = treeLayout(leaf['id'])
+			leaf['page_id'] = children[0]['page_id']
+			leaf['parent_object'] = leaf['id']
+			leaf['title'] = children[0]['title']
+			leaf['contains'] = children
 
-		contents.append(node)
+		#~ node = dict()
+		#~ node['id'] = leaf.id
+		#~ if leaf.page_id :
+			#~ node['page_id'] = leaf.page_id
+			#~ if leaf.parent_object :
+				#~ node['parent_id'] = leaf.parent_object.id
+			#~ else :
+				#~ node['parent_id'] = None
+			#~ node['title'] = get_page(leaf.page_id).title
+			#~ node['contains'] = None
+		#~ else :
+			#~ children = treeLayout(leaf.id)
+			#~ node['page_id'] = children[0]['page_id']
+			#~ node['parent_id'] = leaf.id
+			#~ node['title'] = children[0]['title']
+			#~ node['contains'] = children
+
+		contents.append(leaf)
 
 	return contents
 
