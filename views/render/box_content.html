@@ -36,6 +36,8 @@
                                 });
     </script>
 	</div>
-{{else:}}<!-- Content type not supported: {{=box['content_type']}} -->{{pass}}
+{{else:}}<!-- Content type not supported: {{=box['content_type']}} -->
+<div class="content_not_supported"><span class="filename">{{=box_info['file_url'].split('/')[-1]}}</span><br/><span class="mime_type"><br/>{{=box['content_type']}}</span></div>
+{{pass}}
 {{return}}
 {{render_content(box, box_info)}}
