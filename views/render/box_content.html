@@ -5,16 +5,15 @@
 	{{childbox = box_info['child_box']}}
 	{{childbox_info = box_info['child_box_info']}}
 	<div class="clipbox">
-		{{ render_content(childbox, childbox_info) }}
+        <div class="imgbox" id="box{{=childbox['id']}}" type="{{=childbox['content_type']}}">
+            {{ render_content(childbox, childbox_info) }}
+        </div>
 	</div>
 {{elif box['content_type'] == 'text/html':}}
 	<div class="textbox">{{=box_info['file_contents']}}</div>
 {{elif box['content_type'] in ['image/png', 'image/jpeg', 'image/svg+xml']:}}
-	<div class="imgbox" id="box{{=box['id']}}">
 	<img src="{{=extra_box_info[box['id']]['file_url']}}" style="width: 100%; height: 100%" />
-	</div>
 {{elif box['content_type'] in ['application/pdf']:}}
-	<div class="imgbox" id="box{{=box['id']}}">
     <!-- See http://jsbin.com/pdfjs-helloworld-v2/1/edit -->
     <canvas id="canvas_box{{=box['id']}}" style="border: 1px black dotted; width:100%; height: 100%"></canvas>
     <script type="text/javascript">
@@ -22,8 +21,8 @@
         PDFJS.disableWorker = true;
         PDFJS.getDocument(url).then(function getPdfHelloWorld(pdf) {
 
-                                pdf.getPage(1).then(function getPageHelloWorld(page) {
-                                                    var scale = 1.5;
+                                    pdf.getPage({{if not box['content_meta']:}} 1 {{else:}}{{='1' and box['content_meta']['pdf_page']}}{{pass}}).then(function getPageHelloWorld(page) {
+                                                    var scale = 1.0;
                                                     var viewport = page.getViewport(scale);
 
                                                     var canvas = document.getElementById('canvas_box{{=box["id"]}}');
@@ -35,7 +34,6 @@
                                                     });
                                 });
     </script>
-	</div>
 {{else:}}<!-- Content type not supported: {{=box['content_type']}} -->
 <div class="content_not_supported"><span class="filename">{{=box_info['file_url'].split('/')[-1]}}</span><br/><span class="mime_type"><br/>{{=box['content_type']}}</span></div>
 {{pass}}

@@ -39,8 +39,21 @@ def delete(box_id):
 	except Exception, e:
 		raise HTTP(400, 'Malformed delete request: %s' % e)
 	box = get_box(db_id)
-	if box.content_type == '':
+	if box.content_type == '' or box.content_type is None:
 		raise HTTP(400, 'Called delete content on empty box: %s' % box_id)
 
 	delete_content(db_id)
 
+@service.run
+def get_content_meta(box_id):
+    db_id = html_id_to_db_id(box_id)
+    box = get_box(db_id)
+    return response.json(box['content_meta'])
+
+import gluon.contrib.simplejson
+@service.run
+def set_content_meta(box_id, meta_json):
+    db_id = html_id_to_db_id(box_id)
+    box = get_box(db_id)
+    json_dict = gluon.contrib.simplejson.loads(meta_json)
+    update_box(db_id, content_meta=json_dict)

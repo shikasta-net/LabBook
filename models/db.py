@@ -2,7 +2,7 @@ db = DAL('sqlite://storage.sqlite')
 from gluon.custom_import import track_changes; track_changes(True)
 from gluon.tools import *
 from gluon import current
-import os, shutil
+import os, shutil, pickle
 
 service = Service()
 crud = Crud(db)
@@ -48,6 +48,8 @@ def delete_page(page_id) :
 
 # Defines an abstract box model. Fields are self-explanatory and in units of em.
 # ondelete='CASCADE' by default, which causes all referring records to be deleted on a delete
+# The content_meta field stores a python dictionary using the python pickle library to
+# transform the type into a string representation.
 db.define_table('boxes',
 				Field('page_id', 'reference pages'),
 				Field('position_x', 'double', default='1'),
@@ -56,6 +58,7 @@ db.define_table('boxes',
 				Field('height', 'double', default='1'),
 				Field('content_type', 'string', default=''),
 				Field('content_id', 'string', default=''),
+                Field('content_meta', 'string', filter_in=(lambda x: pickle.dumps(x)), filter_out=(lambda s: s and pickle.loads(s)), default=None),
 				Field('created_on', 'datetime', default=request.now),
 				Field('modified_on', 'datetime', default=request.now))
 

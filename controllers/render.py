@@ -19,6 +19,11 @@ def page():
 
 	return dict(page=page, boxes_on_pages=boxes_on_pages, child_boxes=child_boxes, extra_box_info=extra_box_info, mathjax_URL=mathjax_URL)
 
+def box():
+    box_id = request.args[0]
+    box = get_box(box_id)
+    return dict(box=box, box_info=box_content_info(box))
+
 from xml.dom import minidom
 def box_content_info(box):
 	extra_info = {}

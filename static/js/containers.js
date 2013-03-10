@@ -157,3 +157,7 @@ containers.clearContent = function (target) {
     activeContainer.children("*").not('ui-resizable-handle').detach()
     activeContainer.attr("type", "");
 }
+
+containers.updateBox = function (box_id) {
+
+}

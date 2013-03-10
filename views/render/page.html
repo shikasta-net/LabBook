@@ -4,7 +4,7 @@
 	<!-- Load static page css -->
 	<link rel="stylesheet" type="text/css" href="{{=URL('static', 'css/page_css.css')}}" />
 	<!-- Load dynamic box css -->
-	<link rel="stylesheet" type="text/css" href="{{=URL('render', 'dynamic_css.css?page='+str(page.id))}}" />
+	<link id="dynamic_css" rel="stylesheet" type="text/css" href="{{=URL('render', 'dynamic_css.css?page='+str(page.id))}}" />
 	<!-- Load jQuery and jQuery-ui -->
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
