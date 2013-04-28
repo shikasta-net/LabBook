@@ -95,6 +95,8 @@ def print_pdf():
 			mj_css = kwargs['mj_css']
 			# Read the MathJax specific HTML
 			maths = kwargs['maths[]']
+			# Read the PDF.JS specific HTML
+			pdfs = kwargs['pdfs[]']
 		except:
 			raise HTTP(400, 'Invalid arguments')
 		
@@ -112,13 +114,40 @@ def print_pdf():
 		# Write JavaScript processing file
 		script_path = os.path.join(printjobdir, 'temp.js')
 		f = open(script_path, 'w')
+				
 		f.write('var maths = [];\n\n')
-		for m in maths:
-			f.write('maths.push(\'' + m + '\');\n\n');
+				
+		if type(maths) is str:
+			f.write('maths.push(\'' + maths + '\');\n\n')
+		else:
+			for m in maths:
+				f.write('maths.push(\'' + m + '\');\n\n')
+
+		f.write('var pdfs = [];\n\n')
+	
+		if type(pdfs) is str:
+			f.write('pdfs.push(\'' + pdfs + '\');\n\n')
+		else:
+			for pdf in pdfs:
+				f.write('pdfs.push(\'' + pdf + '\');\n\n')
+		
 		f.write('var scripts = $(\'script[type^="math/tex"]\');\n')
 		f.write('scripts.each(function(index) {\n')
 		f.write('   $(maths[index]).insertBefore($(this));\n')
+		f.write('});\n\n')
+
+		f.write('var pdfCanvases = $(\'canvas.pdf_canvas_box\');\n\n')
+		f.write('pdfCanvases.each(function(index) {\n')
+		f.write('    var pdfCanvas = $(pdfCanvases[index]);\n')
+		f.write(('    pdfCanvas.replaceWith($(\'<img '
+				 + 'id="pdfCanvas\' + index + \'" '
+				 + 'width="\' + pdfCanvas[index].width + \'" '
+				 + 'height="\' + pdfCanvas[index].height + \'" '
+				 + 'style="\' + pdfCanvas[index].style + \'" '
+				 + 'src="\' + pdfs[index] + \'" '
+				 + '/>\'));\n'))
 		f.write('});')
+		
 		f.close()
 	
 		# Run PrinceXML
@@ -126,6 +155,7 @@ def print_pdf():
 		prince_args = [prince_path]
 		prince_args.append(current_path) # function output to print from
 		prince_args.append('-o %s' % os.path.join(printjobdir, 'download.pdf')) # output filename
+		prince_args.append('--script=%s' % URL('static', 'js/jquery.js', host=True)) # import jquery
 		prince_args.append('--script=http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js') # import jquery
 		prince_args.append('--script=%s' % script_path) # Script to insert math elements
 		prince_args.append('--style=%s' % css_path) # CSS to style math elements

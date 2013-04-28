@@ -10,10 +10,18 @@ printing.print_page = function() {
 		var temp = $('<div></div>').append($(maths[i]).prev().clone());
 		maths_arr.push(temp.html());
 	}
+	var pdfs = $('canvas.pdf_canvas_box');
+	pdfs_arr = [];
+	for (i=0; i< pdfs.length; i++) {
+//		var temp = $('<div></div>').append(pdfs[i].toDataURL());
+		pdfs_arr.push(pdfs[i].toDataURL());
+	}
+	
 	var styles = $('style')
 	var mj_css = styles[styles.length - 1].textContent;
 	var data = {};
 	data.maths = maths_arr;
+	data.pdfs = pdfs_arr;
 	data.mj_css = mj_css;
 	data.current_path = current_path;
 	$.post(printing.serviceURL, data, function (data) {

@@ -15,7 +15,7 @@
 	<img src="{{=extra_box_info[box['id']]['file_url']}}" style="width: 100%; height: 100%" />
 {{elif box['content_type'] in ['application/pdf']:}}
     <!-- See http://jsbin.com/pdfjs-helloworld-v2/1/edit -->
-    <canvas id="canvas_box{{=box['id']}}" style="border: 1px black dotted; width:100%; height: 100%"></canvas>
+    <canvas class='pdf_canvas_box' id="canvas_box{{=box['id']}}" style="border: 1px black dotted; width:100%; height: 100%"></canvas>
     <script type="text/javascript">
         var url = "{{=box_info['file_url']}}";
         PDFJS.disableWorker = true;
