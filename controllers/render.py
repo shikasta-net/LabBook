@@ -139,11 +139,12 @@ def print_pdf():
 		f.write('var pdfCanvases = $(\'canvas.pdf_canvas_box\');\n\n')
 		f.write('pdfCanvases.each(function(index) {\n')
 		f.write('    var pdfCanvas = $(pdfCanvases[index]);\n')
+		f.write('    pdfCanvas.siblings(\'script\').remove();\n')
 		f.write(('    pdfCanvas.replaceWith($(\'<img '
 				 + 'id="pdfCanvas\' + index + \'" '
 				 + 'width="\' + pdfCanvas[index].width + \'" '
 				 + 'height="\' + pdfCanvas[index].height + \'" '
-				 + 'style="\' + pdfCanvas[index].style + \'" '
+				 + 'style="\' + $(pdfCanvas[index]).attr(\'style\') + \'" '
 				 + 'src="\' + pdfs[index] + \'" '
 				 + '/>\'));\n'))
 		f.write('});')
