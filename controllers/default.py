@@ -10,6 +10,13 @@ def index():
         errorMsg.append(errorActions)
         statusList.append(errorMsg)
 
+    wrk = db_schedule(db_schedule.scheduler_worker.id>0).select().first()
+    if (myscheduler.now() - wrk.last_heartbeat > datetime.timedelta(seconds=myscheduler.heartbeat)):
+        errorMsg = LI('web2py scheduler not started - printing not available')
+        errorActions = UL(FORM('Start now:', INPUT(_value='Start', _type='button', _name='start_scheduler', _onclick=XML("ajax('%s', [], 'target');" % URL('start_scheduler'))), SPAN('', _id='target', _class='status')))
+        errorMsg.append(errorActions)
+        statusList.append(errorMsg)
+
     if len(statusList) == 0:
         statusList.append(LI('No installation errors detected!'))
         
@@ -34,6 +41,28 @@ def preferences():
             return SPAN("Error: %s" % update.errors.join(', '), _class="error")
         else:
             return SPAN("OK - Updated preference", _class="ok")
+    return locals()
+
+@request.restful()
+def start_scheduler():
+    response.view = 'generic.json'
+    def POST():
+        try:
+            from multiprocessing import Process
+            from shell import run
+            code = "from gluon import current;current._scheduler.loop()"
+            print 'Starting scheduler...'
+            args = {'appname': 'LabBook', 'plain': False, 'import_models': False, 'startfile': None, 'bpython': False, 'python_code': code}
+            args_tuple = ('LabBook', False, False, None, False, code)
+            print args
+            p = Process(target=run, args=args_tuple)
+            p.start()
+            print "Scheduler process started"
+            return SPAN("OK - Scheduler process started", _class="ok")
+        except Exception, e:
+            print e
+            return SPAN("Error - Scheduler process failed to start", _class="error")
+
     return locals()
 
 @request.restful()
